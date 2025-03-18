@@ -1,0 +1,103 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2025-01-17">
+    <creator>NetworkX 2.8.8</creator>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="">
+    <nodes>
+      <node id="Idiophones" label="Idiophones" />
+      <node id="Struck Idiophones" label="Struck Idiophones" />
+      <node id="100.1" label="Clapper" />
+      <node id="100.2" label="Cymbals" />
+      <node id="100.3" label="Triangle" />
+      <node id="Plucked Idiophones" label="Plucked Idiophones" />
+      <node id="110.1" label="Music Box" />
+      <node id="110.2" label="Jew's Harp" />
+      <node id="Friction Idiophones" label="Friction Idiophones" />
+      <node id="120.1" label="Glass Harmonica" />
+      <node id="120.2" label="Harmonica Blocks" />
+      <node id="Blown Idiophones" label="Blown Idiophones" />
+      <node id="130.1" label="Aeolsklavier" />
+      <node id="130.2" label="Blown Chimes" />
+      <node id="Membranophones" label="Membranophones" />
+      <node id="Struck Membranophones" label="Struck Membranophones" />
+      <node id="210.1" label="Snare Drum" />
+      <node id="210.2" label="Bass Drum" />
+      <node id="Plucked Membranophones" label="Plucked Membranophones" />
+      <node id="220.1" label="Plucked Drum" />
+      <node id="Friction Membranophones" label="Friction Membranophones" />
+      <node id="230.1" label="Friction Drum" />
+      <node id="Singing Membranophones" label="Singing Membranophones" />
+      <node id="240.1" label="Kazoo" />
+      <node id="Chordophones" label="Chordophones" />
+      <node id="Simple Chordophones" label="Simple Chordophones" />
+      <node id="310.1" label="Zither" />
+      <node id="310.2" label="Lyre" />
+      <node id="Composite Chordophones" label="Composite Chordophones" />
+      <node id="320.1" label="Violin" />
+      <node id="320.2" label="Guitar" />
+      <node id="320.3" label="Harp" />
+      <node id="Aerophones" label="Aerophones" />
+      <node id="Free Aerophones" label="Free Aerophones" />
+      <node id="410.1" label="Harmonica" />
+      <node id="410.2" label="Free Reed Organ" />
+      <node id="Non-Free Aerophones" label="Non-Free Aerophones" />
+      <node id="420.1" label="Flute" />
+      <node id="420.2" label="Oboe" />
+      <node id="420.3" label="Trumpet" />
+      <node id="Electrophones" label="Electrophones" />
+      <node id="Electromechanical Instruments" label="Electromechanical Instruments" />
+      <node id="510.1" label="Hammond Organ" />
+      <node id="510.2" label="Electric Guitar" />
+      <node id="Electronic Instruments" label="Electronic Instruments" />
+      <node id="520.1" label="Synthesizer" />
+      <node id="520.2" label="Theremin" />
+      <node id="520.3" label="Drum Machine" />
+    </nodes>
+    <edges>
+      <edge source="Idiophones" target="Struck Idiophones" id="0" />
+      <edge source="Idiophones" target="Plucked Idiophones" id="1" />
+      <edge source="Idiophones" target="Friction Idiophones" id="2" />
+      <edge source="Idiophones" target="Blown Idiophones" id="3" />
+      <edge source="Struck Idiophones" target="100.1" id="4" />
+      <edge source="Struck Idiophones" target="100.2" id="5" />
+      <edge source="Struck Idiophones" target="100.3" id="6" />
+      <edge source="Plucked Idiophones" target="110.1" id="7" />
+      <edge source="Plucked Idiophones" target="110.2" id="8" />
+      <edge source="Friction Idiophones" target="120.1" id="9" />
+      <edge source="Friction Idiophones" target="120.2" id="10" />
+      <edge source="Blown Idiophones" target="130.1" id="11" />
+      <edge source="Blown Idiophones" target="130.2" id="12" />
+      <edge source="Membranophones" target="Struck Membranophones" id="13" />
+      <edge source="Membranophones" target="Plucked Membranophones" id="14" />
+      <edge source="Membranophones" target="Friction Membranophones" id="15" />
+      <edge source="Membranophones" target="Singing Membranophones" id="16" />
+      <edge source="Struck Membranophones" target="210.1" id="17" />
+      <edge source="Struck Membranophones" target="210.2" id="18" />
+      <edge source="Plucked Membranophones" target="220.1" id="19" />
+      <edge source="Friction Membranophones" target="230.1" id="20" />
+      <edge source="Singing Membranophones" target="240.1" id="21" />
+      <edge source="Chordophones" target="Simple Chordophones" id="22" />
+      <edge source="Chordophones" target="Composite Chordophones" id="23" />
+      <edge source="Simple Chordophones" target="310.1" id="24" />
+      <edge source="Simple Chordophones" target="310.2" id="25" />
+      <edge source="Composite Chordophones" target="320.1" id="26" />
+      <edge source="Composite Chordophones" target="320.2" id="27" />
+      <edge source="Composite Chordophones" target="320.3" id="28" />
+      <edge source="Aerophones" target="Free Aerophones" id="29" />
+      <edge source="Aerophones" target="Non-Free Aerophones" id="30" />
+      <edge source="Free Aerophones" target="410.1" id="31" />
+      <edge source="Free Aerophones" target="410.2" id="32" />
+      <edge source="Non-Free Aerophones" target="420.1" id="33" />
+      <edge source="Non-Free Aerophones" target="420.2" id="34" />
+      <edge source="Non-Free Aerophones" target="420.3" id="35" />
+      <edge source="Electrophones" target="Electromechanical Instruments" id="36" />
+      <edge source="Electrophones" target="Electronic Instruments" id="37" />
+      <edge source="Electromechanical Instruments" target="510.1" id="38" />
+      <edge source="Electromechanical Instruments" target="510.2" id="39" />
+      <edge source="Electronic Instruments" target="520.1" id="40" />
+      <edge source="Electronic Instruments" target="520.2" id="41" />
+      <edge source="Electronic Instruments" target="520.3" id="42" />
+    </edges>
+  </graph>
+</gexf>

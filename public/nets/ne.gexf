@@ -1,0 +1,47 @@
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+  <graph mode="static" defaultedgetype="directed">
+    <nodes>
+      <node id="3" label="materials" />
+      <node id="5" label="subjects" />
+      <node id="500" label="humans" />
+      <node id="501" label="non-humans" />
+      <node id="502" label="cyborgs" />
+      <node id="503" label="avatars" />
+      <node id="4" label="objects" />
+      <node id="400" label="primitives" />
+      <node id="401" label="tools" />
+      <node id="402" label="soundbased" />
+      <node id="6" label="interactions" />
+      <node id="600" label="microscale" />
+      <node id="601" label="vocality" />
+      <node id="602" label="env-sens" />
+      <node id="603" label="bio-sens" />
+      <node id="604" label="vocality" />
+      <node id="605" label="dmi" />
+      <node id="606" label="acoustic" />
+
+
+    </nodes>
+    <edges>
+      <edge id="4" source="4" target="5" />
+      <edge id="3" source="3" target="4" />
+      <edge id="5" source="5" target="6" />
+      <edge id="4" source="3" target="5" />
+      <edge id="4_0" source="4" target="400" />
+      <edge id="4_1" source="4" target="401" />
+      <edge id="4_2" source="4" target="402" />
+      <edge id="5_0" source="5" target="500" />
+      <edge id="5_1" source="5" target="501" />
+      <edge id="5_2" source="5" target="502" />
+      <edge id="5_3" source="5" target="502" />
+      <edge id="6_0" source="6" target="600" />
+      <edge id="6_0" source="6" target="600" />
+      <edge id="6_1" source="6" target="601" />
+      <edge id="6_2" source="6" target="602" />
+      <edge id="6_3" source="6" target="603" />
+      <edge id="6_4" source="6" target="604" />
+      <edge id="6_5" source="6" target="605" />
+      <edge id="6_6" source="6" target="606" />
+    </edges>
+  </graph>
+</gexf>

@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:viz="http://www.gexf.net/1.2draft/viz" version="1.2">
+  <graph mode="static" defaultedgetype="directed">
+    <nodes>
+      <!-- Geometry (Blue) -->
+      <node id="geometric_principles" label="Geometric Principles (-400 BC, Plato)">
+        <viz:position x="10.5" y="20.3" z="-400"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="elements_geometry" label="Elements of Geometry (-350 BC, Eudoxus)">
+        <viz:position x="5.8" y="-12.4" z="-350"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="archimedean_geometry" label="Archimedean Geometry (-250 BC, Archimedes)">
+        <viz:position x="12.3" y="-7.8" z="-250"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="conics" label="Conics (-200 BC, Apollonius)">
+        <viz:position x="-4.6" y="18.9" z="-200"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="spherical_geometry" label="Spherical Geometry (-100 BC, Hipparchus)">
+        <viz:position x="7.4" y="-16.5" z="-100"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="heronian_triangles" label="Heronian Triangles (50 AD, Hero)">
+        <viz:position x="-11.7" y="5.2" z="50"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="perspective_geometry" label="Perspective Geometry (1450, Alberti)">
+        <viz:position x="-6.8" y="18.5" z="1450"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="analytic_geometry" label="Analytic Geometry (1637, Descartes)">
+        <viz:position x="8.1" y="20.1" z="1637"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="differential_geometry" label="Differential Geometry (1827, Gauss)">
+        <viz:position x="13.8" y="6.7" z="1827"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+      <node id="theorema_egregium" label="Theorema Egregium (1872, Gauss)">
+        <viz:position x="10.1" y="-10.3" z="1872"/>
+        <viz:color r="0" g="0" b="255" a="1"/>
+      </node>
+
+      <!-- Number Theory (Red) -->
+      <node id="prime_numbers" label="Prime Numbers (-300 BC, Euclid)">
+        <viz:position x="-8.9" y="15.6" z="-300"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="diophantine_equations" label="Diophantine Equations (300 AD, Diophantus)">
+        <viz:position x="6.7" y="17.4" z="300"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="modular_arithmetic" label="Modular Arithmetic (1801, Gauss)">
+        <viz:position x="-12.1" y="-8.2" z="1801"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="riemann_zeta" label="Riemann Zeta Function (1859, Riemann)">
+        <viz:position x="-5.7" y="16.2" z="1859"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="number_theory_hardy" label="Number Theory (1920, Hardy-Ramanujan)">
+        <viz:position x="-4.3" y="-14.8" z="1920"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="fermats_last_theorem" label="Fermat's Last Theorem Proof (1991, Wiles)">
+        <viz:position x="10.4" y="-9.4" z="1991"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="green_tao" label="Green-Tao Theorem (2004, Green-Tao)">
+        <viz:position x="9.2" y="17.1" z="2004"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="sieve_method" label="Sieve Method (2006, Bombieri)">
+        <viz:position x="-10.7" y="-6.5" z="2006"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="additive_number_theory" label="Additive Number Theory (2016, Tao)">
+        <viz:position x="-7.3" y="-11.6" z="2016"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+      <node id="diophantine_numbers" label="Diophantine Numbers (2020, Bombieri)">
+        <viz:position x="-4.8" y="14.1" z="2020"/>
+        <viz:color r="255" g="0" b="0" a="1"/>
+      </node>
+
+      <!-- Analysis (Green) -->
+      <node id="infinite_series" label="Infinite Series (1400, Madhava)">
+        <viz:position x="12.7" y="6.3" z="1400"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="calculus" label="Calculus (1665, Newton-Leibniz)">
+        <viz:position x="-7.5" y="-12.6" z="1665"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="calculus_of_variations" label="Calculus of Variations (1696, Bernoulli)">
+        <viz:position x="-6.1" y="17.8" z="1696"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="fourier_series" label="Fourier Series (1817, Fourier)">
+        <viz:position x="12.4" y="14.4" z="1817"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="harmonic_analysis" label="Harmonic Analysis (1822, Fourier)">
+        <viz:position x="-7.8" y="-13.5" z="1822"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="mean_value_theorem" label="Mean Value Theorem (1949, Cauchy)">
+        <viz:position x="-8.4" y="-12.8" z="1949"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="functional_analysis" label="Functional Analysis (1922, Banach)">
+        <viz:position x="8.7" y="18.3" z="1922"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="wavelet_theory" label="Wavelet Theory (1997, Daubechies)">
+        <viz:position x="-4.7" y="-13.8" z="1997"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+      <node id="partial_derivatives" label="Partial Derivatives (2019, Tao)">
+        <viz:position x="14.5" y="6.1" z="2019"/>
+        <viz:color r="0" g="255" b="0" a="1"/>
+      </node>
+
+      <!-- Algebra (Purple) -->
+      <node id="golden_ratio" label="Golden Ratio (-370 BC, Pythagoras)">
+        <viz:position x="-15.2" y="8.7" z="-370"/>
+        <viz:color r="128" g="0" b="128" a="1"/>
+      </node>
+      <node id="algebra" label="Algebra (800 AD, Al-Khwarizmi)">
+        <viz:position x="-7.1" y="16.8" z="800"/>
+        <viz:color r="128" g="0" b="128" a="1"/>
+      </node>
+      <node id="binomial_theorem" label="Binomial Theorem (1100, Omar Khayyam)">
+        <viz:position x="7.8" y="19.2" z="1100"/>
+        <viz:color r="128" g="0" b="128" a="1"/>
+      </node>
+      <node id="geometric_algebra" label="Geometric Algebra (1300, Levi ben Gerson)">
+        <viz:position x="-8.2" y="-13.1" z="1300"/>
+        <viz:color r="128" g="0" b="128" a="1"/>
+      </node>
+      <node id="group_theory" label="Group Theory (1794, Lagrange)">
+        <viz:position x="8.4" y="19.6" z="1794"/>
+        <viz:color r="128" g="0" b="128" a="1"/>
+      </node>
+      <node id="langlands_program" label="Langlands Program (1995, Langlands)">
+        <viz:position x="15.6" y="8.9" z="1995"/>
+        <viz:color r="128" g="0" b="128" a="1"/>
+      </node>
+
+      <!-- Probability/Statistics (Orange) -->
+      <node id="probability_foundations" label="Probability Foundations (1654, Pascal-Fermat)">
+        <viz:position x="11.6" y="15.3" z="1654"/>
+        <viz:color r="255" g="165" b="0" a="1"/>
+      </node>
+      <node id="probability_theory" label="Probability Theory (1713, Bernoulli)">
+        <viz:position x="9.7" y="-11.9" z="1713"/>
+        <viz:color r="255" g="165" b="0" a="1"/>
+      </node>
+      <node id="normal_distribution" label="Normal Distribution (1733, De Moivre)">
+        <viz:position x="-10.4" y="4.1" z="1733"/>
+        <viz:color r="255" g="165" b="0" a="1"/>
+      </node>
+      <node id="ergodic_theory" label="Ergodic Theory (1941, Birkhoff)">
+        <viz:position x="12.8" y="13.2" z="1941"/>
+        <viz:color r="255" g="165" b="0" a="1"/>
+      </node>
+      <node id="density_positive_sets" label="Density Positive Sets (1976, Szemerédi)">
+        <viz:position x="14.1" y="7.2" z="1976"/>
+        <viz:color r="255" g="165" b="0" a="1"/>
+      </node>
+
+      <!-- Topology (Yellow) -->
+      <node id="graph_theory" label="Graph Theory (1754, Euler)">
+        <viz:position x="14.9" y="10.7" z="1754"/>
+        <viz:color r="255" g="255" b="0" a="1"/>
+      </node>
+      <node id="topology_concepts" label="Topology Concepts (1768, Euler)">
+        <viz:position x="-5.2" y="-15.1" z="1768"/>
+        <viz:color r="255" g="255" b="0" a="1"/>
+      </node>
+      <node id="topology_poincare" label="Topology (1895, Poincaré)">
+        <viz:position x="-9.8" y="4.8" z="1895"/>
+        <viz:color r="255" g="255" b="0" a="1"/>
+      </node>
+      <node id="poincare_conjecture" label="Poincaré Conjecture (1904, Poincaré)">
+        <viz:position x="15.3" y="9.3" z="1904"/>
+        <viz:color r="255" g="255" b="0" a="1"/>
+      </node>
+      <node id="hypercycles" label="Hypercycles (2010, Tao-Wright)">
+        <viz:position x="13.2" y="12.5" z="2010"/>
+        <viz:color r="255" g="255" b="0" a="1"/>
+      </node>
+
+      <!-- Applied Mathematics (Cyan) -->
+      <node id="hydraulic_mechanisms" label="Hydraulic Mechanisms (10 AD, Hero)">
+        <viz:position x="14.8" y="9.6" z="10"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="epicycles_astronomy" label="Epicycles in Astronomy (20 AD, Ptolemy)">
+        <viz:position x="-6.3" y="-14.2" z="20"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="spherical_astronomy" label="Spherical Astronomy (100 AD, Ptolemy)">
+        <viz:position x="9.1" y="13.8" z="100"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="almagest" label="Almagest (150 AD, Ptolemy)">
+        <viz:position x="-13.4" y="-8.5" z="150"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="aryabhatiya" label="Aryabhatiya (500 AD, Aryabhata)">
+        <viz:position x="-9.5" y="-11.3" z="500"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="surya_siddhanta" label="Surya Siddhanta (600 AD)">
+        <viz:position x="11.2" y="7.9" z="600"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="sine_function" label="Sine Function (900 AD, Al-Battani)">
+        <viz:position x="8.6" y="-9.7" z="900"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="harmonic_mean" label="Harmonic Mean (975 AD, Al-Kindi)">
+        <viz:position x="-12.8" y="4.5" z="975"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="book_of_optics" label="Book of Optics (1020, Ibn al-Haytham)">
+        <viz:position x="13.5" y="12.1" z="1020"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="trigonometric_functions" label="Trigonometric Functions (1030, Al-Zarqālī)">
+        <viz:position x="-5.4" y="-15.7" z="1030"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="liber_abaci" label="Liber Abaci (1202, Fibonacci)">
+        <viz:position x="-14.6" y="-6.9" z="1202"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="mean_speed_theorem" label="Mean Speed Theorem (1250, Oxford Calculators)">
+        <viz:position x="10.9" y="14.7" z="1250"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="heliocentric_theory" label="Heliocentric Theory (1543, Copernicus)">
+        <viz:position x="9.4" y="-10.8" z="1543"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="law_of_pendulum" label="Law of Pendulum (1581, Galileo)">
+        <viz:position x="-11.3" y="3.7" z="1581"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="logarithms" label="Logarithms (1596, Napier)">
+        <viz:position x="14.2" y="11.4" z="1596"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="keplers_laws" label="Kepler's Laws (1609, Kepler)">
+        <viz:position x="-4.9" y="-16.2" z="1609"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="principle_of_inertia" label="Principle of Inertia (1638, Galileo)">
+        <viz:position x="-13.7" y="-7.4" z="1638"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="laws_of_motion" label="Laws of Motion (1687, Newton)">
+        <viz:position x="13.1" y="5.8" z="1687"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="navier_stokes" label="Navier-Stokes Equations (1936, Leray)">
+        <viz:position x="-11.6" y="-7.1" z="1936"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="weak_global_solution" label="Weak Global Solution (1990, Lions)">
+        <viz:position x="-5.1" y="15.9" z="1990"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+      <node id="elliptic_curve_crypto" label="Elliptic Curve Cryptography (1994, Koblitz-Miller)">
+        <viz:position x="-9.2" y="5.4" z="1994"/>
+        <viz:color r="0" g="255" b="255" a="1"/>
+      </node>
+    </nodes>
+    <edges>
+      <!-- Geometry Connections -->
+      <edge id="1" source="geometric_principles" target="elements_geometry" />
+      <edge id="2" source="golden_ratio" target="elements_geometry" />
+      <edge id="3" source="elements_geometry" target="archimedean_geometry" />
+      <edge id="4" source="elements_geometry" target="conics" />
+      <edge id="5" source="elements_geometry" target="spherical_geometry" />
+      <edge id="6" source="archimedean_geometry" target="heronian_triangles" />
+      <edge id="7" source="spherical_geometry" target="perspective_geometry" />
+      <edge id="8" source="perspective_geometry" target="differential_geometry" />
+      <edge id="9" source="differential_geometry" target="theorema_egregium" />
+
+      <!-- Astronomy and Applied Math -->
+      <edge id="10" source="spherical_geometry" target="spherical_astronomy" />
+      <edge id="11" source="spherical_astronomy" target="almagest" />
+      <edge id="12" source="almagest" target="epicycles_astronomy" />
+      <edge id="13" source="epicycles_astronomy" target="heliocentric_theory" />
+      <edge id="14" source="heliocentric_theory" target="keplers_laws" />
+      <edge id="15" source="keplers_laws" target="laws_of_motion" />
+
+      <!-- Number Theory -->
+      <edge id="16" source="prime_numbers" target="diophantine_equations" />
+      <edge id="17" source="prime_numbers" target="modular_arithmetic" />
+      <edge id="18" source="prime_numbers" target="riemann_zeta" />
+      <edge id="19" source="diophantine_equations" target="diophantine_numbers" />
+      <edge id="20" source="modular_arithmetic" target="number_theory_hardy" />
+      <edge id="21" source="number_theory_hardy" target="green_tao" />
+      <edge id="22" source="green_tao" target="additive_number_theory" />
+      <edge id="23" source="riemann_zeta" target="langlands_program" />
+
+      <!-- Analysis Evolution -->
+      <edge id="24" source="infinite_series" target="calculus" />
+      <edge id="25" source="calculus" target="calculus_of_variations" />
+      <edge id="26" source="calculus" target="partial_derivatives" />
+      <edge id="27" source="calculus" target="mean_value_theorem" />
+      <edge id="28" source="fourier_series" target="harmonic_analysis" />
+      <edge id="29" source="harmonic_analysis" target="wavelet_theory" />
+      <edge id="30" source="functional_analysis" target="weak_global_solution" />
+
+      <!-- Algebra Development -->
+      <edge id="31" source="algebra" target="geometric_algebra" />
+      <edge id="32" source="algebra" target="binomial_theorem" />
+      <edge id="33" source="geometric_algebra" target="analytic_geometry" />
+      <edge id="34" source="binomial_theorem" target="group_theory" />
+      <edge id="35" source="group_theory" target="modular_arithmetic" />
+
+      <!-- Probability and Statistics -->
+      <edge id="36" source="probability_foundations" target="probability_theory" />
+      <edge id="37" source="probability_theory" target="normal_distribution" />
+      <edge id="38" source="probability_theory" target="ergodic_theory" />
+      <edge id="39" source="normal_distribution" target="density_positive_sets" />
+
+      <!-- Topology Branch -->
+      <edge id="40" source="graph_theory" target="topology_concepts" />
+      <edge id="41" source="topology_concepts" target="topology_poincare" />
+      <edge id="42" source="topology_poincare" target="poincare_conjecture" />
+      <edge id="43" source="topology_concepts" target="differential_geometry" />
+      <edge id="44" source="poincare_conjecture" target="hypercycles" />
+
+      <!-- Cross-Specialty Connections -->
+      <edge id="45" source="sine_function" target="trigonometric_functions" />
+      <edge id="46" source="trigonometric_functions" target="analytic_geometry" />
+      <edge id="47" source="analytic_geometry" target="differential_geometry" />
+      <edge id="48" source="navier_stokes" target="weak_global_solution" />
+      <edge id="49" source="harmonic_analysis" target="functional_analysis" />
+      <edge id="50" source="elliptic_curve_crypto" target="number_theory_hardy" />
+    </edges>
+  </graph>
+</gexf>

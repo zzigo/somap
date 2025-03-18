@@ -1,0 +1,160 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2025-01-17">
+    <creator>NetworkX 3.4.2</creator>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="">
+    <attributes mode="static" class="node">
+      <attribute id="0" title="color" type="string" />
+      <attribute id="1" title="size" type="long" />
+      <attribute id="2" title="level" type="long" />
+    </attributes>
+    <nodes>
+      <node id="3" label="materials">
+        <attvalues>
+          <attvalue for="0" value="#ff7043" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="5" label="subjects">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="4" label="objects">
+        <attvalues>
+          <attvalue for="0" value="#66bb6a" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="6" label="interactions">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="500" label="humans">
+        <attvalues>
+          <attvalue for="0" value="#8ef2ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="501" label="non-humans">
+        <attvalues>
+          <attvalue for="0" value="#8ef2ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="502" label="cyborgs">
+        <attvalues>
+          <attvalue for="0" value="#8ef2ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="503" label="avatars">
+        <attvalues>
+          <attvalue for="0" value="#8ef2ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="400" label="primitives">
+        <attvalues>
+          <attvalue for="0" value="#b2ffb6" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="401" label="tools">
+        <attvalues>
+          <attvalue for="0" value="#b2ffb6" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="402" label="soundbased">
+        <attvalues>
+          <attvalue for="0" value="#b2ffb6" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="600" label="microscale">
+        <attvalues>
+          <attvalue for="0" value="#f793ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="601" label="vocality">
+        <attvalues>
+          <attvalue for="0" value="#f793ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="602" label="env-sens">
+        <attvalues>
+          <attvalue for="0" value="#f793ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="603" label="bio-sens">
+        <attvalues>
+          <attvalue for="0" value="#f793ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="604" label="vocality">
+        <attvalues>
+          <attvalue for="0" value="#f793ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="605" label="dmi">
+        <attvalues>
+          <attvalue for="0" value="#f793ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="606" label="acoustic">
+        <attvalues>
+          <attvalue for="0" value="#f793ff" />
+          <attvalue for="1" value="3" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <edge source="3" target="4" id="3" />
+      <edge source="5" target="500" id="0" />
+      <edge source="5" target="501" id="1" />
+      <edge source="5" target="502" id="2" />
+      <edge source="5" target="503" id="6" />
+      <edge source="5" target="6" id="5" />
+      <edge source="4" target="400" id="7" />
+      <edge source="4" target="401" id="8" />
+      <edge source="4" target="402" id="9" />
+      <edge source="4" target="5" id="4" />
+      <edge source="6" target="600" id="10" />
+      <edge source="6" target="601" id="11" />
+      <edge source="6" target="602" id="12" />
+      <edge source="6" target="603" id="13" />
+      <edge source="6" target="604" id="14" />
+      <edge source="6" target="605" id="15" />
+      <edge source="6" target="606" id="16" />
+    </edges>
+  </graph>
+</gexf>

@@ -1,0 +1,1067 @@
+<?xml version='1.0' encoding='utf-8'?>
+<gexf xmlns="http://www.gexf.net/1.2draft" version="1.2">
+  <meta lastmodifieddate="2025-01-17">
+    <creator>Instrument Evolution Network</creator>
+  </meta>
+  <graph mode="static" defaultedgetype="directed">
+    <attributes class="node" mode="static">
+      <attribute id="0" title="color" type="string"/>
+      <attribute id="1" title="size" type="integer"/>
+      <attribute id="2" title="level" type="integer"/>
+    </attributes>
+    <nodes>
+      <!-- Parent Categories -->
+      <node id="chordophones" label="Chordophones">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/> <!-- Orange -->
+          <attvalue for="1" value="10"/>
+          <attvalue for="2" value="0"/>
+        </attvalues>
+      </node>
+      <node id="aerophones" label="Aerophones">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/> <!-- Yellow -->
+          <attvalue for="1" value="10"/>
+          <attvalue for="2" value="0"/>
+        </attvalues>
+      </node>
+      <node id="idiophones" label="Idiophones">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/> <!-- Blue -->
+          <attvalue for="1" value="10"/>
+          <attvalue for="2" value="0"/>
+        </attvalues>
+      </node>
+      <node id="keyboards" label="Keyboards and Plucked">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/> <!-- Violet -->
+          <attvalue for="1" value="10"/>
+          <attvalue for="2" value="0"/>
+        </attvalues>
+      </node>
+
+      <!-- Chordophones -->
+      <node id="violin" label="Violin">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Violin Development Nodes -->
+      <node id="violin_1500" label="Cremonese Craftsmanship Innovations (1500)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1650" label="Development of Stradivari and Guarneri Models (1650)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1780" label="Adoption of Modern Bow Design by Tourte (1780)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1820" label="Chinrest Addition for Comfort (1820)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1850" label="Fine Tuners on Tailpiece (1850)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1920" label="Transition to Steel-Core Strings (1920)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1950" label="Synthetic Gut String Innovations (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1970" label="Carbon Fiber Bows (1970)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1980" label="Adjustable Shoulder Rests (1980)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="violin_1990" label="Electric Violin Development (1990)">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="viola" label="Viola">
+        <attvalues>
+          <attvalue for="0" value="#ff7043"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Add all violin and viola advancements here as nodes with a unique ID -->
+
+      <!-- Aerophones -->
+      <node id="trumpet" label="Trumpet">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Trumpet Development Nodes -->
+      <node id="trumpet_1500" label="Natural Trumpet Development (1500)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1600" label="Slide Trumpet Introduction (1600)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1780" label="Keyed Trumpet Invention (1780)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1815" label="Valve System Development (1815)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1830" label="Rotary Valve Trumpets (1830)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1850" label="Bb and C Trumpets Standardized (1850)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1880" label="Shepherd's Crook Bell Shape (1880)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1920" label="Monel Valve Materials (1920)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_1950" label="Reverse Leadpipe Designs (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trumpet_2000" label="Lightweight Alloy Construction (2000)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe" label="Oboe">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <node id="clarinet" label="Clarinet">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Clarinet Development Nodes -->
+      <node id="clarinet_1650" label="Chalumeau Evolution (1650)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1700" label="Barrel and Bell Design Refinements (1700)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1710" label="Multi-Key Clarinet Introduction (Johann Denner, 1710)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1812" label="Müller 13-Key System (1812)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1840" label="Boehm System Adaptation (1840)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1850" label="Ebonite and Hard Rubber Materials (1850)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1900" label="Poly-Cylindrical Bore Development (1900)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1950" label="Undercut Tone Holes (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_1980" label="Adjustable Thumb Rest (1980)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="clarinet_2000" label="ABS and Resin for Student Models (2000)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <!-- Oboe Development Nodes -->
+      <node id="oboe_1650" label="Shawm Transition to Oboe (1650)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_1700" label="Narrow Bore and Reed Refinements (1700)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_1750" label="Three-Key Oboe Standardization (1750)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_1820" label="Conservatoire System by Triébert (1820)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_1850" label="Modern Plateau Key System (1850)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_1920" label="Plastic and Synthetic Reeds (1920)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_1950" label="Full Conservatoire Key System Adoption (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_2000" label="Duet+ System for Tuning Stability (2000)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_2010" label="Composite Body Materials (2010)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="oboe_2015" label="Laser-Cut Tone Holes (2015)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute" label="Flute">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Flute Development Nodes -->
+      <node id="flute_1000" label="Transition to Transverse Flute (1000)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1500" label="Conical Bore Adoption (1500)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1650" label="Multiple Key Systems (1650)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1847" label="Theobald Boehm System (1847)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1850" label="Cylindrical Bore Innovation (1850)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1860" label="Silver Alloy Construction (1860)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1920" label="Split E Mechanism (1920)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1950" label="Open-Hole Design Standardization (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_1980" label="Flute Headjoint Material Variants (1980)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="flute_2000" label="Carbon Fiber and Composite Materials (2000)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone" label="Trombone">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <node id="tuba" label="Tuba">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Tuba Development Nodes -->
+      <node id="tuba_1800" label="Ophicleide Predecessor (1800)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_1835" label="Invention of the Tuba (1835)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_1838" label="Rotary Valve Mechanism (1838)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_1845" label="Piston Valve Tubas (1845)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_1870" label="Contrabass Tuba Development (1870)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_1920" label="Front-Action Piston Design (1920)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_1950" label="Compact Travel Tubas (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_1980" label="Synthetic Mouthpieces (1980)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_2000" label="Enhanced Bell Projection (2000)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="tuba_2010" label="Carbon Fiber Tubas (2010)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <!-- Trombone Development Nodes -->
+      <node id="trombone_1400" label="Sackbut Development (15th Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1600" label="Bell Flare Expansion (17th Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1650" label="Slide Standardization (16th–17th Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1700" label="Larger Bore Design (18th Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1800" label="Valve Introduction (1800s)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1839" label="F Attachment Addition (1839)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1850" label="Widened Bell Diameter (19th Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1900" label="Lightweight Alloys (20th Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_1950" label="Modular Slide Construction (Mid-20th Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="trombone_2000" label="Carbon Fiber Slides (21st Century)">
+        <attvalues>
+          <attvalue for="0" value="#ffee58"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+
+      <!-- Idiophones -->
+      <node id="timpani" label="Timpani">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Timpani Development Nodes -->
+      <node id="timpani_1500" label="Hand-Tuned Timpani (1500)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_1800" label="Pedal Tuning System Invention (1800)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_1920" label="Balanced-Action Pedal Development (1920)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_1940" label="Fiberglass Shell Introduction (1940)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_1950" label="Synthetic Drumheads (1950)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_1960" label="Chain and Cable Tuning Mechanisms (1960)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_1970" label="Rotational Tuning Pedals (1970)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_1980" label="Extended Range Timpani Designs (1980)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_2000" label="MIDI-Compatible Timpani Systems (2000)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="timpani_2010" label="Lightweight Compact Timpani (2010)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone" label="Vibraphone">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Vibraphone Development Nodes -->
+      <node id="vibraphone_1920" label="Motorized Fans for Vibrato Effect (1920)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_1930" label="Aluminum Bar Introduction (1930)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_1940" label="Variable-Speed Motor Development (1940)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_1950" label="Damping Pedal Mechanism (1950)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_1960" label="Extended Range Vibraphones (1960)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_1970" label="Synthetic Bar Materials for Durability (1970)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_1980" label="Foldable Frame Design for Portability (1980)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_1990" label="Amplification and Pickup Systems (1990)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_2000" label="MIDI-Compatible Vibraphones (2000)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="vibraphone_2010" label="Computer-Controlled Motor Systems (2010)">
+        <attvalues>
+          <attvalue for="0" value="#42a5f5"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+
+      <!-- Keyboards -->
+      <node id="piano" label="Piano">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Piano Development Nodes -->
+      <node id="piano_1700" label="Cristofori's Hammer Mechanism (1700)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1820" label="Introduction of Iron Frame (1820)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1821" label="Double Escapement Action (1821)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1855" label="Overstrung Scale Design (1855)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1860" label="Full-Cast Iron Frame Adoption (1860)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1870" label="Upright Piano Invention (1870)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1880" label="Felt-Covered Hammers (1880)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1890" label="Pedal Innovations (1890)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_1950" label="Digital Piano Development (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="piano_2000" label="Hybrid Acoustic-Digital Models (2000)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp" label="Harp">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="8"/>
+          <attvalue for="2" value="1"/>
+        </attvalues>
+      </node>
+      <!-- Harp Development Nodes -->
+      <node id="harp_1720" label="Single-Action Pedal Harp (1720)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_1811" label="Double-Action Pedal Harp (1811)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_1850" label="Modern Frame with Brass Plates (1850)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_1920" label="Nylon String Integration (1920)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_1950" label="Electroacoustic Harp Design (1950)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_1970" label="Lightweight Carbon Fiber Frames (1970)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_1980" label="Extended Range Concert Harps (1980)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_2000" label="MIDI-Compatible Harps (2000)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_2010" label="Amplification Systems for Harps (2010)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+      <node id="harp_2015" label="Advanced Synthetic String Technologies (2015)">
+        <attvalues>
+          <attvalue for="0" value="#ab47bc"/>
+          <attvalue for="1" value="6"/>
+          <attvalue for="2" value="2"/>
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <!-- Add edges to connect parent categories with instruments -->
+      <edge id="1" source="chordophones" target="violin"/>
+
+      <!-- Violin Development Edges -->
+      <edge id="114" source="violin" target="violin_1500"/>
+      <edge id="115" source="violin_1500" target="violin_1650"/>
+      <edge id="116" source="violin_1650" target="violin_1780"/>
+      <edge id="117" source="violin_1780" target="violin_1820"/>
+      <edge id="118" source="violin_1820" target="violin_1850"/>
+      <edge id="119" source="violin_1850" target="violin_1920"/>
+      <edge id="120" source="violin_1920" target="violin_1950"/>
+      <edge id="121" source="violin_1950" target="violin_1970"/>
+      <edge id="122" source="violin_1970" target="violin_1980"/>
+      <edge id="123" source="violin_1980" target="violin_1990"/>
+
+      <!-- Harp Development Edges -->
+      <edge id="104" source="harp" target="harp_1720"/>
+      <edge id="105" source="harp_1720" target="harp_1811"/>
+      <edge id="106" source="harp_1811" target="harp_1850"/>
+      <edge id="107" source="harp_1850" target="harp_1920"/>
+      <edge id="108" source="harp_1920" target="harp_1950"/>
+      <edge id="109" source="harp_1950" target="harp_1970"/>
+      <edge id="110" source="harp_1970" target="harp_1980"/>
+      <edge id="111" source="harp_1980" target="harp_2000"/>
+      <edge id="112" source="harp_2000" target="harp_2010"/>
+      <edge id="113" source="harp_2010" target="harp_2015"/>
+
+      <!-- Piano Development Edges -->
+      <edge id="94" source="piano" target="piano_1700"/>
+      <edge id="95" source="piano_1700" target="piano_1820"/>
+      <edge id="96" source="piano_1820" target="piano_1821"/>
+      <edge id="97" source="piano_1821" target="piano_1855"/>
+      <edge id="98" source="piano_1855" target="piano_1860"/>
+      <edge id="99" source="piano_1860" target="piano_1870"/>
+      <edge id="100" source="piano_1870" target="piano_1880"/>
+      <edge id="101" source="piano_1880" target="piano_1890"/>
+      <edge id="102" source="piano_1890" target="piano_1950"/>
+      <edge id="103" source="piano_1950" target="piano_2000"/>
+
+      <!-- Vibraphone Development Edges -->
+      <edge id="84" source="vibraphone" target="vibraphone_1920"/>
+      <edge id="85" source="vibraphone_1920" target="vibraphone_1930"/>
+      <edge id="86" source="vibraphone_1930" target="vibraphone_1940"/>
+      <edge id="87" source="vibraphone_1940" target="vibraphone_1950"/>
+      <edge id="88" source="vibraphone_1950" target="vibraphone_1960"/>
+      <edge id="89" source="vibraphone_1960" target="vibraphone_1970"/>
+      <edge id="90" source="vibraphone_1970" target="vibraphone_1980"/>
+      <edge id="91" source="vibraphone_1980" target="vibraphone_1990"/>
+      <edge id="92" source="vibraphone_1990" target="vibraphone_2000"/>
+      <edge id="93" source="vibraphone_2000" target="vibraphone_2010"/>
+      <edge id="2" source="chordophones" target="viola"/>
+      <edge id="3" source="aerophones" target="trumpet"/>
+
+      <!-- Timpani Development Edges -->
+      <edge id="74" source="timpani" target="timpani_1500"/>
+      <edge id="75" source="timpani_1500" target="timpani_1800"/>
+      <edge id="76" source="timpani_1800" target="timpani_1920"/>
+      <edge id="77" source="timpani_1920" target="timpani_1940"/>
+      <edge id="78" source="timpani_1940" target="timpani_1950"/>
+      <edge id="79" source="timpani_1950" target="timpani_1960"/>
+      <edge id="80" source="timpani_1960" target="timpani_1970"/>
+      <edge id="81" source="timpani_1970" target="timpani_1980"/>
+      <edge id="82" source="timpani_1980" target="timpani_2000"/>
+      <edge id="83" source="timpani_2000" target="timpani_2010"/>
+      <edge id="63" source="aerophones" target="tuba"/>
+
+      <!-- Tuba Development Edges -->
+      <edge id="64" source="tuba" target="tuba_1800"/>
+      <edge id="65" source="tuba_1800" target="tuba_1835"/>
+      <edge id="66" source="tuba_1835" target="tuba_1838"/>
+      <edge id="67" source="tuba_1838" target="tuba_1845"/>
+      <edge id="68" source="tuba_1845" target="tuba_1870"/>
+      <edge id="69" source="tuba_1870" target="tuba_1920"/>
+      <edge id="70" source="tuba_1920" target="tuba_1950"/>
+      <edge id="71" source="tuba_1950" target="tuba_1980"/>
+      <edge id="72" source="tuba_1980" target="tuba_2000"/>
+      <edge id="73" source="tuba_2000" target="tuba_2010"/>
+
+      <!-- Trumpet Development Edges -->
+      <edge id="53" source="trumpet" target="trumpet_1500"/>
+      <edge id="54" source="trumpet_1500" target="trumpet_1600"/>
+      <edge id="55" source="trumpet_1600" target="trumpet_1780"/>
+      <edge id="56" source="trumpet_1780" target="trumpet_1815"/>
+      <edge id="57" source="trumpet_1815" target="trumpet_1830"/>
+      <edge id="58" source="trumpet_1830" target="trumpet_1850"/>
+      <edge id="59" source="trumpet_1850" target="trumpet_1880"/>
+      <edge id="60" source="trumpet_1880" target="trumpet_1920"/>
+      <edge id="61" source="trumpet_1920" target="trumpet_1950"/>
+      <edge id="62" source="trumpet_1950" target="trumpet_2000"/>
+      <edge id="4" source="aerophones" target="flute"/>
+      <edge id="31" source="aerophones" target="oboe"/>
+      <edge id="42" source="aerophones" target="clarinet"/>
+
+      <!-- Clarinet Development Edges -->
+      <edge id="43" source="clarinet" target="clarinet_1650"/>
+      <edge id="44" source="clarinet_1650" target="clarinet_1700"/>
+      <edge id="45" source="clarinet_1700" target="clarinet_1710"/>
+      <edge id="46" source="clarinet_1710" target="clarinet_1812"/>
+      <edge id="47" source="clarinet_1812" target="clarinet_1840"/>
+      <edge id="48" source="clarinet_1840" target="clarinet_1850"/>
+      <edge id="49" source="clarinet_1850" target="clarinet_1900"/>
+      <edge id="50" source="clarinet_1900" target="clarinet_1950"/>
+      <edge id="51" source="clarinet_1950" target="clarinet_1980"/>
+      <edge id="52" source="clarinet_1980" target="clarinet_2000"/>
+
+      <!-- Oboe Development Edges -->
+      <edge id="32" source="oboe" target="oboe_1650"/>
+      <edge id="33" source="oboe_1650" target="oboe_1700"/>
+      <edge id="34" source="oboe_1700" target="oboe_1750"/>
+      <edge id="35" source="oboe_1750" target="oboe_1820"/>
+      <edge id="36" source="oboe_1820" target="oboe_1850"/>
+      <edge id="37" source="oboe_1850" target="oboe_1920"/>
+      <edge id="38" source="oboe_1920" target="oboe_1950"/>
+      <edge id="39" source="oboe_1950" target="oboe_2000"/>
+      <edge id="40" source="oboe_2000" target="oboe_2010"/>
+      <edge id="41" source="oboe_2010" target="oboe_2015"/>
+      <edge id="5" source="idiophones" target="timpani"/>
+      <edge id="6" source="idiophones" target="vibraphone"/>
+      <edge id="7" source="keyboards" target="piano"/>
+      <edge id="8" source="keyboards" target="harp"/>
+
+      <!-- Add edges for advancements -->
+      <!-- Flute Development Edges -->
+      <edge id="20" source="aerophones" target="flute"/>
+      <edge id="21" source="flute" target="flute_1000"/>
+      <edge id="22" source="flute_1000" target="flute_1500"/>
+      <edge id="23" source="flute_1500" target="flute_1650"/>
+      <edge id="24" source="flute_1650" target="flute_1847"/>
+      <edge id="25" source="flute_1847" target="flute_1850"/>
+      <edge id="26" source="flute_1850" target="flute_1860"/>
+      <edge id="27" source="flute_1860" target="flute_1920"/>
+      <edge id="28" source="flute_1920" target="flute_1950"/>
+      <edge id="29" source="flute_1950" target="flute_1980"/>
+      <edge id="30" source="flute_1980" target="flute_2000"/>
+
+      <!-- Trombone Development Edges -->
+      <edge id="9" source="aerophones" target="trombone"/>
+      <edge id="10" source="trombone" target="trombone_1400"/>
+      <edge id="11" source="trombone_1400" target="trombone_1650"/>
+      <edge id="12" source="trombone_1650" target="trombone_1600"/>
+      <edge id="13" source="trombone_1600" target="trombone_1700"/>
+      <edge id="14" source="trombone_1700" target="trombone_1800"/>
+      <edge id="15" source="trombone_1800" target="trombone_1839"/>
+      <edge id="16" source="trombone_1839" target="trombone_1850"/>
+      <edge id="17" source="trombone_1850" target="trombone_1900"/>
+      <edge id="18" source="trombone_1900" target="trombone_1950"/>
+      <edge id="19" source="trombone_1950" target="trombone_2000"/>
+    </edges>
+  </graph>
+</gexf>

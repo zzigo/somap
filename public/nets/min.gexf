@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<gexf xmlns="http://www.gexf.net/1.2draft" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.gexf.net/1.2draft http://www.gexf.net/1.2draft/gexf.xsd" version="1.2">
+  <meta lastmodifieddate="2025-01-17">
+    <creator>Custom GEXF Generator</creator>
+    <description>Branches of Miniaturization, Observation, and Speculative Instruments</description>
+  </meta>
+  <graph defaultedgetype="directed" mode="static" name="Branches">
+    <attributes mode="static" class="node">
+      <attribute id="0" title="color" type="string" />
+      <attribute id="1" title="size" type="integer" />
+      <attribute id="2" title="level" type="integer" />
+    </attributes>
+    <nodes>
+      <!-- RED Branch: Miniaturization History -->
+      <node id="1" label="Intel 8008 (1972)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="2" label="Intel 80386 (1985)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="6" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="3" label="P5 Pentium (1993)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="7" />
+          <attvalue for="2" value="3" />
+        </attvalues>
+      </node>
+      <node id="4" label="Motorola PC 601 (1993)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="7" />
+          <attvalue for="2" value="3" />
+        </attvalues>
+      </node>
+      <node id="5" label="Klamath (1997)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="8" />
+          <attvalue for="2" value="4" />
+        </attvalues>
+      </node>
+      <node id="6" label="AMD K6 (1997)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="8" />
+          <attvalue for="2" value="4" />
+        </attvalues>
+      </node>
+      <node id="7" label="Core Duo (2006)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="9" />
+          <attvalue for="2" value="5" />
+        </attvalues>
+      </node>
+      <node id="8" label="All Core Line (2006+)">
+        <attvalues>
+          <attvalue for="0" value="#ff0000" />
+          <attvalue for="1" value="10" />
+          <attvalue for="2" value="6" />
+        </attvalues>
+      </node>
+
+      <!-- BLUE Branch: Observation of Miniatures -->
+      <node id="9" label="Staphylococcus Aureus (1880)">
+        <attvalues>
+          <attvalue for="0" value="#0000ff" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="10" label="Spermatozoon Head (1677)">
+        <attvalues>
+          <attvalue for="0" value="#0000ff" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="11" label="Red Blood Cells (1658)">
+        <attvalues>
+          <attvalue for="0" value="#0000ff" />
+          <attvalue for="1" value="5" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="12" label="Elemental Particles (1927)">
+        <attvalues>
+          <attvalue for="0" value="#0000ff" />
+          <attvalue for="1" value="6" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="13" label="Higgs Boson (2012)">
+        <attvalues>
+          <attvalue for="0" value="#0000ff" />
+          <attvalue for="1" value="10" />
+          <attvalue for="2" value="3" />
+        </attvalues>
+      </node>
+
+      <!-- YELLOW Branch: Speculative Instruments -->
+      <node id="14" label="Theremin (1928)">
+        <attvalues>
+          <attvalue for="0" value="#ffff00" />
+          <attvalue for="1" value="6" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="15" label="Ondes Martenot (1928)">
+        <attvalues>
+          <attvalue for="0" value="#ffff00" />
+          <attvalue for="1" value="6" />
+          <attvalue for="2" value="1" />
+        </attvalues>
+      </node>
+      <node id="16" label="ILLIAC (1956)">
+        <attvalues>
+          <attvalue for="0" value="#ffff00" />
+          <attvalue for="1" value="7" />
+          <attvalue for="2" value="2" />
+        </attvalues>
+      </node>
+      <node id="17" label="ShoZyg (1968)">
+        <attvalues>
+          <attvalue for="0" value="#ffff00" />
+          <attvalue for="1" value="8" />
+          <attvalue for="2" value="3" />
+        </attvalues>
+      </node>
+      <node id="18" label="Glissotar (2021)">
+        <attvalues>
+          <attvalue for="0" value="#ffff00" />
+          <attvalue for="1" value="9" />
+          <attvalue for="2" value="4" />
+        </attvalues>
+      </node>
+    </nodes>
+    <edges>
+      <!-- RED Branch Connections -->
+      <edge id="e1" source="1" target="2" />
+      <edge id="e2" source="2" target="3" />
+      <edge id="e3" source="3" target="4" />
+      <edge id="e4" source="4" target="5" />
+      <edge id="e5" source="5" target="6" />
+      <edge id="e6" source="6" target="7" />
+      <edge id="e7" source="7" target="8" />
+
+      <!-- BLUE Branch Connections -->
+      <edge id="e8" source="10" target="11" />
+      <edge id="e9" source="11" target="9" />
+      <edge id="e10" source="9" target="12" />
+      <edge id="e11" source="12" target="13" />
+
+      <!-- YELLOW Branch Connections -->
+      <edge id="e12" source="14" target="15" />
+      <edge id="e13" source="15" target="16" />
+      <edge id="e14" source="16" target="17" />
+      <edge id="e15" source="17" target="18" />
+    </edges>
+  </graph>
+</gexf>
