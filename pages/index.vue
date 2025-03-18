@@ -16,8 +16,24 @@
         <input type="range" v-model.number="visControls.neighborAttraction" min="0" max="2" step="0.1">
       </div>
       <div class="control-group">
+        <label>Edge Opacity</label>
+        <input type="range" v-model.number="visControls.edgeOpacity" min="0" max="1" step="0.1">
+      </div>
+      <div class="control-group">
+        <label>Edge Thickness</label>
+        <input type="range" v-model.number="visControls.edgeThickness" min="0.1" max="3" step="0.1">
+      </div>
+      <div class="control-group">
+        <label>Layer Spacing</label>
+        <input type="range" v-model.number="visControls.layerSpacing" min="0.5" max="5" step="0.5">
+      </div>
+      <div class="control-group">
         <label>Show Names</label>
         <input type="checkbox" v-model="visControls.showLabels">
+      </div>
+      <div class="control-group">
+        <label>Show Grid</label>
+        <input type="checkbox" v-model="visControls.showGrid">
       </div>
     </div>
 
@@ -198,7 +214,11 @@ const visControls = ref({
   rotationSpeed: 0.5,
   nodeSizeScale: 1.0,
   neighborAttraction: 1.0,
-  showLabels: true
+  showLabels: true,
+  edgeOpacity: 0.5,
+  edgeThickness: 1.0,
+  showGrid: false,
+  layerSpacing: 2
 });
 
 // Watch for control changes

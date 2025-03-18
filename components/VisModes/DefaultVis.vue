@@ -43,14 +43,14 @@ const props = defineProps({
 const emit = defineEmits(['node-selected']);
 
 const containerRef = ref(null);
-const showLabels = computed(() => props.visControls.showLabels);
-const showGrid = computed(() => props.visControls.showGrid);
-const nodeSizeScale = computed(() => props.visControls.nodeSizeScale);
-const layerSpacing = computed(() => props.visControls.layerSpacing);
-const edgeOpacity = computed(() => props.visControls.edgeOpacity);
-const edgeThickness = computed(() => props.visControls.edgeThickness);
-const neighborAttraction = computed(() => props.visControls.neighborAttraction);
-const rotationSpeed = computed(() => props.visControls.rotationSpeed);
+const showLabels = computed(() => props.visControls.showLabels !== undefined ? props.visControls.showLabels : true);
+const showGrid = computed(() => props.visControls.showGrid !== undefined ? props.visControls.showGrid : false);
+const nodeSizeScale = computed(() => props.visControls.nodeSizeScale !== undefined ? props.visControls.nodeSizeScale : 1);
+const layerSpacing = computed(() => props.visControls.layerSpacing !== undefined ? props.visControls.layerSpacing : 2);
+const edgeOpacity = computed(() => props.visControls.edgeOpacity !== undefined ? props.visControls.edgeOpacity : 0.5);
+const edgeThickness = computed(() => props.visControls.edgeThickness !== undefined ? props.visControls.edgeThickness : 1);
+const neighborAttraction = computed(() => props.visControls.neighborAttraction !== undefined ? props.visControls.neighborAttraction : 1);
+const rotationSpeed = computed(() => props.visControls.rotationSpeed !== undefined ? props.visControls.rotationSpeed : 0.5);
 
 const nodeLabels = ref([]);
 const selectedNodeId = ref(null);
@@ -143,6 +143,19 @@ const initializeNetwork = () => {
   
   const container = containerRef.value;
   
+  // Safety check for container dimensions
+  if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+    console.error("[DefaultVis] Container has zero width or height, cannot initialize WebGL");
+    setTimeout(() => {
+      // Try again later when container might have dimensions
+      if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+        console.log("[DefaultVis] Container now has dimensions, retrying initialization");
+        initializeNetwork();
+      }
+    }, 500);
+    return;
+  }
+  
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x000000);
 
@@ -168,14 +181,19 @@ const initializeNetwork = () => {
   console.log("[DefaultVis] Appending renderer to container");
   container.appendChild(renderer.domElement);
 
-  // Setup post-processing
-  console.log("[DefaultVis] Setting up post-processing");
+  // Make sure composer has valid dimensions
+  if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+    console.error("[DefaultVis] Cannot create composer with zero dimensions");
+    return;
+  }
+  
+  console.log("[DefaultVis] Setting up post-processing with dimensions:", container.offsetWidth, "x", container.offsetHeight);
   const composer = new EffectComposer(renderer);
   const renderPass = new RenderPass(scene, camera);
   composer.addPass(renderPass);
 
   const bloomPass = new UnrealBloomPass(
-    new THREE.Vector2(container.offsetWidth, container.offsetHeight),
+    new THREE.Vector2(Math.max(1, container.offsetWidth), Math.max(1, container.offsetHeight)),
     0.1, // strength
     0.75, // radius
     0.4 // threshold
@@ -427,7 +445,20 @@ const initializeNetwork = () => {
 
   // Window resize handler
   const handleResize = () => {
-    if (!camera || !renderer || !container) return;
+    if (!threeObjects.value || !threeObjects.value.camera || !threeObjects.value.renderer || !containerRef.value) return;
+    
+    const container = containerRef.value;
+    const camera = threeObjects.value.camera;
+    const renderer = threeObjects.value.renderer;
+    const composer = threeObjects.value.composer;
+    
+    // Check for valid dimensions
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      console.warn("[DefaultVis] Cannot resize to zero dimensions");
+      return;
+    }
+    
+    console.log("[DefaultVis] Handling resize:", container.offsetWidth, "x", container.offsetHeight);
     
     camera.left = container.offsetWidth / -20;
     camera.right = container.offsetWidth / 20;
@@ -436,7 +467,10 @@ const initializeNetwork = () => {
     camera.updateProjectionMatrix();
     
     renderer.setSize(container.offsetWidth, container.offsetHeight);
-    composer.setSize(container.offsetWidth, container.offsetHeight);
+    
+    if (composer) {
+      composer.setSize(container.offsetWidth, container.offsetHeight);
+    }
   };
   
   window.addEventListener('resize', handleResize);
@@ -463,6 +497,7 @@ const initializeNetwork = () => {
     nodeObjects,
     raycaster,
     mouse,
+    controls,
     handleResize,
     cleanup: () => {
       console.log("[DefaultVis] Cleaning up resources");
@@ -471,21 +506,15 @@ const initializeNetwork = () => {
       if (animationFrameId) {
         console.log("[DefaultVis] Canceling animation frame");
         cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
       }
       
-      // Remove renderer from DOM
-      if (renderer && renderer.domElement && container) {
-        try {
-          console.log("[DefaultVis] Removing renderer from DOM");
-          if (container.contains(renderer.domElement)) {
-            container.removeChild(renderer.domElement);
-          }
-        } catch (e) {
-          console.warn("[DefaultVis] Error removing renderer element:", e);
-        }
-      }
+      // Clear references to avoid memory leaks
+      raycaster = null;
+      mouse = null;
+      controls = null;
       
-      // Remove event listeners
+      // Safely remove event listeners first
       try {
         console.log("[DefaultVis] Removing event listeners");
         window.removeEventListener('resize', handleResize);
@@ -504,10 +533,31 @@ const initializeNetwork = () => {
         // Clean up edge objects
         if (threeObjects.value && threeObjects.value.edgeObjects) {
           threeObjects.value.edgeObjects.forEach(edge => {
-            if (edge.geometry) edge.geometry.dispose();
-            if (edge.material) edge.material.dispose();
+            if (edge.geometry) {
+              edge.geometry.dispose();
+              edge.geometry = null;
+            }
+            if (edge.material) {
+              edge.material.dispose();
+              edge.material = null;
+            }
           });
           threeObjects.value.edgeObjects = [];
+        }
+        
+        // Clean up node objects
+        if (threeObjects.value && threeObjects.value.nodeObjects) {
+          Object.values(threeObjects.value.nodeObjects).forEach(node => {
+            if (node.geometry) {
+              node.geometry.dispose();
+              node.geometry = null;
+            }
+            if (node.material) {
+              node.material.dispose();
+              node.material = null;
+            }
+          });
+          threeObjects.value.nodeObjects = {};
         }
         
         // Clean up other scene objects
@@ -515,21 +565,60 @@ const initializeNetwork = () => {
           scene.traverse((object) => {
             if (object.geometry) {
               object.geometry.dispose();
+              object.geometry = null;
             }
             if (object.material) {
               if (Array.isArray(object.material)) {
-                object.material.forEach(material => material.dispose());
+                object.material.forEach(material => {
+                  material.dispose();
+                });
               } else {
                 object.material.dispose();
               }
+              object.material = null;
             }
           });
+          
+          // Clear the scene
+          while(scene.children.length > 0) { 
+            scene.remove(scene.children[0]); 
+          }
         }
         
+        // Clear any passes from composer before disposing
         if (composer) {
           console.log("[DefaultVis] Disposing composer");
-          if (composer.renderTarget1) composer.renderTarget1.dispose();
-          if (composer.renderTarget2) composer.renderTarget2.dispose();
+          if (composer.passes) {
+            for (let i = composer.passes.length - 1; i >= 0; i--) {
+              const pass = composer.passes[i];
+              if (pass) {
+                composer.removePass(pass);
+              }
+            }
+          }
+          
+          if (composer.renderTarget1) {
+            composer.renderTarget1.dispose();
+            composer.renderTarget1 = null;
+          }
+          if (composer.renderTarget2) {
+            composer.renderTarget2.dispose();
+            composer.renderTarget2 = null;
+          }
+          
+          composer = null;
+        }
+        
+        // Remove renderer from DOM
+        if (renderer && container) {
+          try {
+            console.log("[DefaultVis] Removing renderer from DOM");
+            if (container.contains(renderer.domElement)) {
+              container.removeChild(renderer.domElement);
+            }
+          } catch (e) {
+            console.warn("[DefaultVis] Error removing renderer element:", e);
+          }
         }
         
         if (renderer) {

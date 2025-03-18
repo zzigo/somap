@@ -32,10 +32,11 @@ const props = defineProps({
 });
 
 const containerRef = ref(null);
-const showLabels = computed(() => props.visControls.showLabels);
-const nodeSizeScale = computed(() => props.visControls.nodeSizeScale);
-const edgeOpacity = computed(() => props.visControls.edgeOpacity);
-const neighborAttraction = computed(() => props.visControls.neighborAttraction);
+const showLabels = computed(() => props.visControls.showLabels !== undefined ? props.visControls.showLabels : true);
+const nodeSizeScale = computed(() => props.visControls.nodeSizeScale !== undefined ? props.visControls.nodeSizeScale : 1);
+const edgeOpacity = computed(() => props.visControls.edgeOpacity !== undefined ? props.visControls.edgeOpacity : 0.5);
+const neighborAttraction = computed(() => props.visControls.neighborAttraction !== undefined ? props.visControls.neighborAttraction : 1);
+const rotationSpeed = computed(() => props.visControls.rotationSpeed !== undefined ? props.visControls.rotationSpeed : 0);
 
 const nodeLabels = ref([]);
 const threeObjects = ref({
@@ -44,12 +45,26 @@ const threeObjects = ref({
   scene: null,
   camera: null,
   renderer: null,
+  createEdges: null,
 });
 
 // Initialize the 2D visualization
 const initializeNetwork = () => {
   if (!containerRef.value) return;
   const container = containerRef.value;
+  
+  // Safety check for container dimensions
+  if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+    console.error("[FlatVis] Container has zero width or height, cannot initialize WebGL");
+    setTimeout(() => {
+      // Try again later when container might have dimensions
+      if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+        console.log("[FlatVis] Container now has dimensions, retrying initialization");
+        initializeNetwork();
+      }
+    }, 500);
+    return;
+  }
   
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(0x121212);
@@ -122,6 +137,14 @@ const initializeNetwork = () => {
   
   // Create edges as flat lines
   const createEdges = () => {
+    if (!threeObjects.value || !threeObjects.value.nodeGroup) {
+      console.warn("[FlatVis] Cannot create edges, nodeGroup not initialized");
+      return;
+    }
+    
+    const nodeGroup = threeObjects.value.nodeGroup;
+    const nodeObjects = threeObjects.value.nodeObjects;
+    
     // Remove existing edges
     nodeGroup.children.forEach(child => {
       if (child.userData && child.userData.isEdge) {
@@ -146,7 +169,6 @@ const initializeNetwork = () => {
       
       // Use a gradient color between source and target
       const sourceMaterial = sourceNode.material;
-      const targetMaterial = targetNode.material;
       const edgeColor = new THREE.Color(sourceMaterial.color.getHex());
       
       const material = new THREE.LineBasicMaterial({
@@ -162,6 +184,9 @@ const initializeNetwork = () => {
       nodeGroup.add(line);
     });
   };
+  
+  // Store the createEdges function in threeObjects so it can be accessed by watchers
+  threeObjects.value.createEdges = createEdges;
   
   createEdges();
   
@@ -257,7 +282,17 @@ const initializeNetwork = () => {
   
   // Resize handler
   const handleResize = () => {
-    if (!camera || !renderer || !container) return;
+    if (!threeObjects.value || !threeObjects.value.camera || !threeObjects.value.renderer || !containerRef.value) return;
+    
+    const container = containerRef.value;
+    const camera = threeObjects.value.camera;
+    const renderer = threeObjects.value.renderer;
+    
+    // Check for valid dimensions
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      console.warn("[FlatVis] Cannot resize to zero dimensions");
+      return;
+    }
     
     // Update camera frustum
     camera.left = container.offsetWidth / -2;
@@ -280,40 +315,157 @@ const initializeNetwork = () => {
     nodeObjects,
     handleResize,
     cleanup: () => {
+      console.log("[FlatVis] Cleaning up resources");
+      
       if (animationFrameId) {
+        console.log("[FlatVis] Canceling animation frame");
         cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
       }
-      if (renderer) {
+      
+      // Safely remove event listeners
+      try {
+        console.log("[FlatVis] Removing event listeners");
+        window.removeEventListener('resize', handleResize);
+      } catch (e) {
+        console.warn("[FlatVis] Error removing event listeners:", e);
+      }
+      
+      // Remove renderer from DOM
+      if (renderer && container) {
         try {
-          container.removeChild(renderer.domElement);
+          console.log("[FlatVis] Removing renderer from DOM");
+          if (container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement);
+          }
         } catch (e) {
-          console.warn("Error removing renderer element:", e);
+          console.warn("[FlatVis] Error removing renderer element:", e);
         }
       }
-      window.removeEventListener('resize', handleResize);
       
       // Dispose of ThreeJS resources
-      scene.traverse((object) => {
-        if (object.geometry) {
-          object.geometry.dispose();
+      try {
+        console.log("[FlatVis] Disposing ThreeJS resources");
+        
+        // Clean up node objects
+        if (threeObjects.value && threeObjects.value.nodeObjects) {
+          Object.values(threeObjects.value.nodeObjects).forEach(node => {
+            if (node.geometry) {
+              node.geometry.dispose();
+              node.geometry = null;
+            }
+            if (node.material) {
+              node.material.dispose();
+              node.material = null;
+            }
+          });
+          threeObjects.value.nodeObjects = {};
         }
-        if (object.material) {
-          if (Array.isArray(object.material)) {
-            object.material.forEach(material => material.dispose());
-          } else {
-            object.material.dispose();
+        
+        // Clean up scene objects
+        if (scene) {
+          scene.traverse((object) => {
+            if (object.geometry) {
+              object.geometry.dispose();
+              object.geometry = null;
+            }
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach(material => {
+                  material.dispose();
+                  material = null;
+                });
+              } else {
+                object.material.dispose();
+                object.material = null;
+              }
+            }
+          });
+          
+          // Clear the scene
+          while(scene.children.length > 0) { 
+            scene.remove(scene.children[0]); 
           }
         }
-      });
-      
-      renderer.dispose();
+        
+        // Dispose of renderer
+        if (renderer) {
+          console.log("[FlatVis] Disposing renderer");
+          renderer.dispose();
+          renderer.forceContextLoss();
+          renderer.domElement = null;
+          renderer = null;
+        }
+        
+        // Clear references
+        scene = null;
+        camera = null;
+        nodeGroup = null;
+        
+        console.log("[FlatVis] Cleanup complete");
+      } catch (e) {
+        console.warn("[FlatVis] Error disposing ThreeJS resources:", e);
+      }
     }
   };
 };
 
+// Watch for control changes
+watch(() => props.visControls.nodeSizeScale, (value) => {
+  if (!threeObjects.value || !threeObjects.value.nodeObjects) return;
+  
+  Object.entries(threeObjects.value.nodeObjects).forEach(([id, node]) => {
+    const originalNode = props.graphData.nodes.find(n => n.id === id);
+    if (originalNode) {
+      const radius = (originalNode.size || 3) * value / 10;
+      // Create a new geometry with the updated size
+      if (node.geometry) node.geometry.dispose();
+      node.geometry = new THREE.CircleGeometry(radius, 32);
+    }
+  });
+  
+  // Recreate edges to match updated node sizes
+  if (threeObjects.value.nodeGroup && threeObjects.value.createEdges) {
+    threeObjects.value.createEdges();
+  }
+}, { immediate: true });
+
+// Handle keyboard shortcuts
+const handleKeyDown = (event) => {
+  // Add any keyboard shortcuts for FlatVis if needed
+};
+
+// Safely initialize the network
+const safeInitialize = () => {
+  // Check if component is still mounted before initializing
+  if (!containerRef.value) {
+    console.warn("[FlatVis] Cannot initialize, container ref is null");
+    return;
+  }
+  
+  // Check if already initialized to prevent double initialization
+  if (threeObjects.value && threeObjects.value.renderer) {
+    console.warn("[FlatVis] Already initialized, skipping");
+    return;
+  }
+  
+  console.log("[FlatVis] Safe initialization started");
+  
+  // Initialize with a slight delay to ensure the container is rendered
+  setTimeout(() => {
+    if (containerRef.value) {
+      initializeNetwork();
+    } else {
+      console.warn("[FlatVis] Container lost during delayed initialization");
+    }
+  }, 50);
+};
+
 // Initialize when component mounts
 onMounted(() => {
-  initializeNetwork();
+  console.log("[FlatVis] Component mounted");
+  window.addEventListener('keydown', handleKeyDown);
+  safeInitialize();
 });
 
 // Clean up when component is unmounted
@@ -325,6 +477,21 @@ onBeforeUnmount(() => {
   try {
     if (threeObjects.value && threeObjects.value.cleanup) {
       threeObjects.value.cleanup();
+    }
+    
+    // Also explicitly set the component state to "unmounted"
+    // to prevent any further renders or animations
+    if (threeObjects.value) {
+      console.log("[FlatVis] Setting component state to unmounted");
+      threeObjects.value.isUnmounted = true;
+      
+      // Clear node labels to prevent rendering issues
+      nodeLabels.value = [];
+      
+      // Clear reference functions
+      threeObjects.value.createEdges = null;
+      threeObjects.value.handleResize = null;
+      threeObjects.value.cleanup = null;
     }
   } catch (err) {
     console.error("[FlatVis] Error during cleanup:", err);

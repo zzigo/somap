@@ -33,10 +33,10 @@ const props = defineProps({
 
 const containerRef = ref(null);
 const showLabels = computed(() => props.visControls.showLabels);
-const showGrid = computed(() => props.visControls.showGrid);
+const showGrid = computed(() => props.visControls.showGrid !== undefined ? props.visControls.showGrid : false);
 const nodeSizeScale = computed(() => props.visControls.nodeSizeScale);
-const layerSpacing = computed(() => props.visControls.layerSpacing);
-const edgeOpacity = computed(() => props.visControls.edgeOpacity);
+const layerSpacing = computed(() => props.visControls.layerSpacing || 2);
+const edgeOpacity = computed(() => props.visControls.edgeOpacity !== undefined ? props.visControls.edgeOpacity : 0.5);
 const neighborAttraction = computed(() => props.visControls.neighborAttraction);
 const rotationSpeed = computed(() => props.visControls.rotationSpeed);
 
@@ -60,6 +60,19 @@ const threeObjects = ref({
 const initializeNetwork = () => {
   if (!containerRef.value) return;
   const container = containerRef.value;
+
+  // Safety check for container dimensions
+  if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+    console.error("[ColorNeighborsVis] Container has zero width or height, cannot initialize WebGL");
+    setTimeout(() => {
+      // Try again later when container might have dimensions
+      if (container.offsetWidth > 0 && container.offsetHeight > 0) {
+        console.log("[ColorNeighborsVis] Container now has dimensions, retrying initialization");
+        initializeNetwork();
+      }
+    }, 500);
+    return;
+  }
 
   // Find root nodes and assign colors
   const targets = new Set(props.graphData.edges.map(e => e.target));
@@ -194,8 +207,15 @@ const initializeNetwork = () => {
       
       if (!sourceNode || !targetNode) return;
       
-      const sourcePos = sourceNode.position;
-      const targetPos = targetNode.position;
+      const sourcePos = sourceNode.position.clone();
+      const targetPos = targetNode.position.clone();
+      
+      // Skip if any position values are NaN
+      if (isNaN(sourcePos.x) || isNaN(sourcePos.y) || isNaN(sourcePos.z) ||
+          isNaN(targetPos.x) || isNaN(targetPos.y) || isNaN(targetPos.z)) {
+        console.warn(`[ColorNeighborsVis] Skipping edge with NaN position: ${source} -> ${target}`);
+        return;
+      }
       
       // Use source node's color for the edge
       const edgeColor = new THREE.Color().copy(sourceNode.material.color);
@@ -247,7 +267,7 @@ const initializeNetwork = () => {
         if (node !== otherNode) {
           const diff = node.position.clone().sub(otherNode.position);
           const dist = diff.length();
-          if (dist < 10) {
+          if (dist > 0.001 && dist < 10) { // Avoid division by zero or very small values
             const force = diff.normalize().multiplyScalar(1 / (dist * dist));
             node.userData.force.add(force);
           }
@@ -261,22 +281,44 @@ const initializeNetwork = () => {
           if (otherNode) {
             const diff = otherNode.position.clone().sub(node.position);
             const dist = diff.length();
-            // Use neighborAttraction parameter to control strength
-            const attraction = diff.normalize().multiplyScalar(dist * neighborAttraction.value * 0.05);
-            node.userData.force.add(attraction);
+            if (dist > 0.001) { // Avoid very small distances
+              // Use neighborAttraction parameter to control strength
+              const attraction = diff.normalize().multiplyScalar(dist * (neighborAttraction.value || 1) * 0.05);
+              node.userData.force.add(attraction);
+            }
           }
         }
       });
       
       // Keep nodes at their level's height
-      const targetY = node.userData.level * layerSpacing.value;
+      const targetY = node.userData.level * (layerSpacing.value || 2);
       const yDiff = targetY - node.position.y;
       node.userData.force.y += yDiff * 0.05;
       
       // Update velocity and position
       node.userData.velocity.add(node.userData.force.multiplyScalar(0.1));
       node.userData.velocity.multiplyScalar(0.9); // Damping
-      node.position.add(node.userData.velocity);
+      
+      // Check for NaN values before applying velocity
+      if (!isNaN(node.userData.velocity.x) && 
+          !isNaN(node.userData.velocity.y) && 
+          !isNaN(node.userData.velocity.z)) {
+        node.position.add(node.userData.velocity);
+      } else {
+        console.warn(`[ColorNeighborsVis] Detected NaN velocity for node ${node.userData.id}, resetting.`);
+        node.userData.velocity.set(0, 0, 0);
+      }
+      
+      // Safety check for NaN position values
+      if (isNaN(node.position.x) || isNaN(node.position.y) || isNaN(node.position.z)) {
+        console.warn(`[ColorNeighborsVis] Detected NaN position for node ${node.userData.id}, resetting position.`);
+        // Reset to a random valid position
+        node.position.set(
+          Math.random() * 10 - 5,
+          node.userData.level * (layerSpacing.value || 2),
+          Math.random() * 10 - 5
+        );
+      }
     });
     
     // Recreate edges to match new positions
@@ -296,7 +338,17 @@ const initializeNetwork = () => {
   
   // Window resize handler
   const handleResize = () => {
-    if (!camera || !renderer || !container) return;
+    if (!threeObjects.value || !threeObjects.value.camera || !threeObjects.value.renderer || !containerRef.value) return;
+    
+    const container = containerRef.value;
+    const camera = threeObjects.value.camera;
+    const renderer = threeObjects.value.renderer;
+    
+    // Check for valid dimensions
+    if (container.offsetWidth === 0 || container.offsetHeight === 0) {
+      console.warn("[ColorNeighborsVis] Cannot resize to zero dimensions");
+      return;
+    }
     
     camera.aspect = container.offsetWidth / container.offsetHeight;
     camera.updateProjectionMatrix();
@@ -314,34 +366,95 @@ const initializeNetwork = () => {
     nodeObjects,
     handleResize, // Store the reference to handleResize function
     cleanup: () => {
+      console.log("[ColorNeighborsVis] Cleaning up resources");
+      
       if (animationFrameId) {
+        console.log("[ColorNeighborsVis] Canceling animation frame");
         cancelAnimationFrame(animationFrameId);
+        animationFrameId = null;
       }
+      
+      // Safely remove event listeners
+      try {
+        console.log("[ColorNeighborsVis] Removing event listeners");
+        window.removeEventListener('resize', handleResize);
+      } catch (e) {
+        console.warn("[ColorNeighborsVis] Error removing event listeners:", e);
+      }
+      
+      // Remove renderer from DOM
       if (renderer) {
         try {
-          container.removeChild(renderer.domElement);
+          console.log("[ColorNeighborsVis] Removing renderer from DOM");
+          if (container.contains(renderer.domElement)) {
+            container.removeChild(renderer.domElement);
+          }
         } catch (e) {
-          console.warn("Error removing renderer element:", e);
+          console.warn("[ColorNeighborsVis] Error removing renderer element:", e);
         }
       }
-      // Remove event listener
-      window.removeEventListener('resize', handleResize);
       
       // Dispose of ThreeJS resources
-      scene.traverse((object) => {
-        if (object.geometry) {
-          object.geometry.dispose();
+      try {
+        console.log("[ColorNeighborsVis] Disposing ThreeJS resources");
+        
+        // Clean up node objects
+        if (threeObjects.value && threeObjects.value.nodeObjects) {
+          Object.values(threeObjects.value.nodeObjects).forEach(node => {
+            if (node.geometry) {
+              node.geometry.dispose();
+              node.geometry = null;
+            }
+            if (node.material) {
+              node.material.dispose();
+              node.material = null;
+            }
+          });
         }
-        if (object.material) {
-          if (Array.isArray(object.material)) {
-            object.material.forEach(material => material.dispose());
-          } else {
-            object.material.dispose();
+        
+        // Clean up scene objects
+        if (scene) {
+          scene.traverse((object) => {
+            if (object.geometry) {
+              object.geometry.dispose();
+              object.geometry = null;
+            }
+            if (object.material) {
+              if (Array.isArray(object.material)) {
+                object.material.forEach(material => {
+                  material.dispose();
+                });
+              } else {
+                object.material.dispose();
+              }
+              object.material = null;
+            }
+          });
+          
+          // Clear the scene
+          while(scene.children.length > 0) { 
+            scene.remove(scene.children[0]); 
           }
         }
-      });
-      
-      renderer.dispose();
+        
+        // Dispose of renderer
+        if (renderer) {
+          console.log("[ColorNeighborsVis] Disposing renderer");
+          renderer.dispose();
+          renderer.forceContextLoss();
+          renderer.domElement = null;
+          renderer = null;
+        }
+        
+        // Clear references
+        scene = null;
+        camera = null;
+        nodeGroup = null;
+        
+        console.log("[ColorNeighborsVis] Cleanup complete");
+      } catch (e) {
+        console.warn("[ColorNeighborsVis] Error during cleanup:", e);
+      }
     }
   };
   
