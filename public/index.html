@@ -1,0 +1,3100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SOMAP</title>
+  <link href="/output.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.73.2/dist/3d-force-graph.min.js"></script>
+  <style>
+    #graph-container { 
+      width: 100%; 
+      height: 100vh; 
+      position: relative; 
+      z-index: 1; 
+      display: none; 
+    }
+    .graph-controls {
+      position: fixed;
+      top: 60px;
+      right: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    .graph-control-btn {
+      padding: 8px 16px;
+      background-color: rgba(0, 0, 0, 0.6);
+      color: white;
+      border: 1px solid #666;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      min-width: 120px;
+      text-align: center;
+    }
+    .graph-control-btn:hover {
+      background-color: rgba(255, 149, 0, 0.7);
+    }
+    #status-bar { 
+      position: fixed; 
+      bottom: 0; 
+      left: 0; 
+      right: 0; 
+      background: rgba(0, 0, 0, 0.7); 
+      z-index: 20;
+      transition: transform 0.5s ease;
+    }
+    #left-sidebar, #second-sidebar { 
+      transition: transform 0.5s ease, opacity 0.5s ease;
+    }
+    #left-sidebar { 
+      position: fixed; 
+      left: 0; 
+      top: 0; 
+      bottom: 40px; 
+      width: 40px; 
+      background: rgba(0, 0, 0, 0.7); 
+      z-index: 10;
+    }
+    #second-sidebar { 
+      position: fixed; 
+      left: 40px; 
+      top: 0; 
+      bottom: 40px; 
+      width: auto; 
+      min-width: 200px;
+      max-width: 350px;
+      background: transparent; 
+      z-index: 9; 
+      overflow-y: auto; 
+      transform: translateX(0);
+      opacity: 1;
+      resize: horizontal;
+      overflow-x: hidden;
+    }
+    #second-sidebar.hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    .form-container { 
+      background: rgba(20, 20, 20, 0.8); 
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      margin-top: 8px;
+    }
+    .input-transparent { background: rgba(255, 255, 255, 0.03); border: none; }
+    select.input-transparent {
+      appearance: none;
+      background: rgba(255, 255, 255, 0.03) url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") 
+      no-repeat right 5px center;
+      background-size: 15px;
+      padding-right: 25px;
+    }
+    select.input-transparent option {
+      background-color: #1a1a1a;
+      color: white;
+    }
+    .color-picker-wrapper {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      overflow: visible; /* Change from hidden to visible */
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+      z-index: 50;
+    }
+    .color-preview-button {
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      background-color: #FF9500; /* Default color */
+      border: 2px solid white; /* Make border more visible */
+      border-radius: 3px;
+    }
+    .color-palette {
+      display: none;
+      position: absolute;
+      top: calc(100% + 5px);
+      left: 0;
+      margin-top: 8px;
+      background: rgba(30, 30, 30, 0.95);
+      border-radius: 8px;
+      padding: 12px;
+      width: 240px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+    }
+    /* Make room for color picker when visible */
+    .accordion-content.has-active-color-picker {
+      padding-bottom: 300px;
+    }
+    .color-palette.visible {
+      display: block;
+    }
+    .palette-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .palette-color {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    .palette-color:hover {
+      transform: scale(1.15);
+    }
+    .selected-color-display {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .color-preview {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    .custom-color-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-top: 12px;
+    }
+    input[type="color"] {
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      border: none;
+      background: none;
+      cursor: pointer;
+    }
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+    }
+    .icon { width: 18px; height: 18px; fill: none; stroke: white; stroke-width: 1.5; }
+    .popup { position: absolute; background: rgba(0, 0, 0, 0.7); padding: 10px; z-index: 30; width: 200px; right: 0; bottom: 40px; }
+    .popup-item { display: flex; align-items: center; gap: 8px; padding: 5px; cursor: pointer; }
+    .popup-item:hover { background: #ff9500; color: black; }
+    .accordion { padding: 10px 0; position: relative; }
+    .accordion-content { 
+      position: absolute; 
+      left: 40px; 
+      top: 0; 
+      background: rgba(0, 0, 0, 0.7); 
+      width: 200px; 
+      display: none; 
+      z-index: 10; 
+      padding: 5px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    /* Relations need more width to properly display content */
+    .accordion[data-form="relation"] .accordion-content,
+    .accordion[data-form="type"] .accordion-content {
+      width: 350px;
+    }
+    .accordion:hover .accordion-content { display: block; }
+    .accordion-content.persistent { display: block; }
+    .accordion-item { padding: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .accordion-item:hover { background: #ff9500; color: black; }
+    .accordion-item .edit-icons { display: none; }
+    .accordion-item:hover .edit-icons { 
+      display: flex; 
+      gap: 5px; 
+      position: relative;
+      z-index: 15;
+    }
+    .accordion-item .edit-icons svg {
+      cursor: pointer;
+      background-color: rgba(50, 50, 50, 0.7);
+      border-radius: 3px;
+      padding: 2px;
+      min-width: 18px;
+      min-height: 18px;
+    }
+    .accordion-item .edit-icons svg:hover {
+      background-color: #ff9500;
+      transform: scale(1.1);
+    }
+    #menu-toggle, #user-toggle { pointer-events: auto; }
+    #status-bar-right { margin-right: 5px; display: flex; align-items: center; }
+    #user-toggle { margin-left: auto; }
+    .color-dot {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 5px;
+    }
+    .icon-sm {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      vertical-align: middle;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      margin: 0 4px;
+    }
+    .relation-content {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
+    }
+    .relation-name {
+      font-weight: bold;
+    }
+    .relation-details {
+      display: flex;
+      align-items: center;
+      opacity: 0.8;
+    }
+    .text-lytBlue {
+      color: #4dabf7;
+    }
+    .text-lytGreen {
+      color: #51cf66;
+    }
+    .text-lytRed {
+      color: #ff6b6b; 
+    }
+    .hover\:bg-lytRed:hover {
+      background-color: #ff6b6b;
+    }
+    .hover\:bg-lytBlue:hover {
+      background-color: #51cbee;
+    }
+    @media (max-width: 768px) {
+      #status-bar { font-size: 14px; padding: 5px; flex-direction: column; align-items: flex-end; }
+      #left-sidebar { width: 100%; bottom: 40px; }
+      #second-sidebar { width: 100%; left: 0; }
+      .popup { width: 100%; right: 0; }
+      #auth-fields { flex-direction: column; width: 100%; }
+      #status-bar-right { margin-right: 5px; }
+    }
+    .inline-edit-active {
+      position: relative;
+    }
+    .inline-edit-input {
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      padding: 5px;
+      background: rgba(0, 0, 0, 0.85);
+      border: 1px solid #ff9500;
+      color: white;
+      font-size: inherit;
+      outline: none;
+      z-index: 100;
+    }
+    .sidebar-hidden {
+      transform: translateX(-100%);
+      opacity: 0;
+    }
+    .left-sidebar-hidden {
+      transform: translateX(-40px);
+      opacity: 0;
+    }
+    .statusbar-hidden {
+      transform: translateY(100%);
+    }
+    .line-type-indicator {
+      margin: 0 5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="status-bar" class="flex items-center justify-between p-2">
+    <div class="flex items-center gap-2">
+      <button id="menu-toggle" class="flex items-center p-2 hover:text-lytOrange" title="Toggle Left Sidebar">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
+      </button>
+      <span id="active-perspective" class="text-lytGrey" title="Active Perspective">default</span>
+    </div>
+    <div id="status-bar-right" class="flex items-center gap-2">
+      <button id="user-toggle" class="flex items-center p-2 hover:text-lytOrange" title="User Menu">
+        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="6" r="4" stroke="#fff" stroke-width="1.5"></circle>
+          <path d="M15 20.6151C14.0907 20.8619 13.0736 21 12 21C8.13401 21 5 19.2091 5 17C5 14.7909 8.13401 13 12 13C15.866 13 19 14.7909 19 17C19 17.3453 18.9234 17.6804 18.7795 18" stroke="#fff" stroke-width="1.5" stroke-linecap="round"></path>
+        </svg>
+      </button>
+      <span id="user-display" class="cursor-pointer hover:text-lytOrange" title="Current User"></span>
+      <div id="entities-display" class="flex items-center gap-1 cursor-pointer hover:text-lytOrange hidden" title="Entity Count">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0" /></svg>
+        <span id="entity-count"></span>
+      </div>
+      <div id="auth-fields" class="flex items-center gap-2 hidden">
+        <input id="username" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="User" title="Username" />
+        <input id="password" type="password" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Pass" title="Password" />
+        <button id="signup" class="flex items-center p-2 hover:text-lytOrange" title="Sign Up">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" /></svg>
+        </button>
+        <button id="login" class="flex items-center p-2 hover:text-lytOrange" title="Login">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4m-6-4l4-4-4-4m4 4H3" /></svg>
+        </button>
+      </div>
+      <div id="user-menu" class="popup hidden">
+        <div id="login-opt" class="popup-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4m-6-4l4-4-4-4m4 4H3" /></svg>
+          Login
+        </div>
+        <div id="logout-opt" class="popup-item hidden">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m6 14l4-4-4-4m4 4H9" /></svg>
+          Logout
+        </div>
+        <div id="signup-opt" class="popup-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" /></svg>
+          Sign Up
+        </div>
+        <div class="popup-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0-18 0" /></svg>
+          About
+        </div>
+        <div class="popup-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M12 4v16" /></svg>
+          User Guide
+        </div>
+        <div class="popup-item">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M3 12h18" /></svg>
+          Methodology
+        </div>
+      </div>
+      <div id="entities-popup" class="popup hidden bottom-40 right-60"></div>
+    </div>
+  </div>
+  <div id="left-sidebar" class="flex flex-col gap-2 p-2">
+    <div class="accordion" data-form="entity">
+      <div class="flex items-center gap-2">
+        <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M14 4.577v6.846L8 15l-6-3.577V4.577L8 1l6 3.577zM8.5.134a1 1 0 0 0-1 0l-6 3.577a1 1 0 0 0-.5.866v6.846a1 1 0 0 0 .5.866l6 3.577a1 1 0 0 0 1 0l6-3.577a1 1 0 0 0 .5-.866V4.577a1 1 0 0 0-.5-.866L8.5.134z"></path>
+        </svg>
+        <div class="accordion-content">
+          <div class="accordion-item" data-form="entity-form">
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Add Entity
+          </div>
+          <div id="entity-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
+            <div class="text-white mb-2">Add Entity</div>
+            <input id="entity-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
+            <select id="entity-type" class="input-transparent text-white p-1 placeholder-lytGrey">
+              <option value="" disabled selected>Select a Type</option>
+            </select>
+            <button id="entity-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Entity</button>
+            <button id="entity-debug" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Debug Entity Creation</button>
+          </div>
+          <div id="entities-list" class="pl-4"></div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-form="type">
+      <div class="flex items-center gap-2">
+        <svg class="icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+          <path d="M6.70247571,4412.07175 L12.0994757,4404.08575 C12.3864757,4403.69975 13.0004757,4403.90275 13.0004757,4404.38375 L13.0004757,4415.43475 C13.0004757,4415.82075 12.5804757,4416.06175 12.2474757,4415.86675 L6.85047571,4412.80175 C6.59347571,4412.65075 6.52447571,4412.31075 6.70247571,4412.07175 L6.70247571,4412.07175 Z M21.1494757,4412.80175 L15.7534757,4415.86675 C15.4194757,4416.06175 15.0004757,4415.82075 15.0004757,4415.43475 L15.0004757,4404.38375 C15.0004757,4403.90275 15.6134757,4403.69975 15.9014757,4404.08575 L21.2984757,4412.07175 C21.4754757,4412.31075 21.4064757,4412.65075 21.1494757,4412.80175 L21.1494757,4412.80175 Z M15.0004757,4399.52575 L15.0004757,4399.52575 C14.5184757,4398.82475 13.4824757,4398.82475 13.0004757,4399.52575 L13.0004757,4399.52575 L4.24047571,4412.02975 C3.80847571,4412.60975 3.97647571,4413.43575 4.60047571,4413.80175 L13.0004757,4418.62575 L13.4234757,4418.85375 C13.7834757,4419.04775 14.2164757,4419.04775 14.5764757,4418.85375 L15.0004757,4418.62575 L23.4004757,4413.80175 C24.0234757,4413.43575 24.1914757,4412.60975 23.7604757,4412.02975 L15.0004757,4399.52575 Z" transform="translate(-4, -4399)"></path>
+        </svg>
+        <div class="accordion-content">
+          <div class="accordion-item" data-form="type-form">
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Add Type
+          </div>
+          <div id="type-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
+            <div class="text-white mb-2">Add Type</div>
+            <input id="type-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
+            
+            <div class="flex items-center gap-2">
+              <div class="flex-grow">
+                <input id="type-color-hex" class="input-transparent text-white p-1 placeholder-lytGrey w-full" placeholder="Color (e.g., #FF9500)" />
+              </div>
+              <div class="color-picker-wrapper" style="min-width: 36px; min-height: 36px;">
+                <div id="color-preview-button" class="color-preview-button"></div>
+                <div class="color-palette" id="color-palette">
+                  <div class="palette-grid">
+                    <!-- Default colors -->
+                    <div class="palette-color" style="background-color: #FF6B6B" data-color="#FF6B6B"></div>
+                    <div class="palette-color" style="background-color: #FF9500" data-color="#FF9500"></div>
+                    <div class="palette-color" style="background-color: #FFBE0B" data-color="#FFBE0B"></div>
+                    <div class="palette-color" style="background-color: #4CAF50" data-color="#4CAF50"></div>
+                    <div class="palette-color" style="background-color: #51CBEE" data-color="#51CBEE"></div>
+                    <div class="palette-color" style="background-color: #5E60CE" data-color="#5E60CE"></div>
+                    <div class="palette-color" style="background-color: #8338EC" data-color="#8338EC"></div>
+                    <div class="palette-color" style="background-color: #FF70A6" data-color="#FF70A6"></div>
+                    
+                    <div class="palette-color" style="background-color: #E63946" data-color="#E63946"></div>
+                    <div class="palette-color" style="background-color: #F77F00" data-color="#F77F00"></div>
+                    <div class="palette-color" style="background-color: #FCBF49" data-color="#FCBF49"></div>
+                    <div class="palette-color" style="background-color: #2A9D8F" data-color="#2A9D8F"></div>
+                    <div class="palette-color" style="background-color: #118AB2" data-color="#118AB2"></div>
+                    <div class="palette-color" style="background-color: #3A0CA3" data-color="#3A0CA3"></div>
+                    <div class="palette-color" style="background-color: #7209B7" data-color="#7209B7"></div>
+                    <div class="palette-color" style="background-color: #F72585" data-color="#F72585"></div>
+                  
+                    <div class="palette-color" style="background-color: #D90429" data-color="#D90429"></div>
+                    <div class="palette-color" style="background-color: #FB8500" data-color="#FB8500"></div>
+                    <div class="palette-color" style="background-color: #EFD595" data-color="#EFD595"></div>
+                    <div class="palette-color" style="background-color: #06D6A0" data-color="#06D6A0"></div>
+                    <div class="palette-color" style="background-color: #0077B6" data-color="#0077B6"></div>
+                    <div class="palette-color" style="background-color: #3F37C9" data-color="#3F37C9"></div>
+                    <div class="palette-color" style="background-color: #560BAD" data-color="#560BAD"></div>
+                    <div class="palette-color" style="background-color: #B5179E" data-color="#B5179E"></div>
+                  </div>
+                  <div class="custom-color-row">
+                    <input type="color" id="type-color-picker" class="h-6 w-6 cursor-pointer" value="#FF9500" />
+                    <span class="text-xs text-white">Custom Color</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <input id="type-color" type="hidden" value="0xff9500" />
+            
+            <input id="type-shape" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Shape (e.g., circle, box, sphere)" />
+            <button id="type-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Type</button>
+            <div class="flex items-center justify-between mt-2">
+              <button id="type-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update</button>
+              <button id="type-test-delete" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytRed hover:text-black text-xs" style="width: 48%;">Test Delete</button>
+            </div>
+            <button id="api-debug-test" class="flex items-center justify-center p-1 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytGreen hover:text-black text-xs w-full">Debug API Test</button>
+          </div>
+          <div id="types-list" class="pl-4"></div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-form="relation">
+      <div class="flex items-center gap-2">
+        <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+          <path d="M13.5 12h-1.793L10 10.293V6.5L9.5 6H8V4h.5l.5-.5v-2L8.5 1h-2l-.5.5v2l.5.5H7v2H5.5l-.5.5v3.793L3.293 12H1.5l-.5.5v2l.5.5h2l.5-.5v-1.793L5.707 11h3.586L11 12.707V14.5l.5.5h2l.5-.5v-2l-.5-.5zM7 2h1v1H7V2zM6 7h3v3H6V7zm-3 7H2v-1h1v1zm10 0h-1v-1h1v1z"></path>
+        </svg>
+        <div class="accordion-content">
+          <div class="accordion-item" data-form="relation-form">
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Add Relation
+          </div>
+          <div id="relation-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
+            <div class="text-white mb-2">Add Relation</div>
+            <input id="relation-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
+            <select id="relation-from" class="input-transparent text-white p-1 placeholder-lytGrey">
+              <option value="" disabled selected>Source Entity</option>
+            </select>
+            <select id="relation-to" class="input-transparent text-white p-1 placeholder-lytGrey">
+              <option value="" disabled selected>Target Entity</option>
+            </select>
+            <select id="relation-line" class="input-transparent text-white p-1 placeholder-lytGrey">
+              <option value="solid" selected>Solid Line</option>
+              <option value="dashed">Dashed Line</option>
+              <option value="dotted">Dotted Line</option>
+            </select>
+            <div class="text-xs text-gray-500 mt-1 mb-2">
+              Line types will appear with different styles in the UI and 3D graph
+            </div>
+            <button id="relation-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Relation</button>
+            <button id="relation-debug" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Debug Relation Creation</button>
+          </div>
+          <div id="relations-list" class="pl-4"></div>
+        </div>
+      </div>
+    </div>
+    <hr class="border-lytGrey" />
+    <div class="accordion" data-form="perspective">
+      <div class="flex items-center gap-2">
+        <svg class="icon" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+          <path d="M44 28V36L31 38.6M44 28L4 32M44 28V20M4 32V44L17 41.4M4 32V16M44 20V12L31 9.4M44 20L4 16M4 16V4L17 6.6M31 9.4V38.6M31 9.4L17 6.6M31 38.6L17 41.4M17 6.6V41.4" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <div class="accordion-content">
+          <div class="accordion-item" data-form="perspective-form">
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Add Perspective
+          </div>
+          <div id="perspective-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
+            <div class="text-white mb-2">Add Perspective</div>
+            <input id="perspective-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
+            <button id="perspective-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Perspective</button>
+          </div>
+          <div id="perspectives-list" class="pl-4">
+            <div class="accordion-item">default</div>
+            <div class="accordion-item">Sachs-Hornbostel</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <hr class="border-lytGrey" />
+    <div class="accordion" data-form="controls">
+      <div class="flex items-center gap-2">
+        <svg class="icon" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+          <path d="M498.723,89.435H183.171V76.958c0-18.3-14.888-33.188-33.188-33.188h-51.5c-18.3,0-33.188,14.888-33.188,33.188v12.477 H13.275C5.943,89.435,0,95.38,0,102.711c0,7.331,5.943,13.275,13.275,13.275h52.018v12.473c0,18.3,14.888,33.188,33.188,33.188 h51.501c18.3,0,33.188-14.888,33.188-33.188v-12.473h315.553c7.332,0,13.275-5.945,13.275-13.275 C511.999,95.38,506.055,89.435,498.723,89.435z M156.621,128.459c0,3.66-2.978,6.638-6.638,6.638H98.482 c-3.66,0-6.638-2.978-6.638-6.638V76.958c0-3.66,2.978-6.638,6.638-6.638h51.501c3.66,0,6.638,2.978,6.638,6.638V128.459z" fill="#fff"></path>
+          <path d="M498.725,237.295h-52.019v-12.481c0-18.3-14.888-33.188-33.188-33.188h-51.501c-18.3,0-33.188,14.888-33.188,33.188 v12.481H13.275C5.943,237.295,0,243.239,0,250.57c0,7.331,5.943,13.275,13.275,13.275h315.553v12.469 c0,18.3,14.888,33.188,33.188,33.188h51.501c18.3,0,33.188-14.888,33.188-33.188v-12.469h52.019 c7.332,0,13.275-5.945,13.275-13.275C512,243.239,506.057,237.295,498.725,237.295z M420.155,276.315 c0,3.66-2.978,6.638-6.638,6.638h-51.501c-3.66,0-6.638-2.978-6.638-6.638v-51.501c0-3.66,2.978-6.638,6.638-6.638h51.501 c3.66,0,6.638,2.978,6.638,6.638V276.315z" fill="#fff"></path>
+          <path d="M498.725,396.014H276.432v-12.473c0-18.3-14.888-33.188-33.188-33.188h-51.501c-18.3,0-33.188,14.888-33.188,33.188 v12.473H13.275C5.943,396.014,0,401.959,0,409.289c0,7.331,5.943,13.275,13.275,13.275h145.279v12.477 c0,18.3,14.888,33.188,33.188,33.188h51.501c18.3,0,33.188-14.888,33.188-33.188v-12.477h222.293 c7.332,0,13.275-5.945,13.275-13.275C512,401.957,506.057,396.014,498.725,396.014z M249.881,435.042 c0,3.66-2.978,6.638-6.638,6.638h-51.501c-3.66,0-6.638-2.978-6.638-6.638v-51.501c0-3.66,2.978-6.638,6.638-6.638h51.501 c3.66,0,6.638,2.978,6.638,6.638V435.042z" fill="#fff"></path>
+        </svg>
+        <div class="accordion-content">
+          <div class="accordion-item graph-controls-item" data-control="style-toggle">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 2V4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 20V22" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4.93 4.93L6.34 6.34" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M17.66 17.66L19.07 19.07" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 12H4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20 12H22" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6.34 17.66L4.93 19.07" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M19.07 4.93L17.66 6.34" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Graph Style
+          </div>
+          <div id="style-controls-accordion" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
+            <div class="text-white mb-2">Graph Style Controls</div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; color: white; font-size: 12px;">Particles <span id="particles-value">3</span></label>
+              <input id="particles-control" type="range" min="0" max="10" value="3" step="1" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; color: white; font-size: 12px;">Particle Speed <span id="particle-speed-value">0.01</span></label>
+              <input id="particle-speed-control" type="range" min="0.001" max="0.05" value="0.01" step="0.001" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; color: white; font-size: 12px;">Link Width <span id="link-width-value">1.2</span></label>
+              <input id="link-width-control" type="range" min="0.1" max="5" value="1.2" step="0.1" style="width: 100%;">
+            </div>
+            <div style="margin-bottom: 15px;">
+              <label style="display: block; margin-bottom: 5px; color: white; font-size: 12px;">Node Scale <span id="node-scale-value">1</span></label>
+              <input id="node-scale-control" type="range" min="0.5" max="5" value="1" step="0.1" style="width: 100%;">
+            </div>
+            <button id="reset-style-btn" style="background-color: rgba(200, 200, 200, 0.8); color: black; border: none; padding: 8px; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 15px;">Reset Default Style</button>
+            <div style="margin-top: 15px; display: flex; align-items: center;">
+              <input type="checkbox" id="respect-line-type" checked>
+              <label for="respect-line-type" style="color: white; font-size: 12px; margin-left: 8px;">Preserve line type styles</label>
+            </div>
+          </div>
+          <div class="accordion-item graph-controls-item" data-control="emit-particles">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Emit Particles
+          </div>
+          <div class="accordion-item graph-controls-item" data-control="auto-flow">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 1L21 5L17 9" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M3 11V9C3 7.93913 3.42143 6.92172 4.17157 6.17157C4.92172 5.42143 5.93913 5 7 5H21" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M7 23L3 19L7 15" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 13V15C21 16.0609 20.5786 17.0783 19.8284 17.8284C19.0783 18.5786 18.0609 19 17 19H3" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span id="auto-flow-status">Auto Flow: Off</span>
+          </div>
+          <div class="accordion-item graph-controls-item" data-control="highlight-node">
+            <svg class="icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 20V10" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M18 20V4" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6 20V16" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Highlight Connections
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accordion" data-form="property">
+      <div class="flex items-center gap-2">
+        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20 7h-3V4c0-1.103-.897-2-2-2H9c-1.103 0-2 .897-2 2v3H4c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V9c0-1.103-.897-2-2-2zM9 4h6v3H9V4zM4 9h16l.001 10H4V9z"></path>
+          <path d="M13 14h-2v-2h2v2zm4 0h-2v-2h2v2zm-8 0H7v-2h2v2z"></path>
+        </svg>
+        <div class="accordion-content">
+          <div class="accordion-item" data-form="property-form">
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Add Property
+          </div>
+          <div id="property-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
+            <div class="text-white mb-2">Add Property</div>
+            <input id="property-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
+            <select id="property-data-type" class="input-transparent text-white p-1 placeholder-lytGrey">
+              <option value="" disabled selected>Select Data Type</option>
+              <option value="number">Number</option>
+              <option value="parameterSpace">Parameter Space</option>
+              <option value="string">String</option>
+              <option value="boolean">Boolean</option>
+              <option value="enum">Enumeration</option>
+            </select>
+            
+            <!-- Conditional fields for number/parameter space -->
+            <div id="property-number-fields" class="hidden">
+              <div class="flex gap-2">
+                <input id="property-min" type="number" class="input-transparent text-white p-1 placeholder-lytGrey w-1/2" placeholder="Min" />
+                <input id="property-max" type="number" class="input-transparent text-white p-1 placeholder-lytGrey w-1/2" placeholder="Max" />
+              </div>
+              <input id="property-mean" type="number" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Mean (optional)" />
+              <select id="property-distribution" class="input-transparent text-white p-1 placeholder-lytGrey">
+                <option value="" disabled selected>Distribution Type</option>
+                <option value="uniform">Uniform</option>
+                <option value="gaussian">Gaussian (Normal)</option>
+                <option value="exponential">Exponential</option>
+              </select>
+              <input id="property-unit" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Unit (optional)" />
+            </div>
+            
+            <!-- Conditional fields for enum -->
+            <div id="property-enum-fields" class="hidden">
+              <textarea id="property-options" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Options (one per line)"></textarea>
+            </div>
+            
+            <!-- Applicable types multiselect -->
+            <div>
+              <label class="text-white text-sm">Applicable Types</label>
+              <div id="property-applicable-types" class="flex flex-wrap gap-2 mt-1 border border-lytGrey p-2 rounded">
+                <!-- Will be populated with checkboxes -->
+              </div>
+            </div>
+            
+            <button id="property-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Property</button>
+          </div>
+          
+          <div class="accordion-item" data-form="predictor-form">
+            <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            Add Property Predictor
+          </div>
+          <div id="predictor-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
+            <div class="text-white mb-2">Add Property Predictor</div>
+            <input id="predictor-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
+            <textarea id="predictor-formula" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Formula (e.g., Math.sqrt(tension/mass) * length)"></textarea>
+            
+            <div>
+              <label class="text-white text-sm">Input Properties</label>
+              <div id="predictor-input-properties" class="flex flex-wrap gap-2 mt-1 border border-lytGrey p-2 rounded">
+                <!-- Will be populated with checkboxes -->
+              </div>
+            </div>
+            
+            <div class="text-white mb-2">Output</div>
+            <input id="predictor-output-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Output Name" />
+            <input id="predictor-output-unit" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Output Unit (optional)" />
+            <select id="predictor-output-type" class="input-transparent text-white p-1 placeholder-lytGrey">
+              <option value="" disabled selected>Output Type</option>
+              <option value="number">Number</option>
+              <option value="string">String</option>
+              <option value="boolean">Boolean</option>
+            </select>
+            
+            <!-- Applicable types multiselect -->
+            <div>
+              <label class="text-white text-sm">Applicable Types</label>
+              <div id="predictor-applicable-types" class="flex flex-wrap gap-2 mt-1 border border-lytGrey p-2 rounded">
+                <!-- Will be populated with checkboxes -->
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+              <input id="predictor-confidence" type="range" min="0" max="1" step="0.05" value="0.95" class="flex-grow" />
+              <span id="predictor-confidence-value" class="text-white">0.95</span>
+            </div>
+            
+            <button id="predictor-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Predictor</button>
+            <button id="predictor-test" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Test Formula</button>
+          </div>
+          
+          <div id="properties-list" class="pl-4"></div>
+          <div id="predictors-list" class="pl-4"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="second-sidebar" class="hidden">
+    <!-- Forms have been moved into the accordion content -->
+  </div>
+  <div id="graph-container"></div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      console.log('DOM fully loaded');
+      
+      // Check for user session in both localStorage and cookies
+      const checkAndRestoreSession = () => {
+        // First try to get from localStorage
+        let userId = localStorage.getItem('userId');
+        console.log('Checking localStorage for userId:', userId);
+        
+        // If not in localStorage, check cookies
+        if (!userId) {
+          console.log('Not found in localStorage, checking cookies...');
+          const cookies = document.cookie.split(';');
+          for (const cookie of cookies) {
+            const [name, value] = cookie.trim().split('=');
+            console.log('Checking cookie:', name, value);
+            if (name === 'userId' && value) {
+              userId = value;
+              // Persist to localStorage for redundancy
+              localStorage.setItem('userId', userId);
+              console.log('Session restored from cookie:', userId);
+              break;
+            }
+          }
+        } else {
+          console.log('Session restored from localStorage:', userId);
+        }
+        
+        // If we found a userId, ensure the cookie is refreshed with a long expiration
+        if (userId) {
+          console.log('Found valid userId, refreshing cookie expiration');
+          const expiryDate = new Date();
+          expiryDate.setDate(expiryDate.getDate() + 30); // 30 day expiration
+          document.cookie = `userId=${userId}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+        } else {
+          console.log('No valid session found');
+        }
+        
+        return userId;
+      };
+      
+      let userId = checkAndRestoreSession();
+      let activePerspective = localStorage.getItem('perspective') || 'default';
+      
+      // Log session info
+      console.log('Session initialized with userId:', userId, 'perspective:', activePerspective);
+      
+      const signupBtn = document.getElementById('signup');
+      const loginBtn = document.getElementById('login');
+      const signupOpt = document.getElementById('signup-opt');
+      const loginOpt = document.getElementById('login-opt');
+      const logoutOpt = document.getElementById('logout-opt');
+      const usernameInput = document.getElementById('username');
+      const passwordInput = document.getElementById('password');
+      const userDisplay = document.getElementById('user-display');
+      const userToggle = document.getElementById('user-toggle');
+      const userMenu = document.getElementById('user-menu');
+      const entityCount = document.getElementById('entity-count');
+      const entitiesDisplay = document.getElementById('entities-display');
+      const entitiesPopup = document.getElementById('entities-popup');
+      const authFields = document.getElementById('auth-fields');
+      const menuToggle = document.getElementById('menu-toggle');
+      const leftSidebar = document.getElementById('left-sidebar');
+      const secondSidebar = document.getElementById('second-sidebar');
+      const graphContainer = document.getElementById('graph-container');
+      const activePerspectiveDisplay = document.getElementById('active-perspective');
+      const addForm = document.getElementById('add-form');
+      const addName = document.getElementById('add-name');
+      const addType = document.getElementById('add-type');
+      const addColor = document.getElementById('add-color');
+      const addShape = document.getElementById('add-shape');
+      const addLine = document.getElementById('add-line');
+      const addSubmit = document.getElementById('add-submit');
+      
+      // Entity form elements
+      const entityForm = document.getElementById('entity-form');
+      const entityName = document.getElementById('entity-name');
+      const entityType = document.getElementById('entity-type');
+      const entitySubmit = document.getElementById('entity-submit');
+      
+      // Type form elements
+      const typeForm = document.getElementById('type-form');
+      const typeName = document.getElementById('type-name');
+      const typeColor = document.getElementById('type-color');
+      const typeColorHex = document.getElementById('type-color-hex');
+      const typeColorPicker = document.getElementById('type-color-picker');
+      const typeShape = document.getElementById('type-shape');
+      const typeSubmit = document.getElementById('type-submit');
+      
+      // Relation form elements
+      const relationForm = document.getElementById('relation-form');
+      const relationName = document.getElementById('relation-name');
+      const relationFrom = document.getElementById('relation-from');
+      const relationTo = document.getElementById('relation-to');
+      const relationLine = document.getElementById('relation-line');
+      const relationSubmit = document.getElementById('relation-submit');
+      
+      // Perspective form elements
+      const perspectiveForm = document.getElementById('perspective-form');
+      const perspectiveName = document.getElementById('perspective-name');
+      const perspectiveSubmit = document.getElementById('perspective-submit');
+      
+      let somData = null;
+      let addMode = null;
+
+      console.log('Elements loaded:', {
+        signupBtn, loginBtn, signupOpt, loginOpt, logoutOpt,
+        usernameInput, passwordInput, userDisplay, userToggle, userMenu,
+        entityCount, entitiesDisplay, entitiesPopup, authFields, menuToggle, leftSidebar, graphContainer
+      });
+
+      if (!signupBtn || !menuToggle || !userToggle) {
+        console.error('Critical elements missing!');
+        return;
+      }
+      
+      // Add a debug mode toggle
+      let debugMode = localStorage.getItem('somapDebug') === 'true';
+      
+      function log(...args) {
+        if (debugMode) console.debug(...args);
+      }
+      
+      // Debug toggle function
+      function toggleDebug() {
+        debugMode = !debugMode;
+        localStorage.setItem('somapDebug', debugMode);
+        console.log(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`);
+        return debugMode;
+      }
+      
+      // Color conversion functions
+      function hexToOxFormat(hex) {
+        // Remove # if present
+        hex = hex.replace('#', '');
+        
+        // Ensure it's a valid hex color
+        if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
+          return '0xff9500'; // Default orange if invalid
+        }
+        
+        return '0x' + hex.toLowerCase();
+      }
+      
+      function oxFormatToHex(oxFormat) {
+        // Handle empty or invalid values
+        if (!oxFormat || !oxFormat.startsWith('0x')) {
+          return '#ff9500'; // Default orange
+        }
+        
+        // Remove 0x and ensure it's 6 characters
+        const hex = oxFormat.substring(2);
+        if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
+          return '#ff9500';
+        }
+        
+        return '#' + hex.toLowerCase();
+      }
+      
+      // Define setupEditDelete function before it's called
+      function setupEditDelete(collection) {
+        log(`Setting up edit/delete handlers for ${collection}`);
+        
+        // Use querySelectorAll to get all items for this collection
+        const items = document.querySelectorAll(`#${collection}-list .accordion-item`);
+        log(`Found ${items.length} items for ${collection}`);
+        
+        items.forEach(item => {
+          const id = item.getAttribute('data-id');
+          if (!id) {
+            log(`Skipping item without data-id:`, item.textContent.trim());
+            return; // Skip items without data-id
+          }
+          
+          log(`Setting up handlers for ${collection} item: ${id}`);
+          
+          // Find the edit-icons container
+          const editIcons = item.querySelector('.edit-icons');
+          if (!editIcons) {
+            log(`No edit icons found for ${collection} item ${id}`);
+            return;
+          }
+          
+          // Get the pencil and trash icons
+          const pencil = editIcons.querySelector('svg:first-child');
+          const trash = editIcons.querySelector('svg:last-child');
+          
+          log(`Found pencil: ${!!pencil}, trash: ${!!trash} for ${collection} item ${id}`);
+          
+          // Make sure icons are clickable and visible
+          if (pencil) {
+            pencil.style.cursor = 'pointer';
+            pencil.style.pointerEvents = 'auto';
+            pencil.style.zIndex = '100';
+            
+            // Add event listener instead of using onclick property
+            pencil.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log(`Edit clicked for ${collection} item ${id}`);
+              
+              const itemText = item.childNodes[0].textContent.trim();
+              setupInlineEdit(item, id, collection, itemText);
+            });
+          }
+
+          if (trash) {
+            trash.style.cursor = 'pointer';
+            trash.style.pointerEvents = 'auto';
+            trash.style.zIndex = '100';
+            
+            // Add event listener instead of using onclick property  
+            trash.addEventListener('click', function(e) {
+              e.preventDefault();
+              e.stopPropagation();
+              console.log(`Delete clicked for ${collection} item ${id}`);
+              
+              const confirmed = confirm(`Are you sure you want to delete this ${collection}?`);
+              if (confirmed) {
+                try {
+                  console.log(`Deleting ${collection} item ${id}`);
+                  
+                  // For API endpoint, we need singular form
+                  const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
+                  
+                  // Extract ID key (12345) from full ID (collection/12345)
+                  let idKey = id;
+                  if (id.includes('/')) {
+                    // Always extract just the numeric ID part
+                    idKey = id.split('/')[1];
+                  }
+                  
+                  // Construct the endpoint properly
+                  const endpoint = `/api/${singularCollection}/${idKey}`;
+                  console.log(`Sending DELETE request to: ${endpoint}`);
+                  
+                  fetch(endpoint, {
+                    method: 'DELETE'
+                  })
+                  .then(response => {
+                    console.log(`Delete response status: ${response.status}`);
+                    return response.text().then(text => ({ status: response.status, text, ok: response.ok }));
+                  })
+                  .then(({ status, text, ok }) => {
+                    console.log(`Delete response (${status}):`, text);
+                    
+                    if (ok) {
+                      console.log(`Successfully deleted ${collection} item ${id}`);
+                      item.remove();
+                      initializeGraph();
+                    } else {
+                      console.error(`Failed to delete ${collection} item:`, text);
+                      alert(`Failed to delete ${collection}: ${text}`);
+                    }
+                  })
+                  .catch(err => {
+                    console.error(`Error deleting ${collection} item:`, err);
+                    alert(`Error deleting ${collection}: ${err.message}`);
+                  });
+                } catch (err) {
+                  console.error(`Error deleting ${collection} item:`, err);
+                  alert(`Error deleting ${collection}: ${err.message}`);
+                }
+              }
+            });
+          }
+        });
+      }
+      
+      // Function to handle inline editing
+      function setupInlineEdit(element, itemId, collection, currentName) {
+        // Create input element
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentName;
+        input.className = 'inline-edit-input';
+        
+        // Add element to DOM
+        element.classList.add('inline-edit-active');
+        element.appendChild(input);
+        
+        // Focus and select all text
+        input.focus();
+        input.select();
+        
+        // Handle save on enter or cancel on escape
+        input.addEventListener('keydown', async (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const newName = input.value.trim();
+            
+            if (newName && newName !== currentName) {
+              try {
+                console.log(`Updating ${collection} item ${itemId} to ${newName}`);
+                
+                // For API endpoint, we need singular form
+                const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
+                
+                // Extract ID key (12345) from full ID (collection/12345)
+                let idKey = itemId;
+                if (itemId.includes('/')) {
+                  // Extract just the numeric part for the API endpoint
+                  idKey = itemId.split('/')[1];
+                }
+                
+                // Construct the endpoint with just the ID key part
+                const endpoint = `/api/${singularCollection}/${idKey}`;
+                console.log(`Sending PATCH request to: ${endpoint}`);
+                
+                const response = await fetch(endpoint, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name: newName })
+                });
+                
+                console.log(`Update response status: ${response.status}`);
+                const responseText = await response.text();
+                console.log(`Update response text:`, responseText);
+                
+                if (response.ok) {
+                  console.log(`Successfully updated ${collection} item ${itemId}`);
+                  
+                  // Update the text content - be careful with the DOM structure
+                  // Some items might have color dots or other elements before the text
+                  const colorDot = element.querySelector('.color-dot');
+                  if (colorDot) {
+                    // If there's a color dot, we need to update just the text node after it
+                    let textNode = null;
+                    for (let i = 0; i < element.childNodes.length; i++) {
+                      if (element.childNodes[i].nodeType === Node.TEXT_NODE) {
+                        textNode = element.childNodes[i];
+                        break;
+                      }
+                    }
+                    if (textNode) {
+                      textNode.textContent = newName;
+                    }
+                  } else if (element.querySelector('.relation-content')) {
+                    // For relations, update the name span
+                    const nameSpan = element.querySelector('.relation-name');
+                    if (nameSpan) {
+                      nameSpan.textContent = newName;
+                    }
+                  } else {
+                    // For simple items, just update the first child text node
+                    let textNode = element.childNodes[0];
+                    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                      textNode.textContent = newName;
+                    }
+                  }
+                  
+                  initializeGraph();
+                } else {
+                  console.error(`Failed to update ${collection} item:`, responseText);
+                  alert(`Failed to update ${collection}: ${responseText}`);
+                }
+              } catch (err) {
+                console.error(`Error updating ${collection} item:`, err);
+                alert(`Error updating ${collection}: ${err.message}`);
+              }
+            }
+            
+            // Clean up regardless of success
+            element.classList.remove('inline-edit-active');
+            input.remove();
+            
+          } else if (e.key === 'Escape') {
+            // Cancel edit
+            element.classList.remove('inline-edit-active');
+            input.remove();
+          }
+        });
+      }
+
+      function updateAuthUI() {
+        // Double-check userId in case it was set by a different tab/window
+        if (!userId) {
+          userId = checkAndRestoreSession();
+        }
+        
+        console.log('Updating UI, userId:', userId);
+        activePerspectiveDisplay.textContent = activePerspective;
+        if (userId) {
+          signupBtn.style.display = 'none';
+          loginBtn.style.display = 'none';
+          signupOpt.style.display = 'none';
+          loginOpt.style.display = 'none';
+          logoutOpt.style.display = 'block';
+          usernameInput.style.display = 'none';
+          passwordInput.style.display = 'none';
+          authFields.style.display = 'none';
+          userDisplay.style.display = 'block';
+          entitiesDisplay.style.display = 'flex';
+          graphContainer.style.display = 'block';
+          
+          // Use classList instead of style.display for elements with transitions
+          leftSidebar.classList.remove('left-sidebar-hidden');
+          // Second sidebar remains hidden until an accordion is clicked
+        } else {
+          signupBtn.style.display = 'flex';
+          loginBtn.style.display = 'flex';
+          signupOpt.style.display = 'block';
+          loginOpt.style.display = 'block';
+          logoutOpt.style.display = 'none';
+          usernameInput.style.display = 'inline-block';
+          passwordInput.style.display = 'inline-block';
+          authFields.style.display = 'none';
+          userDisplay.style.display = 'none';
+          entitiesDisplay.style.display = 'none';
+          graphContainer.style.display = 'none';
+          
+          // Use classList for elements with transitions
+          leftSidebar.classList.add('left-sidebar-hidden');
+          secondSidebar.classList.add('hidden');
+        }
+      }
+
+      async function fetchSOMData() {
+        console.log('Fetching SOM data');
+        
+        // Double-check userId before making the request
+        // This ensures we have the most current session info
+        if (!userId) {
+          userId = checkAndRestoreSession();
+        }
+        
+        const url = userId ? `/api/som?perspective=${activePerspective}` : '/api/som';
+        console.log('Fetching data from URL:', url, 'with userId:', userId);
+        
+        try {
+          const response = await fetch(url);
+          if (!response.ok) {
+            console.error('Fetch failed:', response.status, await response.text());
+            return { nodes: [], links: [] };
+          }
+          const data = await response.json();
+          console.log('SOM Data:', data);
+          somData = data;
+          
+          if (data.error) {
+            console.error('API Error:', data.details);
+            return { nodes: [], links: [] };
+          }
+          
+          if (data.user) {
+            localStorage.setItem('username', data.user.username);
+            userDisplay.textContent = data.user.username;
+            entityCount.textContent = data.user.entityCount;
+            entitiesPopup.innerHTML = data.entities.map(e => `<div>${e.name}</div>`).join('');
+            
+            // Populate entities list
+            document.getElementById('entities-list').innerHTML = data.entities.map(e => `
+              <div class="accordion-item" data-id="${e._id}">
+                ${e.name}
+                <span class="edit-icons">
+                  <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
+                  </svg>
+                  <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                  </svg>
+                </span>
+              </div>`).join('');
+            
+            // Immediately setup edit/delete handlers for entities
+            setupEditDelete('entities');
+            
+            // Populate types list
+            if (data.types && data.types.length > 0) {
+              document.getElementById('types-list').innerHTML = data.types.map(type => `
+                <div class="accordion-item" data-id="${type._id}">
+                  <span class="color-dot" style="background-color: ${oxFormatToHex(type.color || '0xff9500')}"></span>
+                  ${type.name}
+                  <span class="edit-icons">
+                    <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
+                    </svg>
+                    <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                  </span>
+                </div>`).join('');
+              
+              // Immediately setup edit/delete handlers for types
+              setupEditDelete('types');
+              
+              // Populate types dropdown for entity creation
+              const typeSelect = document.getElementById('entity-type');
+              // Clear existing options except the first one
+              typeSelect.innerHTML = '<option value="" disabled selected>Select a Type</option>';
+              // Add types from data
+              data.types.forEach(type => {
+                const option = document.createElement('option');
+                option.value = type._id;
+                option.textContent = type.name;
+                typeSelect.appendChild(option);
+              });
+            }
+            
+            // Populate relations list with translated entity names instead of IDs
+            if (data.relations && data.relations.length > 0) {
+              // Create a map of entity IDs to names for easy lookup
+              const entityMap = {};
+              data.entities.forEach(entity => {
+                entityMap[entity._id] = entity.name;
+              });
+              
+              // Add user to the entity map
+              if (data.user) {
+                entityMap[`users/${data.user.username}`] = `User: ${data.user.username}`;
+              }
+              
+              document.getElementById('relations-list').innerHTML = data.relations.map(relation => {
+                // Get the source and target entity names or use the ID if not found
+                const sourceName = entityMap[relation._from] || relation._from.split('/').pop();
+                const targetName = entityMap[relation._to] || relation._to.split('/').pop();
+                
+                // Get line type indicator symbol
+                let lineTypeSymbol = '―';
+                if (relation.lineType === 'dashed') lineTypeSymbol = '- - -';
+                else if (relation.lineType === 'dotted') lineTypeSymbol = '····';
+                
+                return `
+                <div class="accordion-item" data-id="${relation._id}">
+                  <div class="relation-content">
+                    <span class="relation-name">${relation.name || 'Relationship'}</span>
+                    <div class="relation-details text-xs">
+                      <span class="text-lytBlue">${sourceName}</span>
+                      <span class="line-type-indicator">${lineTypeSymbol}</span>
+                      <svg class="icon-sm" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
+                      <span class="text-lytGreen">${targetName}</span>
+                    </div>
+                  </div>
+                  <span class="edit-icons">
+                    <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
+                        </svg>
+                        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </span>
+                    </div>`;
+              }).join('');
+              
+              // Immediately setup edit/delete handlers for relations
+              setupEditDelete('relations');
+            }
+            
+            // Populate entity dropdowns for relation creation
+            if (data.entities && data.entities.length > 0) {
+              const fromSelect = document.getElementById('relation-from');
+              const toSelect = document.getElementById('relation-to');
+              
+              // Clear existing options except the first one
+              fromSelect.innerHTML = '<option value="" disabled selected>Source Entity</option>';
+              toSelect.innerHTML = '<option value="" disabled selected>Target Entity</option>';
+              
+              // Add user as a possible source
+              const userOption = document.createElement('option');
+              userOption.value = `users/${userId}`;  // Make sure the user ID has the "users/" prefix
+              userOption.textContent = `User: ${userId}`;
+              fromSelect.appendChild(userOption);
+              
+              // Add entities to both dropdowns
+              data.entities.forEach(entity => {
+                // For the FROM dropdown
+                const fromOption = document.createElement('option');
+                fromOption.value = entity._id;  // This already has the "entities/" prefix
+                fromOption.textContent = entity.name;
+                fromSelect.appendChild(fromOption);
+                
+                // For the TO dropdown
+                const toOption = document.createElement('option');
+                toOption.value = entity._id;  // This already has the "entities/" prefix
+                toOption.textContent = entity.name;
+                toSelect.appendChild(toOption);
+              });
+            }
+          }
+          
+          // Fetch perspectives
+          try {
+            const perspectivesResponse = await fetch('/api/perspectives');
+            if (perspectivesResponse.ok) {
+              const perspectives = await perspectivesResponse.json();
+              console.log('Perspectives:', perspectives);
+              
+              // Update perspectives list in the sidebar
+              document.getElementById('perspectives-list').innerHTML = perspectives
+                .map(p => `
+                  <div class="accordion-item" data-id="${p._id || 'default'}">
+                    ${p.name}
+                    ${p.name !== 'default' ? `
+                      <span class="edit-icons">
+                        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
+                        </svg>
+                        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </svg>
+                      </span>
+                    ` : ''}
+                  </div>`
+                )
+                .join('');
+              
+              // Immediately setup edit/delete handlers for perspectives
+              setupEditDelete('perspectives');
+              
+              // Setup perspective click handlers
+              document.querySelectorAll('#perspectives-list .accordion-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                  e.stopPropagation();
+                  const perspectiveName = item.textContent.trim();
+                  activePerspective = perspectiveName;
+                  localStorage.setItem('perspective', perspectiveName);
+                  activePerspectiveDisplay.textContent = perspectiveName;
+                  
+                  // Reload data with new perspective
+                  initializeGraph();
+                });
+              });
+            }
+          } catch (err) {
+            console.error('Error fetching perspectives:', err);
+          }
+
+          const allNodeIds = new Set([...data.entities.map(e => e._id), ...(data.user ? [data.user.username] : [])]);
+          return {
+            nodes: [
+              ...data.entities.map(e => ({
+                id: e._id,
+                name: e.name,
+                color: parseInt(e.color || data.types.find(t => t._id === e.typeId)?.color || '0xff0000')
+              })),
+              ...(data.user ? [{ id: data.user.username, name: data.user.username, color: 0xff69b4 }] : [])
+            ],
+            links: data.relations
+              .filter(r => r._from && r._to && allNodeIds.has(r._from) && allNodeIds.has(r._to))
+              .map(r => ({
+                source: r._from,
+                target: r._to,
+                lineType: r.lineType || 'solid',
+                name: r.name,
+                id: r._id,
+                endpointMode: r.endpointMode || 'arrow'
+              }))
+          };
+        } catch (error) {
+          console.error('Fetch SOM data failed:', error);
+          return { nodes: [], links: [] };
+        }
+      }
+
+      // Initialize graph style controls after the graph is loaded
+      let styleControlsContainer;
+      let particleControls;
+      let particleSpeedControl;
+      let linkWidthControl;
+      let nodeScaleControl;
+      
+      // Setup style controls only after graph initialization
+      function setupStyleControls() {
+        if (!window.Graph) {
+          console.error('Cannot setup style controls: Graph not initialized');
+          return;
+        }
+        
+        // Create style controls container if it doesn't exist
+        if (!styleControlsContainer) {
+          styleControlsContainer = document.createElement('div');
+          styleControlsContainer.style.position = 'fixed';
+          styleControlsContainer.style.bottom = '60px';
+          styleControlsContainer.style.right = '10px';
+          styleControlsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+          styleControlsContainer.style.padding = '10px';
+          styleControlsContainer.style.borderRadius = '5px';
+          styleControlsContainer.style.zIndex = '100';
+          styleControlsContainer.style.display = 'none'; // Hidden by default
+          graphContainer.appendChild(styleControlsContainer);
+          
+          // Toggle button for style controls
+          const styleToggleBtn = document.createElement('button');
+          styleToggleBtn.id = 'style-toggle-btn';
+          styleToggleBtn.textContent = 'Graph Style';
+          styleToggleBtn.style.position = 'fixed';
+          styleToggleBtn.style.top = '60px';
+          styleToggleBtn.style.right = '250px';
+          styleToggleBtn.style.padding = '8px 16px';
+          styleToggleBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
+          styleToggleBtn.style.color = 'white';
+          styleToggleBtn.style.border = '1px solid #666';
+          styleToggleBtn.style.borderRadius = '4px';
+          styleToggleBtn.style.zIndex = '100';
+          styleToggleBtn.style.cursor = 'pointer';
+          graphContainer.appendChild(styleToggleBtn);
+          
+          styleToggleBtn.addEventListener('click', () => {
+            const isVisible = styleControlsContainer.style.display === 'block';
+            styleControlsContainer.style.display = isVisible ? 'none' : 'block';
+          });
+          
+          // Add the controls
+          particleControls = addControl('Particles', 0, 10, 3, 1, (val) => {
+            if (window.Graph) window.Graph.linkDirectionalParticles(() => val);
+          });
+          
+          particleSpeedControl = addControl('Particle Speed', 0.001, 0.05, 0.01, 0.001, (val) => {
+            if (window.Graph) window.Graph.linkDirectionalParticleSpeed(() => val);
+          });
+          
+          linkWidthControl = addControl('Link Width', 0.1, 5, 1.2, 0.1, (val) => {
+            if (window.Graph) window.Graph.linkWidth(() => val);
+          });
+          
+          nodeScaleControl = addControl('Node Scale', 0.5, 5, 1, 0.1, (val) => {
+            if (window.Graph) window.Graph.nodeVal((node) => 10 * val);
+          });
+          
+          // Setup all other controls
+          setupHighlightNodeButton();
+          setupResetButton();
+          setupLineTypePreservation();
+        }
+      }
+      
+      // Create a function to add controls with safety check for Graph object
+      function addControl(name, min, max, value, step, onChange) {
+        const controlDiv = document.createElement('div');
+        controlDiv.style.marginBottom = '10px';
+        
+        const label = document.createElement('label');
+        label.textContent = name;
+        label.style.display = 'block';
+        label.style.marginBottom = '5px';
+        label.style.color = 'white';
+        label.style.fontSize = '12px';
+        
+        const input = document.createElement('input');
+        input.type = 'range';
+        input.min = min;
+        input.max = max;
+        input.step = step;
+        input.value = value;
+        input.style.width = '100%';
+        
+        const valueDisplay = document.createElement('span');
+        valueDisplay.textContent = value;
+        valueDisplay.style.marginLeft = '10px';
+        valueDisplay.style.color = 'white';
+        valueDisplay.style.fontSize = '12px';
+        
+        input.addEventListener('input', () => {
+          valueDisplay.textContent = input.value;
+          // Only call onChange when Graph exists
+          if (window.Graph) {
+            onChange(parseFloat(input.value));
+          }
+        });
+        
+        controlDiv.appendChild(label);
+        controlDiv.appendChild(input);
+        label.appendChild(valueDisplay);
+        
+        styleControlsContainer.appendChild(controlDiv);
+        
+        return input;
+      }
+      
+      function setupHighlightNodeButton() {
+        // Add particle emitter for specific node relationships
+        const highlightNodeBtn = document.createElement('button');
+        highlightNodeBtn.textContent = 'Highlight Connections';
+        highlightNodeBtn.style.backgroundColor = 'rgba(255, 149, 0, 0.8)';
+        highlightNodeBtn.style.color = 'white';
+        highlightNodeBtn.style.border = 'none';
+        highlightNodeBtn.style.padding = '8px';
+        highlightNodeBtn.style.borderRadius = '4px';
+        highlightNodeBtn.style.cursor = 'pointer';
+        highlightNodeBtn.style.width = '100%';
+        highlightNodeBtn.style.marginBottom = '10px';
+        highlightNodeBtn.style.marginTop = '10px';
+        
+        highlightNodeBtn.addEventListener('click', () => {
+          if (!window.Graph) return;
+          
+          // Get the current graph data
+          const gData = window.Graph.graphData();
+          
+          // Check if we have nodes
+          if (!gData.nodes || gData.nodes.length === 0) return;
+          
+          // Random node to highlight
+          const randomNodeIndex = Math.floor(Math.random() * gData.nodes.length);
+          const randomNode = gData.nodes[randomNodeIndex];
+          
+          // Find all links connected to this node
+          const connectedLinks = gData.links.filter(link => 
+            link.source.id === randomNode.id || link.target.id === randomNode.id
+          );
+          
+          if (connectedLinks.length === 0) {
+            alert(`Node ${randomNode.name || randomNode.id} has no connections.`);
+            return;
+          }
+          
+          // Highlight the node
+          const prevColor = randomNode.__prevColor || randomNode.color;
+          randomNode.__prevColor = prevColor;
+          
+          // Pulse animation for the selected node
+          let pulseDirection = 1;
+          let pulseStrength = 0;
+          const pulseInterval = setInterval(() => {
+            pulseStrength += (0.1 * pulseDirection);
+            if (pulseStrength >= 1) pulseDirection = -1;
+            if (pulseStrength <= 0) {
+              pulseDirection = 1;
+              pulseStrength = 0;
+            }
+            
+            // Apply pulsing color
+            window.Graph.nodeColor(node => {
+              if (node.id === randomNode.id) {
+                const pulseColor = 0xffff00; // Yellow pulse
+                return pulseColor;
+              }
+              return node.color;
+            });
+          }, 50);
+          
+          // Emit particles on all connected links
+          connectedLinks.forEach(link => {
+            // Emit multiple particles
+            for (let i = 0; i < 5; i++) {
+              setTimeout(() => {
+                window.Graph.emitParticle(link);
+              }, i * 300); // Stagger the emission
+            }
+          });
+          
+          // Stop pulse after a few seconds
+          setTimeout(() => {
+            clearInterval(pulseInterval);
+            window.Graph.nodeColor(node => node.color);
+          }, 5000);
+        });
+        
+        styleControlsContainer.appendChild(highlightNodeBtn);
+      }
+      
+      function setupResetButton() {
+        // Add a reset button to restore default settings
+        const resetBtn = document.createElement('button');
+        resetBtn.textContent = 'Reset Default Style';
+        resetBtn.style.backgroundColor = 'rgba(200, 200, 200, 0.8)';
+        resetBtn.style.color = 'black';
+        resetBtn.style.border = 'none';
+        resetBtn.style.padding = '8px';
+        resetBtn.style.borderRadius = '4px';
+        resetBtn.style.cursor = 'pointer';
+        resetBtn.style.width = '100%';
+        resetBtn.style.marginTop = '15px';
+        
+        resetBtn.addEventListener('click', () => {
+          if (!window.Graph) return;
+          
+          // Reset to default values
+          particleControls.value = 3;
+          particleControls.nextElementSibling.textContent = 3;
+          
+          particleSpeedControl.value = 0.01;
+          particleSpeedControl.nextElementSibling.textContent = 0.01;
+          
+          linkWidthControl.value = 1.2;
+          linkWidthControl.nextElementSibling.textContent = 1.2;
+          
+          nodeScaleControl.value = 1;
+          nodeScaleControl.nextElementSibling.textContent = 1;
+          
+          // Apply default settings
+          // Reset to original styling logic based on line types
+          window.Graph
+            .linkDirectionalParticles(link => {
+              // Default particles based on line type
+              if (link.lineType === 'dashed') return 2;
+              if (link.lineType === 'dotted') return 3;
+              return 0;
+            })
+            .linkDirectionalParticleSpeed(link => {
+              // Different speeds based on line type
+              if (link.lineType === 'dotted') return 0.015;
+              if (link.lineType === 'dashed') return 0.008;
+              return 0.01;
+            })
+            .linkWidth(link => link.lineType === 'dotted' ? 0.8 : 1.2)
+            .nodeVal(node => 10);
+        });
+        
+        styleControlsContainer.appendChild(resetBtn);
+      }
+      
+      function setupLineTypePreservation() {
+        // Add a checkbox to toggle respect for line types
+        const lineTypeDiv = document.createElement('div');
+        lineTypeDiv.style.marginTop = '15px';
+        lineTypeDiv.style.display = 'flex';
+        lineTypeDiv.style.alignItems = 'center';
+        
+        const respectLineTypeCheckbox = document.createElement('input');
+        respectLineTypeCheckbox.type = 'checkbox';
+        respectLineTypeCheckbox.id = 'respect-line-type';
+        respectLineTypeCheckbox.checked = true;
+        
+        const lineTypeLabel = document.createElement('label');
+        lineTypeLabel.htmlFor = 'respect-line-type';
+        lineTypeLabel.textContent = 'Preserve line type styles';
+        lineTypeLabel.style.color = 'white';
+        lineTypeLabel.style.fontSize = '12px';
+        lineTypeLabel.style.marginLeft = '8px';
+        
+        respectLineTypeCheckbox.addEventListener('change', () => {
+          if (!window.Graph) return;
+          
+          if (respectLineTypeCheckbox.checked) {
+            // Reset to line type based styles
+            window.Graph
+              .linkDirectionalParticleColor(link => {
+                if (link.lineType === 'dotted') return '#51cbee';
+                if (link.lineType === 'dashed') return '#ffffff';
+                return '#ff9500';
+              })
+              .linkOpacity(link => {
+                if (link.lineType === 'dotted') return 0.4;
+                if (link.lineType === 'dashed') return 0.7;
+                return 0.9;
+              })
+              .linkCurvature(link => {
+                return link.lineType === 'dotted' ? 0.2 : 
+                      link.lineType === 'dashed' ? 0.1 : 0;
+              });
+          } else {
+            // Apply uniform styles
+            window.Graph
+              .linkDirectionalParticleColor(() => '#ff9500')
+              .linkOpacity(0.8)
+              .linkCurvature(0);
+          }
+        });
+        
+        lineTypeDiv.appendChild(respectLineTypeCheckbox);
+        lineTypeDiv.appendChild(lineTypeLabel);
+        styleControlsContainer.appendChild(lineTypeDiv);
+      }
+
+      async function initializeGraph() {
+        console.log('Initializing graph');
+        
+        // Create a global Graph variable that other components can access
+        try {
+          window.Graph = ForceGraph3D()(graphContainer)
+            .nodeColor(node => node.color)
+            .nodeLabel(node => node.name)
+            .linkLabel(link => link.name || 'relationship')
+            .linkDirectionalParticleColor(link => {
+              // Different colored particles based on line type
+              if (link.lineType === 'dotted') return '#51cbee';  // Blue for dotted
+              if (link.lineType === 'dashed') return '#ffffff';  // White for dashed
+              return '#ff9500';  // Orange for solid (default)
+            })
+            .linkDirectionalParticleWidth(link => link.lineType === 'dotted' ? 3 : 4)
+            .linkDirectionalParticles(link => {
+              // Default particles based on line type
+              if (link.particles !== undefined) return link.particles;
+              if (link.lineType === 'dashed') return 2;  // Two particles for dashed
+              if (link.lineType === 'dotted') return 3;  // Three particles for dotted
+              return 0;  // No particles by default for solid lines
+            })
+            .linkDirectionalParticleSpeed(link => {
+              // Different speeds based on line type
+              if (link.lineType === 'dotted') return 0.015;  // Faster for dotted
+              if (link.lineType === 'dashed') return 0.008;  // Medium for dashed
+              return 0.01;  // Standard for solid
+            })
+            .linkHoverPrecision(10)
+            .linkWidth(link => link.lineType === 'dotted' ? 0.8 : 1.2)  // Thinner for dotted
+            .linkOpacity(link => {
+              // Different opacities for different line types
+              if (link.lineType === 'dotted') return 0.4;
+              if (link.lineType === 'dashed') return 0.7;
+              return 0.9;  // Solid lines
+            })
+            // Use curvature for visual distinction since we can't do dashes
+            .linkCurvature(link => {
+              // Create slight curve for different line types
+              return link.lineType === 'dotted' ? 0.2 : 
+                    link.lineType === 'dashed' ? 0.1 : 0;
+            });
+
+          // Suppress the warning about useLegacyLights
+          try {
+            // Get the internal three.js renderer
+            const renderer = window.Graph.renderer();
+            if (renderer) {
+              // Simply delete the deprecated property to avoid warnings
+              delete renderer.useLegacyLights;
+            }
+          } catch (err) {
+            console.warn('Error configuring THREE.js renderer:', err);
+          }
+          
+          // Initialize graph control event handlers
+          initializeGraphControls();
+        } catch (err) {
+          console.error('Error initializing ForceGraph3D:', err);
+          return null;
+        }
+        
+        // Fetch data and populate the graph
+        try {
+          const graphData = await fetchSOMData();
+          
+          if (!graphData || !graphData.nodes || !window.Graph) {
+            console.error('Invalid graph data or Graph not initialized');
+            return window.Graph;
+          }
+          
+          console.log(`Rendering graph with ${graphData.nodes.length} nodes and ${graphData.links?.length || 0} links`);
+          
+          // Update links to include lineType property
+          if (graphData.links) {
+            graphData.links.forEach(link => {
+              // Set lineType property if not already present
+              if (!link.lineType && link.lineMode) {
+                link.lineType = link.lineMode; // Use lineMode as fallback
+              } else if (!link.lineType) {
+                link.lineType = 'solid'; // Default to solid
+              }
+              
+              // Add particle count based on line type
+              if (link.lineType === 'solid') {
+                link.particles = 1;  // One particle for solid lines
+              } else if (link.lineType === 'dashed') {
+                link.particles = 2;  // Two particles for dashed lines
+              }
+            });
+          }
+          
+          // Apply the data to the graph
+          window.Graph.graphData(graphData);
+          
+          // Configure click behavior for links
+          window.Graph.onLinkClick(link => {
+            // Emit particles when link is clicked
+            if (window.Graph && window.Graph.emitParticle) {
+              window.Graph.emitParticle(link);
+            }
+          });
+          
+          return window.Graph;
+        } catch (err) {
+          console.error('Error processing graph data:', err);
+          return window.Graph;
+        }
+      }
+      
+      // Function to initialize graph controls directly
+      function initializeGraphControls() {
+        const particlesControl = document.getElementById('particles-control');
+        const particleSpeedControl = document.getElementById('particle-speed-control');
+        const linkWidthControl = document.getElementById('link-width-control');
+        const nodeScaleControl = document.getElementById('node-scale-control');
+        
+        console.log('Initializing graph controls directly:', {
+          particlesControl, particleSpeedControl, linkWidthControl, nodeScaleControl
+        });
+        
+        // Setup direct event handlers for sliders to affect the graph
+        if (particlesControl) {
+          particlesControl.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            const valueDisplay = document.getElementById('particles-value');
+            if (valueDisplay) valueDisplay.textContent = value;
+            
+            console.log('Particles value changed to:', value);
+            if (window.Graph) {
+              window.Graph.linkDirectionalParticles(() => value);
+            }
+          });
+        }
+        
+        if (particleSpeedControl) {
+          particleSpeedControl.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            const valueDisplay = document.getElementById('particle-speed-value');
+            if (valueDisplay) valueDisplay.textContent = value.toFixed(3);
+            
+            console.log('Particle speed value changed to:', value);
+            if (window.Graph) {
+              window.Graph.linkDirectionalParticleSpeed(() => value);
+            }
+          });
+        }
+        
+        if (linkWidthControl) {
+          linkWidthControl.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            const valueDisplay = document.getElementById('link-width-value');
+            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
+            
+            console.log('Link width value changed to:', value);
+            if (window.Graph) {
+              window.Graph.linkWidth(() => value);
+            }
+          });
+        }
+        
+        if (nodeScaleControl) {
+          nodeScaleControl.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            const valueDisplay = document.getElementById('node-scale-value');
+            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
+            
+            console.log('Node scale value changed to:', value);
+            if (window.Graph) {
+              window.Graph.nodeVal(node => 10 * value);
+            }
+          });
+        }
+      }
+
+      // Function to persistently save user session
+      function saveUserSession(userId) {
+        if (!userId) return;
+        
+        console.log('Saving user session:', userId);
+        
+        // Save to localStorage for client-side persistence
+        localStorage.setItem('userId', userId);
+        
+        // Also set a cookie for server-side recognition with a longer expiry
+        // This uses a 30-day expiration
+        const expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + 30);
+        const cookieValue = `userId=${userId}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
+        console.log('Setting cookie:', cookieValue);
+        document.cookie = cookieValue;
+      }
+
+      signupBtn.addEventListener('click', async () => {
+        console.log('Signup button clicked');
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+        const response = await fetch('/api/users/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await response.json();
+        if (data.userId) {
+          userId = data.userId;
+          saveUserSession(userId);
+          updateAuthUI();
+          initializeGraph();
+        } else {
+          alert(data.error || 'Signup failed');
+        }
+      });
+
+      loginBtn.addEventListener('click', async () => {
+        console.log('Login button clicked');
+        const username = usernameInput.value;
+        const password = passwordInput.value;
+        const response = await fetch('/api/users/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await response.json();
+        if (data.userId) {
+          userId = data.userId;
+          saveUserSession(userId);
+          updateAuthUI();
+          initializeGraph();
+        } else {
+          alert(data.error || 'Login failed');
+        }
+      });
+
+      passwordInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+          console.log('Enter pressed in password input');
+          if (loginBtn.style.display !== 'none') loginBtn.click();
+          else if (signupBtn.style.display !== 'none') signupBtn.click();
+        }
+      });
+
+      logoutOpt.addEventListener('click', async () => {
+        console.log('Logout option clicked');
+        try {
+          // Call the server-side logout endpoint
+          const response = await fetch('/api/users/logout', { method: 'POST' });
+          console.log('Logout response:', response.status);
+        } catch (err) {
+          console.error('Error during logout:', err);
+        }
+        
+        // Clear user ID
+        userId = null;
+        
+        // Clear all session data from localStorage
+        localStorage.removeItem('userId');
+        localStorage.removeItem('username');
+        
+        // Clear the cookie by setting an expired date in the past
+        document.cookie = 'userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
+        console.log('Session cleared from all storage mechanisms');
+        
+        // Update UI to reflect logged out state
+        updateAuthUI();
+        initializeGraph();
+      });
+
+      signupOpt.addEventListener('click', () => {
+        console.log('Signup option clicked');
+        authFields.style.display = 'flex';
+        signupBtn.style.display = 'flex';
+        loginBtn.style.display = 'none';
+        userMenu.classList.add('hidden');
+      });
+
+      loginOpt.addEventListener('click', () => {
+        console.log('Login option clicked');
+        authFields.style.display = 'flex';
+        signupBtn.style.display = 'none';
+        loginBtn.style.display = 'flex';
+        userMenu.classList.add('hidden');
+      });
+
+      userToggle.addEventListener('click', () => {
+        console.log('User toggle clicked');
+        userMenu.classList.toggle('hidden');
+      });
+
+      entitiesDisplay.addEventListener('mouseenter', () => {
+        console.log('Entities display mouseenter');
+        entitiesPopup.classList.remove('hidden');
+      });
+
+      entitiesDisplay.addEventListener('mouseleave', () => {
+        console.log('Entities display mouseleave');
+        entitiesPopup.classList.add('hidden');
+      });
+
+      menuToggle.addEventListener('click', () => {
+        console.log('Menu toggle clicked');
+        const isVisible = !leftSidebar.classList.contains('left-sidebar-hidden');
+         
+        if (isVisible) {
+          leftSidebar.classList.add('left-sidebar-hidden');
+          secondSidebar.classList.add('hidden');
+           
+          // Close all accordion contents
+          document.querySelectorAll('.accordion-content').forEach(content => {
+            content.classList.remove('persistent');
+          });
+        } else {
+          leftSidebar.classList.remove('left-sidebar-hidden');
+          // Second sidebar remains hidden until an accordion is clicked
+        }
+      });
+
+      document.querySelectorAll('.accordion').forEach(accordion => {
+        const accordionIcon = accordion.querySelector('svg');
+        const accordionContent = accordion.querySelector('.accordion-content');
+         
+        accordionIcon.addEventListener('click', (e) => {
+          e.stopPropagation();
+          // Close all other accordion contents
+          document.querySelectorAll('.accordion-content').forEach(content => {
+            if (content !== accordionContent) {
+              content.classList.remove('persistent');
+            }
+          });
+          // Toggle this accordion content
+          accordionContent.classList.toggle('persistent');
+           
+          // Show the second sidebar when accordion content is displayed
+          if (accordionContent.classList.contains('persistent')) {
+            secondSidebar.classList.remove('hidden');
+          } else if (!document.querySelector('.accordion-content.persistent')) {
+            // Hide second sidebar if no accordion content is open
+            secondSidebar.classList.add('hidden');
+          }
+        });
+      });
+
+      document.addEventListener('click', (e) => {
+        // Close accordion contents when clicking outside
+        if (!e.target.closest('.accordion') && 
+            !e.target.closest('.accordion-content') && 
+            !e.target.closest('.form-container')) {
+          document.querySelectorAll('.accordion-content').forEach(content => {
+            content.classList.remove('persistent');
+          });
+          document.querySelectorAll('.form-container').forEach(form => {
+            form.style.display = 'none';
+          });
+        }
+      });
+
+      document.querySelectorAll('.accordion-item').forEach(item => {
+        if (item.textContent.includes('Add')) {
+          item.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent event from bubbling up
+            console.log(`Add ${item.textContent.trim()} clicked`);
+             
+            // Get the form ID from data attribute
+            const formId = item.getAttribute('data-form');
+            const accordionContent = item.closest('.accordion-content');
+             
+            if (formId) {
+              // First hide all forms in all accordion contents
+              document.querySelectorAll('.form-container').forEach(form => {
+                form.style.display = 'none';
+              });
+               
+              // Show the selected form
+              const form = document.getElementById(formId);
+              if (form) {
+                form.style.display = 'flex';
+                 
+                // Set addMode based on the form
+                if (formId === 'entity-form') addMode = 'entity';
+                else if (formId === 'type-form') addMode = 'type';
+                else if (formId === 'relation-form') addMode = 'relation';
+                else if (formId === 'perspective-form') addMode = 'perspective';
+                 
+                // Clear form fields
+                const inputs = form.querySelectorAll('input:not([type="color"])');
+                inputs.forEach(input => {
+                  if (input.type !== 'hidden') input.value = '';
+                });
+              }
+            }
+             
+            // Keep the parent accordion content visible
+            if (accordionContent) {
+              // First remove persistent class from all accordion contents
+              document.querySelectorAll('.accordion-content').forEach(content => {
+                if (content !== accordionContent) {
+                  content.classList.remove('persistent');
+                }
+              });
+              accordionContent.classList.add('persistent');
+            }
+          });
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.ctrlKey && e.key === 'e') {
+          console.log('Ctrl+E pressed');
+          e.preventDefault(); // Prevent default browser behavior
+           
+          // Toggle all sidebar elements
+          const leftSidebar = document.getElementById('left-sidebar');
+          const secondSidebar = document.getElementById('second-sidebar');
+          const statusBar = document.getElementById('status-bar');
+           
+          // Check if the left sidebar is currently visible (not transformed)
+          const isVisible = !leftSidebar.classList.contains('left-sidebar-hidden');
+           
+          // Toggle visibility with CSS classes for smooth transition
+          if (isVisible) {
+            leftSidebar.classList.add('left-sidebar-hidden');
+            secondSidebar.classList.add('hidden');
+            statusBar.classList.add('statusbar-hidden');
+          } else {
+            leftSidebar.classList.remove('left-sidebar-hidden');
+            statusBar.classList.remove('statusbar-hidden');
+            // secondSidebar remains hidden until an accordion is clicked
+          }
+           
+          // Close all accordion contents
+          document.querySelectorAll('.accordion-content').forEach(content => {
+            content.classList.remove('persistent');
+          });
+           
+          // Hide all forms
+          document.querySelectorAll('.form-container').forEach(form => {
+            form.style.display = 'none';
+          });
+        }
+      });
+
+      // Add direct API test function for simple debugging
+      async function directAPITest(action, collection, id) {
+        try {
+          const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
+          
+          // Process the ID correctly
+          let requestId = id;
+          if (id.includes('/')) {
+            // If ID has collection prefix (like "types/123"), extract just the ID part
+            requestId = id.split('/')[1];
+          } else if (collection === 'relations' || collection === 'entities' || collection === 'types') {
+            // For these collections, if no slash, use ID as is
+            requestId = id;
+          }
+          
+          // Construct proper URL
+          const endpoint = `/api/${singularCollection}/${requestId}`;
+          console.log(`Sending ${action} request to: ${endpoint}`);
+          
+          let response;
+          if (action === 'DELETE') {
+            response = await fetch(endpoint, { method: 'DELETE' });
+          } else if (action === 'PATCH') {
+            const newName = prompt(`Enter new name for item in ${collection}:`);
+            if (!newName) return null;
+            response = await fetch(endpoint, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: newName })
+            });
+          }
+          
+          const responseText = await response.text();
+          console.log(`${action} response: ${response.status}`, responseText);
+          
+          if (response.ok) {
+            alert(`${action} operation succeeded`);
+            return true;
+          } else {
+            alert(`${action} operation failed: ${responseText}`);
+            return false;
+          }
+        } catch (err) {
+          console.error(`Error in ${action} operation:`, err);
+          alert(`Error: ${err.message}`);
+          return false;
+        }
+      }
+
+      // Add debug listeners for testing direct API calls
+      document.getElementById('type-test-update').addEventListener('click', async () => {
+        const typeId = prompt("Enter type ID to update (e.g., types/12345 or just 12345):");
+        if (typeId) {
+          const success = await directAPITest('PATCH', 'types', typeId);
+          if (success) initializeGraph();
+        }
+      });
+      
+      document.getElementById('type-test-delete').addEventListener('click', async () => {
+        const typeId = prompt("Enter type ID to delete (e.g., types/12345 or just 12345):");
+        if (typeId) {
+          const success = await directAPITest('DELETE', 'types', typeId);
+          if (success) initializeGraph();
+        }
+      });
+      
+      // Add API Debug Test handler
+      document.getElementById('api-debug-test').addEventListener('click', async () => {
+        console.log("Running comprehensive API Debug Test");
+        
+        // Create a debug results div
+        const resultsDiv = document.createElement('div');
+        resultsDiv.style.position = 'fixed';
+        resultsDiv.style.top = '50%';
+        resultsDiv.style.left = '50%';
+        resultsDiv.style.transform = 'translate(-50%, -50%)';
+        resultsDiv.style.width = '80%';
+        resultsDiv.style.maxHeight = '80vh';
+        resultsDiv.style.overflow = 'auto';
+        resultsDiv.style.backgroundColor = '#222';
+        resultsDiv.style.color = '#fff';
+        resultsDiv.style.padding = '20px';
+        resultsDiv.style.borderRadius = '8px';
+        resultsDiv.style.zIndex = '9999';
+        resultsDiv.style.boxShadow = '0 0 20px rgba(0,0,0,0.7)';
+        resultsDiv.style.fontSize = '14px';
+        resultsDiv.style.fontFamily = 'monospace';
+        
+        document.body.appendChild(resultsDiv);
+        
+        // Add close button
+        const closeButton = document.createElement('button');
+        closeButton.textContent = '✕';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '10px';
+        closeButton.style.right = '10px';
+        closeButton.style.backgroundColor = '#444';
+        closeButton.style.border = 'none';
+        closeButton.style.color = '#fff';
+        closeButton.style.width = '30px';
+        closeButton.style.height = '30px';
+        closeButton.style.borderRadius = '50%';
+        closeButton.style.cursor = 'pointer';
+        closeButton.onclick = () => resultsDiv.remove();
+        resultsDiv.appendChild(closeButton);
+        
+        // Function to add test result to the div
+        function addResult(test, result, details = '') {
+          const resultRow = document.createElement('div');
+          resultRow.style.marginBottom = '10px';
+          resultRow.style.borderBottom = '1px solid #444';
+          resultRow.style.paddingBottom = '10px';
+          
+          const status = result ? '✅' : '❌';
+          resultRow.innerHTML = `<div><strong>${status} ${test}</strong></div>`;
+          
+          if (details) {
+            const detailsElem = document.createElement('div');
+            detailsElem.style.marginTop = '5px';
+            detailsElem.style.marginLeft = '20px';
+            detailsElem.style.color = '#aaa';
+            detailsElem.style.fontSize = '12px';
+            detailsElem.style.whiteSpace = 'pre-wrap';
+            detailsElem.style.wordBreak = 'break-all';
+            detailsElem.textContent = details;
+            resultRow.appendChild(detailsElem);
+          }
+          
+          resultsDiv.appendChild(resultRow);
+        }
+        
+        // Test each API
+        try {
+          // 1. Check the debug endpoint
+          addResult('Testing /api/debug endpoint...', true, 'Started');
+          let debugData = null;
+          try {
+            const debugResponse = await fetch('/api/debug');
+            debugData = await debugResponse.json();
+            addResult('Debug API response', debugResponse.ok, 
+                      `Status: ${debugResponse.status}\nData: ${JSON.stringify(debugData, null, 2).substring(0, 500)}...`);
+          } catch (err) {
+            addResult('Debug API', false, `Error: ${err.message}`);
+          }
+          
+          // 2. Check collections data
+          if (debugData && debugData.collections) {
+            const collections = Object.keys(debugData.collections);
+            addResult('Collections found', collections.length > 0, collections.join(', '));
+            
+            // Find sample IDs for testing
+            const testIds = {};
+            for (const coll of collections) {
+              const sample = debugData.collections[coll].sample;
+              if (sample && sample.length > 0) {
+                testIds[coll] = sample[0]._id;
+              }
+            }
+            addResult('Found test IDs', Object.keys(testIds).length > 0, 
+                      Object.entries(testIds).map(([k, v]) => `${k}: ${v}`).join('\n'));
+            
+            // 3. Test GET endpoints
+            for (const coll of collections) {
+              try {
+                const singularColl = coll.endsWith('s') ? coll.slice(0, -1) : coll;
+                const response = await fetch(`/api/${coll}`);
+                const data = await response.json();
+                addResult(`GET /${coll}`, response.ok, 
+                          `Status: ${response.status}\nItems: ${Array.isArray(data) ? data.length : 'not array'}`);
+              } catch (err) {
+                addResult(`GET /${coll}`, false, `Error: ${err.message}`);
+              }
+            }
+            
+            // 4. Test individual document GET
+            for (const [coll, id] of Object.entries(testIds)) {
+              if (!id) continue;
+              
+              try {
+                const singularColl = coll.endsWith('s') ? coll.slice(0, -1) : coll;
+                const idKey = id.includes('/') ? id.split('/')[1] : id;
+                const response = await fetch(`/api/${singularColl}/${idKey}`);
+                let resultText = '';
+                try {
+                  const data = await response.json();
+                  resultText = `Data: ${JSON.stringify(data).substring(0, 100)}...`;
+                } catch {
+                  resultText = await response.text();
+                }
+                addResult(`GET /${singularColl}/${idKey}`, response.ok, 
+                          `Status: ${response.status}\n${resultText}`);
+              } catch (err) {
+                addResult(`GET /${coll}/${id}`, false, `Error: ${err.message}`);
+              }
+            }
+            
+            // 5. Print all available routes
+            if (debugData.routes) {
+              addResult('Available routes', true, debugData.routes.join('\n'));
+            }
+          }
+          
+          // 6. Add server environment info
+          addResult('Server environment', true, `DB: ${debugData?.dbInfo || 'unknown'}\nTime: ${new Date().toString()}`);
+          
+          // 7. Add client environment info
+          addResult('Client environment', true, 
+                    `User ID: ${userId || 'not logged in'}\nActive perspective: ${activePerspective}\nBrowser: ${navigator.userAgent}`);
+          
+        } catch (err) {
+          addResult('API Debug Test', false, `General error: ${err.message}`);
+        }
+      });
+      
+      // Function to directly test edit/delete operations without relying on UI click handlers
+      function directAPITest(action, collection, id) {
+        return new Promise(async (resolve, reject) => {
+          try {
+            console.log(`Running direct API test: ${action} on ${collection}/${id}`);
+            
+            // Format collection name (singular for API endpoint)
+            const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
+            
+            // Extract ID key (12345) from full ID (collection/12345)
+            const idKey = id.includes('/') ? id.split('/')[1] : id;
+            
+            // Construct proper URL with singular collection and just the ID key
+            const endpoint = `/api/${singularCollection}/${idKey}`;
+            console.log(`Sending ${action} request to: ${endpoint}`);
+            
+            // Show loading state
+            const loadingDiv = document.createElement('div');
+            loadingDiv.style.position = 'fixed';
+            loadingDiv.style.top = '50%';
+            loadingDiv.style.left = '50%';
+            loadingDiv.style.transform = 'translate(-50%, -50%)';
+            loadingDiv.style.backgroundColor = 'rgba(0,0,0,0.7)';
+            loadingDiv.style.color = 'white';
+            loadingDiv.style.padding = '20px';
+            loadingDiv.style.borderRadius = '5px';
+            loadingDiv.style.zIndex = '9999';
+            loadingDiv.textContent = `Sending ${action} request...`;
+            document.body.appendChild(loadingDiv);
+            
+            let response;
+            let body = {};
+            
+            if (action === 'DELETE') {
+              response = await fetch(endpoint, { method: 'DELETE' });
+            } else if (action === 'PATCH') {
+              const newName = prompt(`Enter new name for ${collection} item:`);
+              if (!newName) {
+                document.body.removeChild(loadingDiv);
+                return resolve(null);
+              }
+              
+              body = { name: newName };
+              response = await fetch(endpoint, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+              });
+            }
+            
+            console.log(`${action} response status: ${response.status}`);
+            const responseText = await response.text();
+            console.log(`${action} response text:`, responseText);
+            
+            // Remove loading div
+            document.body.removeChild(loadingDiv);
+            
+            if (response.ok) {
+              const successMsg = `${action} operation succeeded for ${collection}/${id}`;
+              console.log(successMsg);
+              alert(successMsg);
+              resolve(true);
+            } else {
+              // Try to parse the response as JSON for better error message
+              let errorMsg = responseText;
+              try {
+                const errorJson = JSON.parse(responseText);
+                errorMsg = errorJson.error || errorJson.details || responseText;
+              } catch (e) {
+                // Use the text as is if it's not valid JSON
+                errorMsg = `${response.status} ${response.statusText}: ${responseText}`;
+              }
+              
+              console.error(`${action} operation failed:`, errorMsg);
+              alert(`${action} operation failed: ${errorMsg}`);
+              resolve(false);
+            }
+          } catch (err) {
+            console.error(`Error in ${action} operation:`, err);
+            alert(`Error: ${err.message}`);
+            resolve(false);
+          }
+        });
+      }
+
+      // Add event handlers for left sidebar controls
+      document.addEventListener('DOMContentLoaded', function() {
+        // Add event listeners for graph controls in the left sidebar
+        document.querySelectorAll('.graph-controls-item').forEach(item => {
+          item.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const controlType = item.getAttribute('data-control');
+            
+            // Handle different control types
+            switch (controlType) {
+              case 'style-toggle':
+                // Show the style controls form in the accordion
+                const styleControlsAccordion = document.getElementById('style-controls-accordion');
+                if (!styleControlsAccordion) return;
+                
+                const isVisible = styleControlsAccordion.style.display === 'flex';
+                
+                // Hide any other open forms first
+                document.querySelectorAll('.form-container').forEach(form => {
+                  form.style.display = 'none';
+                });
+                
+                // Toggle the style controls form
+                styleControlsAccordion.style.display = isVisible ? 'none' : 'flex';
+                
+                // Make sure the accordion content remains visible
+                const accordionContent = item.closest('.accordion-content');
+                if (accordionContent) {
+                  accordionContent.classList.add('persistent');
+                }
+                break;
+                
+              case 'emit-particles':
+                // Emit particles on random links
+                if (!window.Graph) return;
+                const graphData = window.Graph.graphData();
+                const links = graphData.links;
+                if (links.length === 0) return;
+                
+                // Emit particles on 5 random links
+                const randomCount = Math.min(5, links.length);
+                for (let i = 0; i < randomCount; i++) {
+                  const randomLink = links[Math.floor(Math.random() * links.length)];
+                  window.Graph.emitParticle(randomLink);
+                }
+                break;
+                
+              case 'auto-flow':
+                // Toggle auto flow
+                if (!window.Graph) return;
+                
+                // Toggle global auto emission state
+                window.autoEmission = !window.autoEmission;
+                const statusEl = document.getElementById('auto-flow-status');
+                if (statusEl) {
+                  statusEl.textContent = `Auto Flow: ${window.autoEmission ? 'On' : 'Off'}`;
+                }
+                
+                if (window.autoEmission) {
+                  // Start auto emission
+                  window.autoEmitInterval = setInterval(() => {
+                    const currentData = window.Graph.graphData();
+                    const currentLinks = currentData.links;
+                    
+                    if (!currentLinks || currentLinks.length === 0) return;
+                    
+                    // Get a random link
+                    const randomLink = currentLinks[Math.floor(Math.random() * currentLinks.length)];
+                    window.Graph.emitParticle(randomLink);
+                  }, 300); // Emit every 300ms
+                } else {
+                  // Stop auto emission
+                  clearInterval(window.autoEmitInterval);
+                }
+                break;
+                
+              case 'highlight-node':
+                // Highlight a random node and its connections
+                if (!window.Graph) return;
+                
+                // Get the current graph data
+                const gData = window.Graph.graphData();
+                
+                // Check if we have nodes
+                if (!gData.nodes || gData.nodes.length === 0) return;
+                
+                // Random node to highlight
+                const randomNodeIndex = Math.floor(Math.random() * gData.nodes.length);
+                const randomNode = gData.nodes[randomNodeIndex];
+                
+                // Find all links connected to this node
+                const connectedLinks = gData.links.filter(link => 
+                  link.source.id === randomNode.id || link.target.id === randomNode.id
+                );
+                
+                if (connectedLinks.length === 0) {
+                  alert(`Node ${randomNode.name || randomNode.id} has no connections.`);
+                  return;
+                }
+                
+                // Highlight the node
+                const prevColor = randomNode.__prevColor || randomNode.color;
+                randomNode.__prevColor = prevColor;
+                
+                // Pulse animation for the selected node
+                let pulseDirection = 1;
+                let pulseStrength = 0;
+                const pulseInterval = setInterval(() => {
+                  pulseStrength += (0.1 * pulseDirection);
+                  if (pulseStrength >= 1) pulseDirection = -1;
+                  if (pulseStrength <= 0) {
+                    pulseDirection = 1;
+                    pulseStrength = 0;
+                  }
+                  
+                  // Apply pulsing color
+                  window.Graph.nodeColor(node => {
+                    if (node.id === randomNode.id) {
+                      const pulseColor = 0xffff00; // Yellow pulse
+                      return pulseColor;
+                    }
+                    return node.color;
+                  });
+                }, 50);
+                
+                // Emit particles on all connected links
+                connectedLinks.forEach(link => {
+                  // Emit multiple particles
+                  for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                      window.Graph.emitParticle(link);
+                    }, i * 300); // Stagger the emission
+                  }
+                });
+                
+                // Stop pulse after a few seconds
+                setTimeout(() => {
+                  clearInterval(pulseInterval);
+                  window.Graph.nodeColor(node => node.color);
+                }, 5000);
+                break;
+            }
+          });
+        });
+      });
+
+      // Add a debug mode toggle
+      // NOTE: This is already defined earlier to avoid redeclaration errors
+      
+      function log(...args) {
+        if (debugMode) console.debug(...args);
+      }
+      
+      // Debug toggle function
+      function toggleDebug() {
+        debugMode = !debugMode;
+        localStorage.setItem('somapDebug', debugMode);
+        console.log(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`);
+        return debugMode;
+      }
+      
+      // Function to handle inline editing
+      function setupInlineEdit(element, itemId, collection, currentName) {
+        // Create input element
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = currentName;
+        input.className = 'inline-edit-input';
+        
+        // Add element to DOM
+        element.classList.add('inline-edit-active');
+        element.appendChild(input);
+        
+        // Focus and select all text
+        input.focus();
+        input.select();
+        
+        // Handle save on enter or cancel on escape
+        input.addEventListener('keydown', async (e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            const newName = input.value.trim();
+            
+            if (newName && newName !== currentName) {
+              try {
+                console.log(`Updating ${collection} item ${itemId} to ${newName}`);
+                
+                // For API endpoint, we need singular form
+                const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
+                
+                // Extract ID key (12345) from full ID (collection/12345)
+                let idKey = itemId;
+                if (itemId.includes('/')) {
+                  // Extract just the numeric part for the API endpoint
+                  idKey = itemId.split('/')[1];
+                }
+                
+                // Construct the endpoint with just the ID key part
+                const endpoint = `/api/${singularCollection}/${idKey}`;
+                console.log(`Sending PATCH request to: ${endpoint}`);
+                
+                const response = await fetch(endpoint, {
+                  method: 'PATCH',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ name: newName })
+                });
+                
+                console.log(`Update response status: ${response.status}`);
+                const responseText = await response.text();
+                console.log(`Update response text:`, responseText);
+                
+                if (response.ok) {
+                  console.log(`Successfully updated ${collection} item ${itemId}`);
+                  
+                  // Update the text content - be careful with the DOM structure
+                  // Some items might have color dots or other elements before the text
+                  const colorDot = element.querySelector('.color-dot');
+                  if (colorDot) {
+                    // If there's a color dot, we need to update just the text node after it
+                    let textNode = null;
+                    for (let i = 0; i < element.childNodes.length; i++) {
+                      if (element.childNodes[i].nodeType === Node.TEXT_NODE) {
+                        textNode = element.childNodes[i];
+                        break;
+                      }
+                    }
+                    if (textNode) {
+                      textNode.textContent = newName;
+                    }
+                  } else if (element.querySelector('.relation-content')) {
+                    // For relations, update the name span
+                    const nameSpan = element.querySelector('.relation-name');
+                    if (nameSpan) {
+                      nameSpan.textContent = newName;
+                    }
+                  } else {
+                    // For simple items, just update the first child text node
+                    let textNode = element.childNodes[0];
+                    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+                      textNode.textContent = newName;
+                    }
+                  }
+                  
+                  initializeGraph();
+                } else {
+                  console.error(`Failed to update ${collection} item:`, responseText);
+                  alert(`Failed to update ${collection}: ${responseText}`);
+                }
+              } catch (err) {
+                console.error(`Error updating ${collection} item:`, err);
+                alert(`Error updating ${collection}: ${err.message}`);
+              }
+            }
+            
+            // Clean up regardless of success
+            element.classList.remove('inline-edit-active');
+            input.remove();
+            
+          } else if (e.key === 'Escape') {
+            // Cancel edit
+            element.classList.remove('inline-edit-active');
+            input.remove();
+          }
+        });
+      }
+
+      // Add event listeners for graph controls in the left sidebar
+      document.addEventListener('DOMContentLoaded', function() {
+        // Get style-related elements from accordion menu
+        const styleToggleBtn = document.querySelector('.graph-controls-item[data-control="style-toggle"]');
+        const styleControlsAccordion = document.getElementById('style-controls-accordion');
+        const particlesControl = document.getElementById('particles-control');
+        const particleSpeedControl = document.getElementById('particle-speed-control');
+        const linkWidthControl = document.getElementById('link-width-control');
+        const nodeScaleControl = document.getElementById('node-scale-control');
+        const resetStyleBtn = document.getElementById('reset-style-btn');
+        const respectLineTypeCheckbox = document.getElementById('respect-line-type');
+        
+        // Log all controls for debugging
+        console.log('Graph style controls:', {
+          styleToggleBtn, styleControlsAccordion, particlesControl, particleSpeedControl,
+          linkWidthControl, nodeScaleControl, resetStyleBtn, respectLineTypeCheckbox
+        });
+        
+        // Setup graph controls visibility
+        if (styleToggleBtn && styleControlsAccordion) {
+          styleToggleBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            
+            console.log('Style toggle button clicked');
+            
+            // Get current display value
+            const currentDisplay = window.getComputedStyle(styleControlsAccordion).display;
+            const isVisible = currentDisplay !== 'none';
+            
+            console.log('Style controls current display:', currentDisplay, 'isVisible:', isVisible);
+            
+            // Hide any other open forms first
+            document.querySelectorAll('.form-container').forEach(form => {
+              if (form !== styleControlsAccordion) {
+                form.style.display = 'none';
+              }
+            });
+            
+            // Toggle the style controls form
+            styleControlsAccordion.style.display = isVisible ? 'none' : 'flex';
+            console.log('Set style controls display to:', styleControlsAccordion.style.display);
+            
+            // Make sure the accordion content remains visible
+            const accordionContent = styleToggleBtn.closest('.accordion-content');
+            if (accordionContent) {
+              accordionContent.classList.add('persistent');
+              console.log('Added persistent class to accordion content');
+            }
+          });
+        }
+        
+        // Initialize the control handlers (they will be used when Graph is created)
+        if (particlesControl) {
+          particlesControl.addEventListener('input', function() {
+            const value = parseInt(this.value);
+            const valueDisplay = document.getElementById('particles-value');
+            if (valueDisplay) valueDisplay.textContent = value;
+            
+            console.log('Particles control set to:', value);
+            if (window.Graph) {
+              window.Graph.linkDirectionalParticles(() => value);
+            }
+          });
+        }
+        
+        if (particleSpeedControl) {
+          particleSpeedControl.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            const valueDisplay = document.getElementById('particle-speed-value');
+            if (valueDisplay) valueDisplay.textContent = value.toFixed(3);
+            
+            console.log('Particle speed control set to:', value);
+            if (window.Graph) {
+              window.Graph.linkDirectionalParticleSpeed(() => value);
+            }
+          });
+        }
+        
+        if (linkWidthControl) {
+          linkWidthControl.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            const valueDisplay = document.getElementById('link-width-value');
+            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
+            
+            console.log('Link width control set to:', value);
+            if (window.Graph) {
+              window.Graph.linkWidth(() => value);
+            }
+          });
+        }
+        
+        if (nodeScaleControl) {
+          nodeScaleControl.addEventListener('input', function() {
+            const value = parseFloat(this.value);
+            const valueDisplay = document.getElementById('node-scale-value');
+            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
+            
+            console.log('Node scale control set to:', value);
+            if (window.Graph) {
+              window.Graph.nodeVal((node) => 10 * value);
+            }
+          });
+        }
+        
+        if (resetStyleBtn) {
+          resetStyleBtn.addEventListener('click', function() {
+            console.log('Resetting graph style to defaults');
+            
+            // Reset controls to default values
+            if (particlesControl) {
+              particlesControl.value = 3;
+              const particlesValue = document.getElementById('particles-value');
+              if (particlesValue) particlesValue.textContent = '3';
+            }
+            
+            if (particleSpeedControl) {
+              particleSpeedControl.value = 0.01;
+              const particleSpeedValue = document.getElementById('particle-speed-value');
+              if (particleSpeedValue) particleSpeedValue.textContent = '0.01';
+            }
+            
+            if (linkWidthControl) {
+              linkWidthControl.value = 1.2;
+              const linkWidthValue = document.getElementById('link-width-value');
+              if (linkWidthValue) linkWidthValue.textContent = '1.2';
+            }
+            
+            if (nodeScaleControl) {
+              nodeScaleControl.value = 1;
+              const nodeScaleValue = document.getElementById('node-scale-value');
+              if (nodeScaleValue) nodeScaleValue.textContent = '1';
+            }
+            
+            if (respectLineTypeCheckbox) {
+              respectLineTypeCheckbox.checked = true;
+            }
+            
+            // Apply defaults to graph if available
+            if (window.Graph) {
+              window.Graph
+                .linkDirectionalParticles(link => {
+                  if (link.lineType === 'dashed') return 2;
+                  if (link.lineType === 'dotted') return 3;
+                  return 0;
+                })
+                .linkDirectionalParticleSpeed(link => {
+                  if (link.lineType === 'dotted') return 0.015;
+                  if (link.lineType === 'dashed') return 0.008;
+                  return 0.01;
+                })
+                .linkWidth(link => link.lineType === 'dotted' ? 0.8 : 1.2)
+                .nodeVal(node => 10);
+            }
+          });
+        }
+        
+        if (respectLineTypeCheckbox) {
+          respectLineTypeCheckbox.addEventListener('change', function() {
+            if (!window.Graph) return;
+            
+            if (this.checked) {
+              // Use line type specific styling
+              window.Graph
+                .linkDirectionalParticleColor(link => {
+                  if (link.lineType === 'dotted') return '#51cbee';
+                  if (link.lineType === 'dashed') return '#ffffff';
+                  return '#ff9500';
+                })
+                .linkOpacity(link => {
+                  if (link.lineType === 'dotted') return 0.4;
+                  if (link.lineType === 'dashed') return 0.7;
+                  return 0.9;
+                })
+                .linkCurvature(link => {
+                  return link.lineType === 'dotted' ? 0.2 : 
+                         link.lineType === 'dashed' ? 0.1 : 0;
+                });
+            } else {
+              // Use uniform styling
+              window.Graph
+                .linkDirectionalParticleColor(() => '#ff9500')
+                .linkOpacity(0.8)
+                .linkCurvature(0);
+            }
+          });
+        }
+        
+        // Remove duplicate style controls container
+        const oldStyleControlsContainer = document.getElementById('style-controls');
+        if (oldStyleControlsContainer) {
+          oldStyleControlsContainer.remove();
+        }
+        
+        const emitParticlesItem = document.querySelector('.graph-controls-item[data-control="emit-particles"]');
+        if (emitParticlesItem) {
+          emitParticlesItem.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Emit particles on random links
+            if (!window.Graph) return;
+            const graphData = window.Graph.graphData();
+            const links = graphData.links;
+            if (!links || links.length === 0) return;
+            
+            // Emit particles on 5 random links
+            const randomCount = Math.min(5, links.length);
+            for (let i = 0; i < randomCount; i++) {
+              const randomLink = links[Math.floor(Math.random() * links.length)];
+              window.Graph.emitParticle(randomLink);
+            }
+          });
+        }
+        
+        const autoFlowItem = document.querySelector('.graph-controls-item[data-control="auto-flow"]');
+        if (autoFlowItem) {
+          autoFlowItem.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Toggle auto flow
+            if (!window.Graph) return;
+            
+            // Initialize autoEmission if undefined
+            if (typeof window.autoEmission === 'undefined') {
+              window.autoEmission = false;
+            }
+            
+            // Toggle global auto emission state
+            window.autoEmission = !window.autoEmission;
+            const statusEl = document.getElementById('auto-flow-status');
+            if (statusEl) {
+              statusEl.textContent = `Auto Flow: ${window.autoEmission ? 'On' : 'Off'}`;
+            }
+            
+            if (window.autoEmission) {
+              // Start auto emission
+              window.autoEmitInterval = setInterval(() => {
+                if (!window.Graph) return;
+                const currentData = window.Graph.graphData();
+                const currentLinks = currentData.links;
+                
+                if (!currentLinks || currentLinks.length === 0) return;
+                
+                // Get a random link
+                const randomLink = currentLinks[Math.floor(Math.random() * currentLinks.length)];
+                window.Graph.emitParticle(randomLink);
+              }, 300); // Emit every 300ms
+            } else {
+              // Stop auto emission
+              clearInterval(window.autoEmitInterval);
+            }
+          });
+        }
+        
+        const highlightNodeItem = document.querySelector('.graph-controls-item[data-control="highlight-node"]');
+        if (highlightNodeItem) {
+          highlightNodeItem.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Highlight a random node and its connections
+            if (!window.Graph) return;
+            
+            // Get the current graph data
+            const gData = window.Graph.graphData();
+            
+            // Check if we have nodes
+            if (!gData.nodes || gData.nodes.length === 0) return;
+            
+            // Random node to highlight
+            const randomNodeIndex = Math.floor(Math.random() * gData.nodes.length);
+            const randomNode = gData.nodes[randomNodeIndex];
+            
+            // Find all links connected to this node
+            const connectedLinks = gData.links.filter(link => 
+              link.source.id === randomNode.id || link.target.id === randomNode.id
+            );
+            
+            if (connectedLinks.length === 0) {
+              alert(`Node ${randomNode.name || randomNode.id} has no connections.`);
+              return;
+            }
+            
+            // Highlight the node
+            const prevColor = randomNode.__prevColor || randomNode.color;
+            randomNode.__prevColor = prevColor;
+            
+            // Pulse animation for the selected node
+            let pulseDirection = 1;
+            let pulseStrength = 0;
+            const pulseInterval = setInterval(() => {
+              pulseStrength += (0.1 * pulseDirection);
+              if (pulseStrength >= 1) pulseDirection = -1;
+              if (pulseStrength <= 0) {
+                pulseDirection = 1;
+                pulseStrength = 0;
+              }
+              
+              // Apply pulsing color
+              window.Graph.nodeColor(node => {
+                if (node.id === randomNode.id) {
+                  const pulseColor = 0xffff00; // Yellow pulse
+                  return pulseColor;
+                }
+                return node.color;
+              });
+            }, 50);
+            
+            // Emit particles on all connected links
+            connectedLinks.forEach(link => {
+              // Emit multiple particles
+              for (let i = 0; i < 5; i++) {
+                setTimeout(() => {
+                  window.Graph.emitParticle(link);
+                }, i * 300); // Stagger the emission
+              }
+            });
+            
+            // Stop pulse after a few seconds
+            setTimeout(() => {
+              clearInterval(pulseInterval);
+              window.Graph.nodeColor(node => node.color);
+            }, 5000);
+          });
+        }
+        
+        // Initialize color picker
+        const colorPreviewButton = document.getElementById('color-preview-button');
+        const colorPalette = document.getElementById('color-palette');
+        const typeColorHex = document.getElementById('type-color-hex');
+        const typeColor = document.getElementById('type-color');
+        const typeColorPicker = document.getElementById('type-color-picker');
+        
+        if (colorPreviewButton && colorPalette && typeColorHex && typeColor && typeColorPicker) {
+          // Set initial colors
+          const initialColor = typeColor.value || '0xff9500';
+          const initialHex = oxFormatToHex(initialColor);
+          typeColorHex.value = initialHex;
+          typeColorPicker.value = initialHex;
+          colorPreviewButton.style.backgroundColor = initialHex;
+          
+          // Toggle color palette when clicking the preview button
+          colorPreviewButton.addEventListener('click', function(e) {
+            e.stopPropagation();
+            // Toggle visibility
+            const isVisible = colorPalette.style.display === 'block';
+            colorPalette.style.display = isVisible ? 'none' : 'block';
+            colorPalette.style.zIndex = '1000';
+            
+            // Ensure colorPicker and its parent remain visible during use
+            const accordionContent = colorPreviewButton.closest('.accordion-content');
+            if (accordionContent) {
+              accordionContent.classList.toggle('has-active-color-picker', !isVisible);
+            }
+          });
+          
+          // Handle palette color selection
+          document.querySelectorAll('.palette-color').forEach(color => {
+            color.addEventListener('click', function(e) {
+              e.stopPropagation();
+              const selectedColor = this.getAttribute('data-color');
+              if (!selectedColor) return;
+              
+              // Update all color inputs
+              typeColorHex.value = selectedColor;
+              typeColorPicker.value = selectedColor;
+              typeColor.value = hexToOxFormat(selectedColor);
+              colorPreviewButton.style.backgroundColor = selectedColor;
+              
+              // Hide palette
+              colorPalette.style.display = 'none';
+              
+              // Update accordion content
+              const accordionContent = colorPreviewButton.closest('.accordion-content');
+              if (accordionContent) {
+                accordionContent.classList.remove('has-active-color-picker');
+              }
+            });
+          });
+          
+          // Update from custom color picker
+          typeColorPicker.addEventListener('input', function(e) {
+            e.stopPropagation();
+            const hexValue = this.value;
+            
+            // Update other inputs
+            typeColorHex.value = hexValue;
+            typeColor.value = hexToOxFormat(hexValue);
+            colorPreviewButton.style.backgroundColor = hexValue;
+          });
+          
+          // Update from hex input
+          typeColorHex.addEventListener('input', function(e) {
+            const hexValue = this.value;
+            
+            // Only update if it's a valid hex color
+            if (/^#[0-9A-Fa-f]{6}$/.test(hexValue)) {
+              typeColorPicker.value = hexValue;
+              typeColor.value = hexToOxFormat(hexValue);
+              colorPreviewButton.style.backgroundColor = hexValue;
+            } else if (/^[0-9A-Fa-f]{6}$/.test(hexValue)) {
+              // If they entered 6 hex chars without the #, add it
+              const fullHex = '#' + hexValue;
+              typeColorPicker.value = fullHex;
+              typeColor.value = hexToOxFormat(fullHex);
+              colorPreviewButton.style.backgroundColor = fullHex;
+            }
+          });
+          
+          // Close when clicking outside
+          document.addEventListener('click', function(e) {
+            if (!e.target.closest('.color-picker-wrapper') && colorPalette.style.display === 'block') {
+              colorPalette.style.display = 'none';
+              
+              // Update accordion content
+              document.querySelectorAll('.accordion-content').forEach(content => {
+                content.classList.remove('has-active-color-picker');
+              });
+            }
+          });
+        }
+      });
+
+      // Remove the floating style controls setup
+      // There's already an async implementation of this function earlier in the code
+      // The duplicate implementation is now removed to prevent conflicts
+    });
+  </script>
+</body>
+</html>

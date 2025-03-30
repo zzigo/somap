@@ -1,0 +1,19 @@
+{
+  "name": "somap",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "autoprefixer": "10.4.21",
+    "postcss": "8.4.47",
+    "tailwindcss": "3.4.14"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "arangojs": "10.1.1",
+    "hono": "^4.7.5"
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "name": "somap-entity-service",
+  "version": "1.0.0",
+  "description": "Entity management service for SOMAP",
+  "engines": {
+    "arangodb": "^3.0.0"
+  },
+  "main": "index.js",
+  "scripts": {
+    "setup": "scripts/setup.js",
+    "teardown": "scripts/teardown.js"
+  },
+  "configuration": {
+    "maxEntitiesPerBatch": {
+      "description": "Maximum number of entities that can be created in a batch operation",
+      "type": "integer",
+      "default": 100
+    }
+  },
+  "routes": {
+    // ...existing routes...
+    "/properties": {
+      "description": "Property definitions API",
+      "service": "./services/properties.js"
+    },
+    "/propertyPredictors": {
+      "description": "Property predictors API",
+      "service": "./services/propertyPredictors.js"
+    }
+  }
+}

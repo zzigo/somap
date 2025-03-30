@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SOMAP Interface</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        #log { white-space: pre-wrap; border: 1px solid #ddd; padding: 10px; height: 200px; overflow-y: scroll; }
+    </style>
+</head>
+<body>
+    <h1>SOMAP Interface</h1>
+
+    <!-- SSE Section -->
+    <h2>Live SOMAP Cluster Updates</h2>
+    <div id="sse-log"></div>
+
+    <!-- WebSocket Section -->
+    <h2>Project Data Fetcher</h2>
+    <input type="text" id="projectId" placeholder="Enter Project ID">
+    <button id="fetchProject">Fetch Project</button>
+    <div id="ws-log"></div>
+
+    <script>
+        // Connect to SSE
+        const sseLog = document.getElementById('sse-log');
+        const eventSource = new EventSource('/live/somap-cluster');
+
+        eventSource.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            sseLog.innerText = 'Live Clusters: ' + JSON.stringify(data, null, 2);
+        };
+
+        // Connect to WebSocket
+        const ws = new WebSocket('ws://localhost:3001');
+        const wsLog = document.getElementById('ws-log');
+
+        ws.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            wsLog.innerText = 'Project Data: ' + JSON.stringify(data, null, 2);
+        };
+
+        document.getElementById('fetchProject').addEventListener('click', () => {
+            const projectId = document.getElementById('projectId').value;
+            ws.send(JSON.stringify({ projectId }));
+        });
+    </script>
+</body>
+</html>
