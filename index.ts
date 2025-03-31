@@ -66,6 +66,7 @@ async function startServer() {
   let db: Database;
 
   try {
+    console.log(`Connecting to ArangoDB at ${DB_HOST}:${DB_PORT}...`);
     // Initialize system database connection with retry
     systemDb = new Database({
       url: `http://${DB_HOST}:${DB_PORT}`,
@@ -74,7 +75,7 @@ async function startServer() {
     });
 
     // Test connection with retry
-    const connected = await waitForDatabase(systemDb);
+    const connected = await waitForDatabase(systemDb, 10, 3000);
     if (!connected) {
       throw new Error("Failed to connect to ArangoDB after multiple attempts");
     }
@@ -90,12 +91,14 @@ async function startServer() {
     });
 
     // Test somap database connection
-    const somapConnected = await waitForDatabase(db);
+    const somapConnected = await waitForDatabase(db, 10, 3000);
     if (!somapConnected) {
       throw new Error(
         "Failed to connect to somap database after multiple attempts"
       );
     }
+    
+    console.log("Successfully connected to ArangoDB");
 
     // Get existing collections
     const existing = await db.collections();
@@ -270,11 +273,16 @@ async function startServer() {
     const sanitizedUsername = sanitizeUsername(username);
 
     try {
-      // Find user by username and password
-      const user = await db.collection("users").firstExample({
-        username: sanitizedUsername,
-        password, // In production, this should be hashed and compared securely
-      });
+      // Find user by username and password using AQL
+      const cursor = await db.query(aql`
+        FOR u IN users
+        FILTER u.username == ${sanitizedUsername} AND u.password == ${password}
+        LIMIT 1
+        RETURN u
+      `);
+      
+      const users = await cursor.all();
+      const user = users.length > 0 ? users[0] : null;
 
       if (!user) {
         return c.json({ error: "Invalid credentials" }, 401);
@@ -285,11 +293,11 @@ async function startServer() {
         lastLogin: new Date(),
       });
 
-      // Set session cookie
+      // Set session cookie with better persistence
       setCookie(c, "userId", sanitizedUsername, {
         path: "/",
-        maxAge: 7 * 24 * 60 * 60, // 7 days
-        httpOnly: true,
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        httpOnly: false, // Set to false so client-side JS can read it
         secure: process.env.NODE_ENV === "production",
         sameSite: "Lax",
       });
@@ -344,7 +352,23 @@ async function startServer() {
     const { db } = app.locals;
 
     try {
-      // Create entity using Foxx service
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('entities')) {
+        // Create entities collection if it doesn't exist
+        console.log("Creating entities collection...");
+        await db.createCollection('entities');
+      }
+      
+      if (!collectionNames.includes('relations')) {
+        // Create relations collection if it doesn't exist
+        console.log("Creating relations collection...");
+        await db.createEdgeCollection('relations');
+      }
+      
+      // Create entity directly instead of using Foxx service (which might not be available)
       const entity = {
         label: name,
         type: typeId,
@@ -355,70 +379,34 @@ async function startServer() {
         createdBy: creatorId,
       };
 
-      // Call Foxx service
-      const response = await fetch(
-        `http://${DB_HOST}:${DB_PORT}/_db/somap/_api/entity-service/entities`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${Buffer.from(
-              `${DB_USER}:${DB_PASS}`
-            ).toString("base64")}`,
-          },
-          body: JSON.stringify(entity),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.error("Entity creation failed:", error);
-        return c.json(
-          {
-            error: "Entity creation failed",
-            details: error.message || "Unknown error",
-          },
-          response.status
-        );
-      }
-
-      const result = await response.json();
+      console.log("Creating entity:", entity);
+      
+      // Save entity directly
+      const result = await db.collection("entities").save(entity);
       console.log("Entity created:", result);
 
       // Create creator relation
-      const relation = {
-        _from: `users/${creatorId}`,
-        _to: result.entity._id,
-        predicate: "created",
-        createdAt: new Date(),
-      };
-
-      // Call Foxx service for relation creation
-      const relationResponse = await fetch(
-        `http://${DB_HOST}:${DB_PORT}/_db/somap/_api/entity-service/relations`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Basic ${Buffer.from(
-              `${DB_USER}:${DB_PASS}`
-            ).toString("base64")}`,
-          },
-          body: JSON.stringify(relation),
+      if (collectionNames.includes('relations')) {
+        try {
+          const relation = {
+            _from: `users/${creatorId}`,
+            _to: `entities/${result._key}`,
+            predicate: "created",
+            createdAt: new Date(),
+          };
+  
+          console.log("Creating relation:", relation);
+          const relationResult = await db.collection("relations").save(relation);
+          console.log("Relation created:", relationResult);
+        } catch (relationErr) {
+          console.warn("Failed to create relation:", relationErr);
         }
-      );
-
-      if (!relationResponse.ok) {
-        console.warn(
-          "Failed to create creator relation:",
-          await relationResponse.json()
-        );
       }
 
       return c.json({
-        id: result.entity._id,
+        id: result._id,
         success: true,
-        entity: result.entity,
+        entity: result,
       });
     } catch (err) {
       console.error("Entity creation failed:", err);
@@ -437,6 +425,16 @@ async function startServer() {
   app.get("/api/entities", async (c) => {
     try {
       const perspective = c.req.query("perspective") || "default";
+      
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('entities')) {
+        console.log("Entities collection doesn't exist yet, returning empty array");
+        return c.json([]);
+      }
+      
       const allEntities = await db
         .query(
           aql`
@@ -450,8 +448,43 @@ async function startServer() {
       return c.json(allEntities);
     } catch (err) {
       console.error("Error fetching entities:", err);
+      // Return empty array instead of error
+      return c.json([]);
+    }
+  });
+  
+  // Get a single entity by ID
+  app.get("/api/entities/:id", async (c) => {
+    try {
+      const id = c.req.param("id");
+      
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('entities')) {
+        return c.json({ error: "Entities collection does not exist" }, 404);
+      }
+      
+      // Handle the ID format
+      const docId = id.includes("/") ? id : `entities/${id}`;
+      console.log(`Fetching entity ${docId}`);
+      
+      try {
+        const entity = await db.collection("entities").document(docId);
+        console.log("Found entity:", entity);
+        return c.json(entity);
+      } catch (e) {
+        console.error(`Entity ${docId} not found:`, e);
+        return c.json({ 
+          error: "Entity not found", 
+          details: `Document ${docId} does not exist` 
+        }, 404);
+      }
+    } catch (err) {
+      console.error("Error fetching entity:", err);
       return c.json(
-        { error: "Failed to fetch entities", details: err.message },
+        { error: "Failed to fetch entity", details: err.message },
         500
       );
     }
@@ -461,14 +494,38 @@ async function startServer() {
   app.patch("/api/entities/:id", async (c) => {
     try {
       const id = c.req.param("id");
-      const { name } = await c.req.json();
-      if (!name) {
-        return c.json({ error: "Name is required" }, 400);
+      const updateData = await c.req.json();
+      
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('entities')) {
+        return c.json({ error: "Entities collection does not exist" }, 404);
+      }
+      
+      // Make sure we have something to update
+      if (Object.keys(updateData).length === 0) {
+        return c.json({ error: "No update data provided" }, 400);
       }
 
       const docId = id.includes("/") ? id : `entities/${id}`;
-      console.log(`Updating entity ${docId} with name: ${name}`);
-      const result = await db.collection("entities").update(docId, { name });
+      console.log(`Updating entity ${docId} with data:`, updateData);
+      
+      // Make sure the document exists first
+      try {
+        const doc = await db.collection("entities").document(docId);
+        console.log("Found document to update:", doc);
+      } catch (e) {
+        console.error(`Document ${docId} not found:`, e);
+        return c.json({ 
+          error: "Entity not found", 
+          details: `Document ${docId} does not exist` 
+        }, 404);
+      }
+      
+      // Perform the update
+      const result = await db.collection("entities").update(docId, updateData);
       console.log(`Entity ${docId} updated:`, result);
       return c.json({ success: true, updated: result });
     } catch (err) {
@@ -484,19 +541,55 @@ async function startServer() {
   app.delete("/api/entities/:id", async (c) => {
     try {
       const id = c.req.param("id");
+      console.log("Delete entity request for ID:", id);
+      
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('entities')) {
+        return c.json({ error: "Entities collection does not exist" }, 404);
+      }
+      
       const docId = id.includes("/") ? id : `entities/${id}`;
-      console.log(`Deleting entity ${docId}`);
+      console.log(`Deleting entity with formatted docId: ${docId}`);
+      
+      // First check if the document exists
+      try {
+        const doc = await db.collection("entities").document(docId);
+        console.log("Found document to delete:", doc);
+      } catch (e) {
+        // If collection exists but document doesn't, try other ID formats
+        console.warn(`Document ${docId} not found, trying alternative formats...`);
 
-      // Optionally remove associated relations
-      await db.query(aql`
-        FOR r IN relations
-        FILTER r._from == ${docId} OR r._to == ${docId}
-        REMOVE r IN relations
-      `);
+        // Try with just the ID (no collection prefix)
+        try {
+          if (id.includes("/")) {
+            const parts = id.split("/");
+            if (parts.length > 1) {
+              const altDocId = `entities/${parts[1]}`;
+              console.log(`Trying alternate docId: ${altDocId}`);
+              await db.collection("entities").document(altDocId);
+              console.log(`Found document with alternate docId: ${altDocId}`);
+              
+              // Use this ID for deletion
+              return c.json(await deleteEntityWithRelations(db, altDocId));
+            }
+          }
+        } catch (altErr) {
+          console.warn(`Alternative document format not found either:`, altErr);
+        }
+        
+        // If we reach here, all attempts failed
+        console.error(`Document not found for deletion:`, e);
+        return c.json({ 
+          error: "Entity not found", 
+          details: `Document "${id}" does not exist in any format`
+        }, 404);
+      }
 
-      const result = await db.collection("entities").remove(docId);
-      console.log(`Entity ${docId} deleted:`, result);
-      return c.json({ success: true, deleted: result });
+      // If we get here, document exists and we can delete it
+      return c.json(await deleteEntityWithRelations(db, docId));
     } catch (err) {
       console.error("Error deleting entity:", err);
       return c.json(
@@ -505,15 +598,55 @@ async function startServer() {
       );
     }
   });
+  
+  // Helper function to delete entity and its relations
+  async function deleteEntityWithRelations(db, docId) {
+    console.log(`Removing relations for entity ${docId}`);
+    try {
+      // Remove associated relations - both directions
+      await db.query(aql`
+        FOR r IN relations
+        FILTER r._from == ${docId} OR r._to == ${docId}
+        REMOVE r IN relations
+      `);
+      
+      console.log(`Removing entity ${docId}`);
+      const result = await db.collection("entities").remove(docId);
+      console.log(`Entity ${docId} deleted:`, result);
+      return { success: true, deleted: result };
+    } catch (err) {
+      console.error(`Error in deleteEntityWithRelations:`, err);
+      throw err;
+    }
+  }
 
   // Type Creation
   app.post("/api/types", async (c) => {
     const { name, color, symbol } = await c.req.json();
     try {
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('types')) {
+        // Create types collection if it doesn't exist
+        console.log("Creating types collection...");
+        await db.createCollection('types');
+      }
+      
       const types = db.collection("types");
-      const type = { name, color, symbol, createdAt: new Date() };
+      // Add schema for type (based on CLAUDE.md requirements)
+      const type = { 
+        name, 
+        color, 
+        symbol, 
+        category: 'custom', // Default category
+        schema: {}, // Empty schema to start with
+        createdAt: new Date() 
+      };
       const result = await types.save(type);
-      return c.json({ id: result._id });
+      console.log("Type created:", result);
+      return c.json({ id: result._id, success: true, type: result });
     } catch (err) {
       console.error("Type creation failed:", err);
       return c.json(
@@ -526,16 +659,23 @@ async function startServer() {
   // Get all types
   app.get("/api/types", async (c) => {
     try {
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('types')) {
+        console.log("Types collection doesn't exist yet, returning empty array");
+        return c.json([]);
+      }
+      
       const allTypes = await db
         .query(aql`FOR t IN types RETURN t`)
         .then((cursor) => cursor.all());
       return c.json(allTypes);
     } catch (err) {
       console.error("Error fetching types:", err);
-      return c.json(
-        { error: "Failed to fetch types", details: err.message },
-        500
-      );
+      // Return empty array instead of error
+      return c.json([]);
     }
   });
 
@@ -543,16 +683,47 @@ async function startServer() {
   app.patch("/api/types/:id", async (c) => {
     try {
       const id = c.req.param("id");
-      const { name, color, symbol } = await c.req.json();
+      const { name, color, symbol, category, schema } = await c.req.json();
+      
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('types')) {
+        return c.json({ error: "Types collection does not exist" }, 404);
+      }
+      
+      // Build update data
       const updateData = {};
       if (name) updateData.name = name;
       if (color) updateData.color = color;
       if (symbol) updateData.symbol = symbol;
+      if (category) updateData.category = category;
+      if (schema) updateData.schema = schema;
+      
       if (Object.keys(updateData).length === 0) {
         return c.json({ error: "No update data provided" }, 400);
       }
+      
+      // Handle ID formatting
       const docId = id.includes("/") ? id : `types/${id}`;
+      console.log(`Updating type ${docId} with data:`, updateData);
+      
+      // Make sure the document exists first
+      try {
+        const doc = await db.collection("types").document(docId);
+        console.log("Found document to update:", doc);
+      } catch (e) {
+        console.error(`Document ${docId} not found:`, e);
+        return c.json({ 
+          error: "Type not found", 
+          details: `Document ${docId} does not exist` 
+        }, 404);
+      }
+      
+      // Perform the update
       const result = await db.collection("types").update(docId, updateData);
+      console.log("Update result:", result);
       return c.json({ success: true, updated: result });
     } catch (err) {
       console.error("Error updating type:", err);
@@ -582,34 +753,55 @@ async function startServer() {
   // Relation Creation
   app.post("/api/relations", async (c) => {
     console.log("Relation creation endpoint called");
-    const { name, from, to, lineType } = await c.req.json();
-    console.log("Relation request data:", { name, from, to, lineType });
+    const { name, from, to, lineType, predicate } = await c.req.json();
+    console.log("Relation request data:", { name, from, to, lineType, predicate });
 
     if (!name || !from || !to) {
       return c.json({ error: "Missing required fields: name, from, to" }, 400);
     }
 
     try {
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('relations')) {
+        // Create relations collection if it doesn't exist
+        console.log("Creating relations collection...");
+        await db.createEdgeCollection('relations');
+      }
+      
       const _from = from.includes("/") ? from : `entities/${from}`;
       const _to = to.includes("/") ? to : `entities/${to}`;
+      
+      // Only check if documents exist if the collections exist
+      let fromExists = true;
+      let toExists = true;
+      
+      const fromColl = _from.split("/")[0];
+      const toColl = _to.split("/")[0];
+      
+      if (collectionNames.includes(fromColl)) {
+        try {
+          await db.collection(fromColl).document(_from.split("/")[1]);
+        } catch (e) {
+          fromExists = false;
+        }
+      }
+      
+      if (collectionNames.includes(toColl)) {
+        try {
+          await db.collection(toColl).document(_to.split("/")[1]);
+        } catch (e) {
+          toExists = false;
+        }
+      }
 
-      // Check if documents exist using direct document access
-      const fromDoc = await db
-        .collection(_from.split("/")[0])
-        .document(_from.split("/")[1])
-        .catch(() => null);
-      const toDoc = await db
-        .collection(_to.split("/")[0])
-        .document(_to.split("/")[1])
-        .catch(() => null);
-
-      if (!fromDoc || !toDoc) {
+      if (!fromExists || !toExists) {
         return c.json(
           {
             error: `One or both documents (${_from}, ${_to}) do not exist`,
-            details: `From: ${fromDoc ? "exists" : "missing"}, To: ${
-              toDoc ? "exists" : "missing"
-            }`,
+            details: `From: ${fromExists ? "exists" : "missing"}, To: ${toExists ? "exists" : "missing"}`,
           },
           404
         );
@@ -619,6 +811,7 @@ async function startServer() {
         name,
         _from,
         _to,
+        predicate: predicate || name, // Use name as predicate if not provided
         lineType: lineType || "solid",
         createdAt: new Date(),
       };
@@ -644,14 +837,96 @@ async function startServer() {
   app.patch("/api/relations/:id", async (c) => {
     try {
       const id = c.req.param("id");
-      const { name, lineType } = await c.req.json();
+      // Get update data with all possible fields
+      const { name, lineType, predicate, _from, _to } = await c.req.json();
+      
+      // Create update object with all provided fields
       const updateData = {};
       if (name) updateData.name = name;
       if (lineType) updateData.lineType = lineType;
+      if (predicate) updateData.predicate = predicate;
+      
+      // For edge endpoints, we need special handling
+      if (_from || _to) {
+        // Check if collection exists
+        const collections = await db.collections();
+        const collectionNames = collections.map(coll => coll.name);
+        
+        if (!collectionNames.includes('relations')) {
+          return c.json({ error: "Relations collection does not exist" }, 404);
+        }
+        
+        // Verify that the document exists
+        const docId = id.includes("/") ? id : `relations/${id}`;
+        
+        try {
+          // Get the current relation to maintain values for any fields not being updated
+          const currentRelation = await db.collection("relations").document(docId);
+          
+          // Handle _from endpoint
+          if (_from) {
+            // Use provided _from or keep existing
+            const fromId = _from.includes("/") ? _from : `entities/${_from}`;
+            const fromColl = fromId.split("/")[0];
+            
+            // Check if from document exists
+            if (collectionNames.includes(fromColl)) {
+              try {
+                await db.collection(fromColl).document(fromId.split("/")[1]);
+                updateData._from = fromId;
+              } catch (e) {
+                return c.json({ 
+                  error: "Source document not found", 
+                  details: `Document ${fromId} does not exist` 
+                }, 404);
+              }
+            } else {
+              return c.json({ 
+                error: "Source collection not found", 
+                details: `Collection ${fromColl} does not exist` 
+              }, 404);
+            }
+          }
+          
+          // Handle _to endpoint
+          if (_to) {
+            // Use provided _to or keep existing
+            const toId = _to.includes("/") ? _to : `entities/${_to}`;
+            const toColl = toId.split("/")[0];
+            
+            // Check if to document exists
+            if (collectionNames.includes(toColl)) {
+              try {
+                await db.collection(toColl).document(toId.split("/")[1]);
+                updateData._to = toId;
+              } catch (e) {
+                return c.json({ 
+                  error: "Target document not found", 
+                  details: `Document ${toId} does not exist` 
+                }, 404);
+              }
+            } else {
+              return c.json({ 
+                error: "Target collection not found", 
+                details: `Collection ${toColl} does not exist` 
+              }, 404);
+            }
+          }
+        } catch (e) {
+          console.error(`Relation ${docId} not found:`, e);
+          return c.json({ 
+            error: "Relation not found", 
+            details: `Document ${docId} does not exist` 
+          }, 404);
+        }
+      }
+      
       if (Object.keys(updateData).length === 0) {
         return c.json({ error: "No update data provided" }, 400);
       }
+      
       const docId = id.includes("/") ? id : `relations/${id}`;
+      console.log(`Updating relation ${docId} with:`, updateData);
       const result = await db.collection("relations").update(docId, updateData);
       return c.json({ success: true, updated: result });
     } catch (err) {
@@ -682,45 +957,82 @@ async function startServer() {
   // Get all relations
   app.get("/api/relations", async (c) => {
     try {
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('relations')) {
+        console.log("Relations collection doesn't exist yet, returning empty array");
+        return c.json([]);
+      }
+      
       const allRelations = await db
         .query(aql`FOR r IN relations RETURN r`)
         .then((cursor) => cursor.all());
       return c.json(allRelations);
     } catch (err) {
       console.error("Error fetching relations:", err);
-      return c.json(
-        { error: "Failed to fetch relations", details: err.message },
-        500
-      );
+      // Return empty array instead of error
+      return c.json([]);
     }
   });
 
-  // Perspective Creation
+  // Perspective endpoints - using the dedicated perspectives collection
   app.post("/api/perspectives", async (c) => {
     try {
-      const { name } = await c.req.json();
+      const { name, description, kinds, types, rules, relKinds, origin } = await c.req.json();
+      
       if (!name) {
         return c.json({ error: "Name is required" }, 400);
       }
-      const existingPerspective = await db
-        .query(
-          aql`
-        FOR e IN entities
-        FILTER e.perspective == ${name} AND e.is_perspective == true
-        RETURN e
-      `
-        )
-        .then((cursor) => cursor.all());
+      
+      if (!kinds || !Array.isArray(kinds) || kinds.length === 0) {
+        return c.json({ error: "At least one kind is required" }, 400);
+      }
+      
+      // Check if collection exists
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('perspectives')) {
+        // Create perspectives collection if it doesn't exist
+        console.log("Creating perspectives collection...");
+        await db.createCollection('perspectives');
+      }
+      
+      // Check if perspective already exists
+      let existingPerspective = [];
+      try {
+        existingPerspective = await db
+          .query(aql`
+            FOR p IN perspectives
+            FILTER p.name == ${name}
+            RETURN p
+          `)
+          .then((cursor) => cursor.all());
+      } catch (e) {
+        console.warn("Error checking for existing perspective:", e.message);
+      }
+      
       if (existingPerspective.length > 0) {
         return c.json({ error: "Perspective already exists" }, 409);
       }
+      
+      // Create perspective
       const perspective = {
         name,
-        is_perspective: true,
-        perspective: name,
+        description,
+        kinds,
+        types: types || [],
+        rules: rules || {},
+        relKinds: relKinds || ["connectedTo", "builtBy", "resonatesIn", "partOf", "subTypeOf", "inCategory"],
+        origin: origin || "user-created",
         createdAt: new Date(),
       };
-      const result = await db.collection("entities").save(perspective);
+      
+      // Save to perspectives collection
+      const result = await db.collection("perspectives").save(perspective);
+      console.log("Perspective created:", result);
       return c.json({ id: result._id, success: true, perspective: result });
     } catch (err) {
       console.error("Perspective creation failed:", err);
@@ -734,50 +1046,90 @@ async function startServer() {
   // Get all perspectives
   app.get("/api/perspectives", async (c) => {
     try {
-      const perspectives = await db
-        .query(
-          aql`
-        FOR e IN entities
-        FILTER e.is_perspective == true
-        RETURN e
-      `
-        )
-        .then((cursor) => cursor.all());
-      if (!perspectives.some((p) => p.name === "default")) {
-        perspectives.unshift({ name: "default", is_perspective: true });
+      // Get perspectives from the dedicated collection
+      // Check if collection exists first to avoid errors
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      let perspectives = [];
+      if (collectionNames.includes('perspectives')) {
+        perspectives = await db
+          .query(aql`
+            FOR p IN perspectives
+            RETURN p
+          `)
+          .then((cursor) => cursor.all());
+      } else {
+        console.log("perspectives collection doesn't exist yet, using default only");
       }
+      
+      // Check if default perspective exists, if not add it in the response
+      if (!perspectives.some(p => p.name === "default")) {
+        perspectives.unshift({
+          name: "default",
+          description: "Default perspective with all kinds",
+          kinds: ["object", "agent", "material", "environment", "interaction"],
+          relKinds: ["connectedTo", "builtBy", "resonatesIn", "partOf", "subTypeOf", "inCategory"],
+          _key: "default"
+        });
+      }
+      
       return c.json(perspectives);
     } catch (err) {
       console.error("Error fetching perspectives:", err);
+      // Return default perspective instead of error
+      return c.json([{
+        name: "default",
+        description: "Default perspective with all kinds",
+        kinds: ["object", "agent", "material", "environment", "interaction"],
+        relKinds: ["connectedTo", "builtBy", "resonatesIn", "partOf", "subTypeOf", "inCategory"],
+        _key: "default"
+      }]);
+    }
+  });
+
+  // Get a specific perspective
+  app.get("/api/perspectives/:key", async (c) => {
+    try {
+      const key = c.req.param("key");
+      
+      if (key === "default") {
+        // Return the default perspective
+        return c.json({
+          _key: "default",
+          name: "default",
+          description: "Default perspective with all kinds",
+          kinds: ["object", "agent", "material", "environment", "interaction"],
+          relKinds: ["connectedTo", "builtBy", "resonatesIn", "partOf", "subTypeOf", "inCategory"]
+        });
+      }
+      
+      const docId = key.includes("/") ? key : `perspectives/${key}`;
+      const perspective = await db.collection("perspectives").document(docId);
+      
+      return c.json(perspective);
+    } catch (err) {
+      console.error("Error fetching perspective:", err);
       return c.json(
-        { error: "Failed to fetch perspectives", details: err.message },
+        { error: "Failed to fetch perspective", details: err.message },
         500
       );
     }
   });
 
   // Update perspective
-  app.patch("/api/perspectives/:id", async (c) => {
+  app.patch("/api/perspectives/:key", async (c) => {
     try {
-      const id = c.req.param("id");
-      const { name } = await c.req.json();
-      if (!name) {
-        return c.json({ error: "Name is required" }, 400);
+      const key = c.req.param("key");
+      const update = await c.req.json();
+      
+      if (key === "default") {
+        return c.json({ error: "Cannot modify default perspective" }, 400);
       }
-      const docId = id.includes("/") ? id : `entities/${id}`;
-      const perspective = await db
-        .query(
-          aql`
-        FOR e IN DOCUMENT(${docId})
-        FILTER e.is_perspective == true
-        RETURN e
-      `
-        )
-        .then((cursor) => cursor.all());
-      if (perspective.length === 0) {
-        return c.json({ error: "Not a perspective" }, 404);
-      }
-      const result = await db.collection("entities").update(docId, { name });
+      
+      const docId = key.includes("/") ? key : `perspectives/${key}`;
+      const result = await db.collection("perspectives").update(docId, update);
+      
       return c.json({ success: true, updated: result });
     } catch (err) {
       console.error("Error updating perspective:", err);
@@ -789,28 +1141,256 @@ async function startServer() {
   });
 
   // Delete perspective
-  app.delete("/api/perspectives/:id", async (c) => {
+  app.delete("/api/perspectives/:key", async (c) => {
     try {
-      const id = c.req.param("id");
-      const docId = id.includes("/") ? id : `entities/${id}`;
-      const perspective = await db
-        .query(
-          aql`
-        FOR e IN DOCUMENT(${docId})
-        FILTER e.is_perspective == true
-        RETURN e
-      `
-        )
-        .then((cursor) => cursor.all());
-      if (perspective.length === 0) {
-        return c.json({ error: "Not a perspective" }, 404);
+      const key = c.req.param("key");
+      
+      if (key === "default") {
+        return c.json({ error: "Cannot delete default perspective" }, 400);
       }
-      const result = await db.collection("entities").remove(docId);
+      
+      const docId = key.includes("/") ? key : `perspectives/${key}`;
+      const result = await db.collection("perspectives").remove(docId);
+      
       return c.json({ success: true, deleted: result });
     } catch (err) {
       console.error("Error deleting perspective:", err);
       return c.json(
         { error: "Failed to delete perspective", details: err.message },
+        500
+      );
+    }
+  });
+  
+  // Get entities in a perspective
+  app.get("/api/perspectives/:key/entities", async (c) => {
+    try {
+      const key = c.req.param("key");
+      let perspectiveName;
+      
+      if (key === "default") {
+        perspectiveName = "default";
+      } else {
+        const docId = key.includes("/") ? key : `perspectives/${key}`;
+        const perspective = await db.collection("perspectives").document(docId);
+        perspectiveName = perspective.name;
+      }
+      
+      const entities = await db
+        .query(aql`
+          FOR e IN entities
+          FILTER e.perspective == ${perspectiveName}
+          RETURN e
+        `)
+        .then((cursor) => cursor.all());
+      
+      return c.json(entities);
+    } catch (err) {
+      console.error("Error fetching perspective entities:", err);
+      return c.json(
+        { error: "Failed to fetch perspective entities", details: err.message },
+        500
+      );
+    }
+  });
+
+  // Properties endpoints
+  app.get("/api/properties", async (c) => {
+    try {
+      const allProperties = await db
+        .query(aql`FOR p IN properties RETURN p`)
+        .then((cursor) => cursor.all());
+      return c.json(allProperties);
+    } catch (err) {
+      console.error("Error fetching properties:", err);
+      return c.json(
+        { error: "Failed to fetch properties", details: err.message },
+        500
+      );
+    }
+  });
+
+  app.post("/api/properties", async (c) => {
+    try {
+      const property = await c.req.json();
+      const result = await db.collection("properties").save(property);
+      return c.json({ id: result._id, success: true, property: result });
+    } catch (err) {
+      console.error("Property creation failed:", err);
+      return c.json(
+        { error: "Property creation failed", details: err.message },
+        500
+      );
+    }
+  });
+
+  app.get("/api/properties/:key", async (c) => {
+    try {
+      const key = c.req.param("key");
+      const docId = key.includes("/") ? key : `properties/${key}`;
+      const property = await db.collection("properties").document(docId);
+      return c.json(property);
+    } catch (err) {
+      console.error("Error fetching property:", err);
+      return c.json(
+        { error: "Failed to fetch property", details: err.message },
+        500
+      );
+    }
+  });
+
+  app.patch("/api/properties/:key", async (c) => {
+    try {
+      const key = c.req.param("key");
+      const update = await c.req.json();
+      const docId = key.includes("/") ? key : `properties/${key}`;
+      const result = await db.collection("properties").update(docId, update);
+      return c.json({ success: true, updated: result });
+    } catch (err) {
+      console.error("Error updating property:", err);
+      return c.json(
+        { error: "Failed to update property", details: err.message },
+        500
+      );
+    }
+  });
+
+  app.delete("/api/properties/:key", async (c) => {
+    try {
+      const key = c.req.param("key");
+      const docId = key.includes("/") ? key : `properties/${key}`;
+      const result = await db.collection("properties").remove(docId);
+      return c.json({ success: true, deleted: result });
+    } catch (err) {
+      console.error("Error deleting property:", err);
+      return c.json(
+        { error: "Failed to delete property", details: err.message },
+        500
+      );
+    }
+  });
+
+  // Property Predictors endpoints
+  app.get("/api/propertyPredictors", async (c) => {
+    try {
+      // Check if collection exists first to avoid errors
+      const collections = await db.collections();
+      const collectionNames = collections.map(coll => coll.name);
+      
+      if (!collectionNames.includes('propertyPredictors')) {
+        console.log("propertyPredictors collection doesn't exist yet, returning empty array");
+        return c.json([]);
+      }
+      
+      const allPredictors = await db
+        .query(aql`FOR p IN propertyPredictors RETURN p`)
+        .then((cursor) => cursor.all());
+      return c.json(allPredictors);
+    } catch (err) {
+      console.error("Error fetching property predictors:", err);
+      // Return empty array instead of error for better client experience
+      return c.json([]);
+    }
+  });
+
+  app.post("/api/propertyPredictors", async (c) => {
+    try {
+      const predictor = await c.req.json();
+      const result = await db.collection("propertyPredictors").save(predictor);
+      return c.json({ id: result._id, success: true, predictor: result });
+    } catch (err) {
+      console.error("Property predictor creation failed:", err);
+      return c.json(
+        { error: "Property predictor creation failed", details: err.message },
+        500
+      );
+    }
+  });
+
+  app.get("/api/propertyPredictors/:key", async (c) => {
+    try {
+      const key = c.req.param("key");
+      const docId = key.includes("/") ? key : `propertyPredictors/${key}`;
+      const predictor = await db.collection("propertyPredictors").document(docId);
+      return c.json(predictor);
+    } catch (err) {
+      console.error("Error fetching property predictor:", err);
+      return c.json(
+        { error: "Failed to fetch property predictor", details: err.message },
+        500
+      );
+    }
+  });
+
+  app.post("/api/propertyPredictors/:key/apply", async (c) => {
+    try {
+      const key = c.req.param("key");
+      const { entityId } = await c.req.json();
+      
+      // Call the Foxx service
+      const response = await fetch(
+        `http://${DB_HOST}:${DB_PORT}/_db/somap/_api/entity-service/propertyPredictors/${key}/apply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${Buffer.from(`${DB_USER}:${DB_PASS}`).toString("base64")}`,
+          },
+          body: JSON.stringify({ entityId }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        return c.json(
+          { error: "Failed to apply property predictor", details: error.message },
+          response.status
+        );
+      }
+
+      const result = await response.json();
+      return c.json(result);
+    } catch (err) {
+      console.error("Error applying property predictor:", err);
+      return c.json(
+        { error: "Failed to apply property predictor", details: err.message },
+        500
+      );
+    }
+  });
+
+  app.post("/api/propertyPredictors/:key/bulk-apply", async (c) => {
+    try {
+      const key = c.req.param("key");
+      const { perspectiveId } = await c.req.json();
+      
+      // Call the Foxx service
+      const response = await fetch(
+        `http://${DB_HOST}:${DB_PORT}/_db/somap/_api/entity-service/propertyPredictors/${key}/bulk-apply`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Basic ${Buffer.from(`${DB_USER}:${DB_PASS}`).toString("base64")}`,
+          },
+          body: JSON.stringify({ perspectiveId }),
+        }
+      );
+
+      if (!response.ok) {
+        const error = await response.json();
+        return c.json(
+          { error: "Failed to bulk apply property predictor", details: error.message },
+          response.status
+        );
+      }
+
+      const result = await response.json();
+      return c.json(result);
+    } catch (err) {
+      console.error("Error bulk applying property predictor:", err);
+      return c.json(
+        { error: "Failed to bulk apply property predictor", details: err.message },
         500
       );
     }
@@ -821,46 +1401,93 @@ async function startServer() {
     try {
       const userId = getCookie(c, "userId") || c.req.query("userId") || null;
       const perspective = c.req.query("perspective") || "default";
-      if (!userId) {
-        return c.json({ entities: [], types: [], relations: [], user: null });
+      
+      console.log(`SOM API called with userId: ${userId}, perspective: ${perspective}`);
+      
+      // Always fetch data regardless of login status - we'll filter relations by user later
+      // Use BatchTool approach - run all queries in parallel
+      const [
+        entitiesResult,
+        typesResult,
+        relationsResult,
+        userResult,
+        propertiesResult,
+        predictorsResult,
+        perspectiveResult
+      ] = await Promise.all([
+        // Always fetch entities for the current perspective
+        db.query(aql`
+          FOR e IN entities
+          FILTER e.perspective == ${perspective}
+          RETURN e
+        `).then(cursor => cursor.all()).catch(() => []),
+        
+        // Always fetch all types
+        db.query(aql`
+          FOR t IN types 
+          RETURN t
+        `).then(cursor => cursor.all()).catch(() => []),
+        
+        // Fetch relations - if logged in, only get user's relations, otherwise get public ones
+        db.query(aql`
+          FOR r IN relations
+          FILTER ${userId ? aql`r._from == ${"users/" + userId} OR r.type == 'material' OR r.predicate == 'interactWith'` : aql`r.predicate == 'interactWith' OR r.type == 'material' OR r.predicate == 'connectsTo'`}
+          RETURN r
+        `).then(cursor => cursor.all()).catch(() => []),
+        
+        // Fetch user info if logged in
+        userId ? db.query(aql`
+          FOR u IN users 
+          FILTER u.username == ${userId} 
+          RETURN u
+        `).then(cursor => cursor.all()).catch(() => []) : Promise.resolve([]),
+        
+        // Always fetch all properties
+        db.query(aql`
+          FOR p IN properties
+          RETURN p
+        `).then(cursor => cursor.all()).catch(() => []),
+        
+        // Always fetch all predictors
+        db.query(aql`
+          FOR p IN propertyPredictors
+          RETURN p
+        `).then(cursor => cursor.all()).catch(() => []),
+        
+        // Always fetch perspective info
+        db.query(aql`
+          FOR p IN perspectives
+          FILTER p.name == ${perspective}
+          RETURN p
+        `).then(cursor => cursor.all()).catch(() => [])
+      ]);
+      
+      const user = userResult[0] || null;
+      const currentPerspective = perspectiveResult[0] || {
+        name: "default",
+        description: "Default perspective with all kinds",
+        kinds: ["object", "agent", "material", "environment", "interaction"],
+        relKinds: ["connectedTo", "builtBy", "resonatesIn", "partOf", "subTypeOf", "inCategory", "interactWith"]
+      };
+
+      if (user) {
+        setCookie(c, "userId", userId, { path: "/", maxAge: 604800 });
+        console.log(`User ${userId} found, cookie set`);
       }
-      const allEntities = await db
-        .query(
-          aql`
-        FOR e IN entities
-        FILTER e.perspective == ${perspective}
-        RETURN e
-      `
-        )
-        .then((cursor) => cursor.all())
-        .catch(() => []);
-      const allTypes = await db
-        .query(aql`FOR t IN types RETURN t`)
-        .then((cursor) => cursor.all())
-        .catch(() => []);
-      const userRelations = await db
-        .query(
-          aql`
-        FOR r IN relations
-        FILTER r._from == ${`users/${userId}`} OR r.type == 'material'
-        RETURN r
-      `
-        )
-        .then((cursor) => cursor.all())
-        .catch(() => []);
-      const user = await db
-        .query(aql`FOR u IN users FILTER u.username == ${userId} RETURN u`)
-        .then((cursor) => cursor.all())
-        .then((res) => res[0] || null);
 
-      if (user) setCookie(c, "userId", userId, { path: "/", maxAge: 604800 });
-
+      console.log(`SOM API returning: ${entitiesResult.length} entities, ${typesResult.length} types, ${relationsResult.length} relations`);
+      
       return c.json({
-        entities: allEntities,
-        types: allTypes,
-        relations: userRelations,
-        user: { username: user?.username, entityCount: userRelations.length },
-        perspective,
+        entities: entitiesResult,
+        types: typesResult,
+        relations: relationsResult,
+        properties: propertiesResult,
+        propertyPredictors: predictorsResult,
+        user: user ? { 
+          username: user.username, 
+          entityCount: relationsResult.length 
+        } : null,
+        perspective: currentPerspective
       });
     } catch (err) {
       console.error("Error fetching SOM data:", err);
@@ -875,7 +1502,17 @@ async function startServer() {
   app.get("/api/debug", async (c) => {
     try {
       const collectionStats = {};
-      for (const collName of ["users", "types", "entities", "relations"]) {
+      const collections = [
+        "users", 
+        "types", 
+        "entities", 
+        "relations", 
+        "properties", 
+        "propertyPredictors", 
+        "perspectives"
+      ];
+      
+      for (const collName of collections) {
         try {
           const collection = db.collection(collName);
           const count = await collection.count();
@@ -906,8 +1543,11 @@ async function startServer() {
           "/api/types",
           "/api/relations",
           "/api/perspectives",
+          "/api/properties",
+          "/api/propertyPredictors",
           "/api/som",
         ],
+        version: "SOMAP v2 - Ontology with Dynamic Perspectives"
       });
     } catch (err) {
       return c.json({

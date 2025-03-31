@@ -126,9 +126,9 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       z-index: 1000;
     }
-    /* Make room for color picker when visible */
+    /* Position the color picker relative to form container */
     .accordion-content.has-active-color-picker {
-      padding-bottom: 300px;
+      margin-bottom: 200px;
     }
     .color-palette.visible {
       display: block;
@@ -202,14 +202,15 @@
       overflow-y: auto;
     }
     /* Relations need more width to properly display content */
+    .accordion[data-form="entity"] .accordion-content,
     .accordion[data-form="relation"] .accordion-content,
     .accordion[data-form="type"] .accordion-content {
       width: 350px;
     }
     .accordion:hover .accordion-content { display: block; }
     .accordion-content.persistent { display: block; }
-    .accordion-item { padding: 5px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
-    .accordion-item:hover { background: #ff9500; color: black; }
+    .accordion-item { padding: 15px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+    .accordion-item:hover { background: #ff95007e; color: black; }
     .accordion-item .edit-icons { display: none; }
     .accordion-item:hover .edit-icons { 
       display: flex; 
@@ -229,9 +230,20 @@
       background-color: #ff9500;
       transform: scale(1.1);
     }
-    #menu-toggle, #user-toggle { pointer-events: auto; }
-    #status-bar-right { margin-right: 5px; display: flex; align-items: center; }
-    #user-toggle { margin-left: auto; }
+    #menu-toggle, #user-toggle { 
+      pointer-events: auto; }
+
+    #status-bar-right { 
+      margin-right: 5px; 
+      display: flex; 
+      justify-content: flex-end;
+      align-items: center; 
+      padding-right: 5px; /* safer than margin-right */
+      width: 100%; /* ensures full width of container */}
+
+    #user-toggle { 
+      margin-right: 0; }
+
     .color-dot {
       display: inline-block;
       width: 12px;
@@ -316,28 +328,168 @@
     .line-type-indicator {
       margin: 0 5px;
     }
+    /* Add this to your existing styles */
+    #perspective-dropdown {
+      display: flex;
+      align-items: center;
+      height: 100%;
+    }
+    
+    #perspective-dropdown .icon {
+      display: flex;
+      align-items: center;
+      height: 18px;
+      width: 18px;
+      margin-right: 10px;
+      margin-left: 16px;
+      vertical-align: middle;
+    }
+    
+    #active-perspective {
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* Add this CSS to fix the perspective dropdown menu direction */
+#perspective-dropdown-menu {
+  position: absolute;
+  bottom: 100%;  /* Position above the trigger instead of below */
+  left: 0;
+  margin-bottom: 8px;  /* Add margin below the menu (visually above the icon) */
+  transform-origin: bottom left;  /* Animation should originate from bottom */
+  z-index: 1000;
+  min-width: 250px;
+  padding: 1px;
+  margin: 10px;
+  background-color: rgba(30, 30, 30, 0.1);
+  border: 0px solid rgba(80, 80, 80, 0.8);
+  border-radius: 6px;
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);  /* Shadow direction changed */
+  overflow: hidden;
+}
+
+/* Add a subtle animation for opening upward */
+@keyframes slideUp {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+#perspective-dropdown-menu.show {
+  display: block !important;
+  animation: slideUp 0.2s ease-out;
+}
+
+/* Add to your existing styles */
+#right-info-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 40px;
+  width: 300px;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+  z-index: 10;
+  overflow-y: auto;
+  transform: translateX(0);
+  opacity: 1;
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+#right-info-sidebar.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.info-header {
+  background: rgba(20, 20, 20, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.info-property {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 8px 0;
+}
+
+.info-relation-item {
+  padding: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+}
+
+.info-relation-item .line-type-indicator {
+  display: inline-block;
+  width: 24px;
+}
   </style>
 </head>
 <body>
   <div id="status-bar" class="flex items-center justify-between p-2">
-    <div class="flex items-center gap-2">
+    <div class="flex items-center gap-3">
       <button id="menu-toggle" class="flex items-center p-2 hover:text-lytOrange" title="Toggle Left Sidebar">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
       </button>
-      <span id="active-perspective" class="text-lytGrey" title="Active Perspective">default</span>
-    </div>
-    <div id="status-bar-right" class="flex items-center gap-2">
-      <button id="user-toggle" class="flex items-center p-2 hover:text-lytOrange" title="User Menu">
-        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="12" cy="6" r="4" stroke="#fff" stroke-width="1.5"></circle>
-          <path d="M15 20.6151C14.0907 20.8619 13.0736 21 12 21C8.13401 21 5 19.2091 5 17C5 14.7909 8.13401 13 12 13C15.866 13 19 14.7909 19 17C19 17.3453 18.9234 17.6804 18.7795 18" stroke="#fff" stroke-width="1.5" stroke-linecap="round"></path>
-        </svg>
-      </button>
-      <span id="user-display" class="cursor-pointer hover:text-lytOrange" title="Current User"></span>
-      <div id="entities-display" class="flex items-center gap-1 cursor-pointer hover:text-lytOrange hidden" title="Entity Count">
-        <svg class="icon" viewBox="0 0 24 24"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0" /></svg>
-        <span id="entity-count"></span>
+      
+      <!-- Space out perspective elements -->
+      <div id="perspective-dropdown" class="relative flex items-center cursor-pointer ml-2 mr-4">
+        <div class="flex items-center">
+          <svg class="icon perspective-icon mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="stroke:#ff9500; vertical-align: middle;">
+            <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"></path>
+            <path d="M9.5 15.5L12 13l2.5 2.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+            <path d="M8 10h8M6 14h2M16 14h2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          </svg>
+          <span id="active-perspective" class="text-lytOrange font-bold" title="Active Perspective">default</span>
+        </div>
+        
+        <!-- Dropdown Menu - positioned upward -->
+        <div id="perspective-dropdown-menu" class="absolute hidden left-0 bottom-full mb-1 bg-gray-900 border border-gray-700 rounded shadow-lg z-50 w-64">
+          <div class="py-1 px-2 border-b border-gray-700 text-xs text-gray-400">SELECT PERSPECTIVE</div>
+          <div id="perspective-dropdown-items" class="max-h-48 overflow-y-auto"></div>
+          <div class="py-1 border-t border-gray-700">
+            <div id="create-perspective-btn" class="flex items-center p-2 hover:bg-gray-800 cursor-pointer">
+              <svg class="icon w-4 h-4 mr-2" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              <span>New Perspective</span>
+            </div>
+          </div>
+          
+          <!-- Hidden perspective form -->
+          <div id="perspective-form" class="hidden p-3 border-t border-gray-700 bg-gray-800">
+            <div class="text-white text-sm mb-2">Add New Perspective</div>
+            <input id="perspective-name" class="input-transparent text-white p-1 mb-2 w-full placeholder-lytGrey" placeholder="Name" />
+            <input id="perspective-description" class="input-transparent text-white p-1 mb-2 w-full placeholder-lytGrey" placeholder="Description" />
+            
+            <div class="text-white text-xs mt-2 mb-1">Kinds (comma-separated):</div>
+            <input id="perspective-kinds" class="input-transparent text-white p-1 mb-3 w-full placeholder-lytGrey" placeholder="object,agent,material,environment,interaction" value="object,agent,material,environment,interaction" />
+            
+            <div class="flex gap-2">
+              <button id="perspective-submit" class="flex-1 p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black text-sm">Add</button>
+              <button id="perspective-cancel" class="flex-1 p-2 bg-transparent border border-lytGrey rounded hover:bg-gray-700 text-sm">Cancel</button>
+            </div>
+          </div>
+        </div>
       </div>
+    </div>
+    
+    <!-- Right-aligned items -->
+    <div id="status-bar-right" class="flex items-center gap-2 ml-auto">
+      <div id="entities-display" class="flex items-center gap-1 cursor-pointer hover:text-lytOrange" title="Entity Count">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0" /></svg>
+        <span id="entity-count">0</span>
+      </div>
+      
+      <!-- User section at the right edge -->
+      <div class="flex items-center ml-4">
+        <span id="user-display" class="cursor-pointer hover:text-lytOrange mr-2" title="Current User"></span>
+        <button id="user-toggle" class="flex items-center p-2 hover:text-lytOrange" title="User Menu">
+          <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="6" r="4" stroke="#fff" stroke-width="1.5"></circle>
+            <path d="M15 20.6151C14.0907 20.8619 13.0736 21 12 21C8.13401 21 5 19.2091 5 17C5 14.7909 8.13401 13 12 13C15.866 13 19 14.7909 19 17C19 17.3453 18.9234 17.6804 18.7795 18" stroke="#fff" stroke-width="1.5" stroke-linecap="round"></path>
+          </svg>
+        </button>
+      </div>
+      
       <div id="auth-fields" class="flex items-center gap-2 hidden">
         <input id="username" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="User" title="Username" />
         <input id="password" type="password" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Pass" title="Password" />
@@ -390,12 +542,28 @@
           </div>
           <div id="entity-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
             <div class="text-white mb-2">Add Entity</div>
-            <input id="entity-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
-            <select id="entity-type" class="input-transparent text-white p-1 placeholder-lytGrey">
+            <input id="entity-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" name="entity-name" />
+            <select id="entity-type" class="input-transparent text-white p-1 placeholder-lytGrey" name="entity-type">
               <option value="" disabled selected>Select a Type</option>
             </select>
-            <button id="entity-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Entity</button>
+            
+            <!-- Add Kind selection -->
+            <select id="entity-kind" class="input-transparent text-white p-1 placeholder-lytGrey mt-2" name="entity-kind">
+              <option value="" disabled selected>Select a Kind</option>
+              <option value="object">Object</option>
+              <option value="agent">Agent</option>
+              <option value="material">Material</option>
+              <option value="environment">Environment</option>
+              <option value="interaction">Interaction</option>
+            </select>
+            
+            <button id="entity-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black mt-2">Add Entity</button>
             <button id="entity-debug" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Debug Entity Creation</button>
+
+<div class="flex items-center justify-between mt-2">
+  <button id="entity-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update Entity</button>
+  <button id="entity-test-delete" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytRed hover:text-black text-xs" style="width: 48%;">Test Delete Entity</button>
+</div>
           </div>
           <div id="entities-list" class="pl-4"></div>
         </div>
@@ -413,16 +581,16 @@
           </div>
           <div id="type-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
             <div class="text-white mb-2">Add Type</div>
-            <input id="type-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
+            <input id="type-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" name="type-name" />
             
             <div class="flex items-center gap-2">
               <div class="flex-grow">
-                <input id="type-color-hex" class="input-transparent text-white p-1 placeholder-lytGrey w-full" placeholder="Color (e.g., #FF9500)" />
+                <input id="type-color-hex" class="input-transparent text-white p-1 placeholder-lytGrey w-full" placeholder="Color (e.g., #FF9500)" name="type-color-hex" />
               </div>
               <div class="color-picker-wrapper" style="min-width: 36px; min-height: 36px;">
-                <div id="color-preview-button" class="color-preview-button"></div>
-                <div class="color-palette" id="color-palette">
-                  <div class="palette-grid">
+                <div id="type-color-preview" class="color-preview-button"></div>
+                <div class="color-palette" id="type-color-palette">
+                  <div class="palette-grid" id="type-palette-grid">
                     <!-- Default colors -->
                     <div class="palette-color" style="background-color: #FF6B6B" data-color="#FF6B6B"></div>
                     <div class="palette-color" style="background-color: #FF9500" data-color="#FF9500"></div>
@@ -452,15 +620,26 @@
                     <div class="palette-color" style="background-color: #B5179E" data-color="#B5179E"></div>
                   </div>
                   <div class="custom-color-row">
-                    <input type="color" id="type-color-picker" class="h-6 w-6 cursor-pointer" value="#FF9500" />
+                    <input type="color" id="type-color-picker" class="h-6 w-6 cursor-pointer" value="#FF9500" name="type-color-picker" />
                     <span class="text-xs text-white">Custom Color</span>
                   </div>
                 </div>
               </div>
             </div>
-            <input id="type-color" type="hidden" value="0xff9500" />
+            <input id="type-color-value" type="hidden" value="0xff9500" name="type-color-value" />
             
-            <input id="type-shape" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Shape (e.g., circle, box, sphere)" />
+            <select id="type-shape" class="input-transparent text-white p-1 bg-dkGrey border border-lytGrey rounded">
+              <option value="" disabled selected>Select a Shape</option>
+              <option value="sphere">Sphere</option>
+              <option value="cube">Cube</option>
+              <option value="cylinder">Cylinder</option>
+              <option value="cone">Cone</option>
+              <option value="tetrahedron">Tetrahedron (Pyramid)</option>
+              <option value="octahedron">Octahedron</option>
+              <option value="dodecahedron">Dodecahedron</option>
+              <option value="icosahedron">Icosahedron</option>
+              <option value="torus">Torus (Ring)</option>
+            </select>
             <button id="type-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Type</button>
             <div class="flex items-center justify-between mt-2">
               <button id="type-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update</button>
@@ -472,6 +651,7 @@
         </div>
       </div>
     </div>
+    
     <div class="accordion" data-form="relation">
       <div class="flex items-center gap-2">
         <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -500,6 +680,11 @@
               Line types will appear with different styles in the UI and 3D graph
             </div>
             <button id="relation-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Relation</button>
+
+<div class="flex items-center justify-between mt-2">
+  <button id="relation-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update Relation</button>
+  <button id="relation-test-delete" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytRed hover:text-black text-xs" style="width: 48%;">Test Delete Relation</button>
+</div>
             <button id="relation-debug" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Debug Relation Creation</button>
           </div>
           <div id="relations-list" class="pl-4"></div>
@@ -1769,7 +1954,25 @@
               window.Graph.emitParticle(link);
             }
           });
-          
+
+          // Add node click handler
+          window.Graph.onNodeClick(node => {
+            // Highlight the node
+            window.Graph.nodeColor(n => n.id === node.id ? 0xffff00 : n.color);
+            
+            // Center the view on the node
+            const distance = 40;
+            const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+            window.Graph.cameraPosition(
+              { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+              node,
+              1000
+            );
+            
+            // Show node info in the right sidebar
+            showEntityInfo(node);
+          });
+
           return window.Graph;
         } catch (err) {
           console.error('Error processing graph data:', err);
@@ -2143,10 +2346,10 @@
           console.log(`${action} response: ${response.status}`, responseText);
           
           if (response.ok) {
-            alert(`${action} operation succeeded`);
+            <!-- alert(`${action} operation succeeded`); -->
             return true;
           } else {
-            alert(`${action} operation failed: ${responseText}`);
+            <!-- alert(`${action} operation failed: ${responseText}`); -->
             return false;
           }
         } catch (err) {
@@ -2395,7 +2598,7 @@
               }
               
               console.error(`${action} operation failed:`, errorMsg);
-              alert(`${action} operation failed: ${errorMsg}`);
+              <!-- alert(`${action} operation failed: ${errorMsg}`); -->
               resolve(false);
             }
           } catch (err) {
@@ -3094,7 +3297,271 @@
       // Remove the floating style controls setup
       // There's already an async implementation of this function earlier in the code
       // The duplicate implementation is now removed to prevent conflicts
+
+      // Function to show entity info in the right sidebar
+      function showEntityInfo(node) {
+        if (!node || !somData) return;
+        
+        console.log('Showing info for node:', node);
+        
+        // Find entity details in somData
+        const entity = somData.entities.find(e => e._id === node.id);
+        if (!entity) {
+          console.log('Entity not found in data:', node.id);
+          return;
+        }
+        
+        // Find entity type
+        const entityType = somData.types.find(t => t._id === entity.type);
+        
+        // Show the sidebar
+        const infoSidebar = document.getElementById('right-info-sidebar');
+        infoSidebar.classList.remove('hidden');
+        
+        // Populate fields
+        document.getElementById('entity-info-id').textContent = entity._id;
+        document.getElementById('entity-info-name').textContent = entity.name || entity.label;
+        
+        // Type info with color dot
+        document.getElementById('entity-type-name').textContent = entityType ? entityType.name : 'Unknown';
+        const typeColorDot = document.getElementById('entity-type-color');
+        if (typeColorDot) {
+          typeColorDot.style.backgroundColor = entityType ? oxFormatToHex(entityType.color || '0xff9500') : '#ff9500';
+        }
+        
+        // Other fields
+        document.getElementById('entity-info-kind').textContent = entity.kind || 'Not specified';
+        
+        // Format properties as JSON
+        const propsDiv = document.getElementById('entity-info-props');
+        if (entity.props && Object.keys(entity.props).length > 0) {
+          propsDiv.innerHTML = '';
+          Object.entries(entity.props).forEach(([key, value]) => {
+            const propDiv = document.createElement('div');
+            propDiv.className = 'info-property';
+            propDiv.innerHTML = `<span class="text-lytGrey">${key}:</span> ${JSON.stringify(value)}`;
+            propsDiv.appendChild(propDiv);
+          });
+        } else {
+          propsDiv.textContent = 'No properties';
+        }
+        
+        // Created info
+        document.getElementById('entity-info-created-by').textContent = entity.createdBy || 'Unknown';
+        document.getElementById('entity-info-created-at').textContent = entity.createdAt ? 
+          new Date(entity.createdAt).toLocaleString() : 'Unknown';
+        
+        // Find all relations for this entity
+        const entityId = entity._id;
+        const incomingRelations = somData.relations.filter(r => r._to === entityId);
+        const outgoingRelations = somData.relations.filter(r => r._from === entityId);
+        
+        // Populate incoming relations
+        const incomingList = document.getElementById('entity-incoming-list');
+        incomingList.innerHTML = '';
+        if (incomingRelations.length > 0) {
+          incomingRelations.forEach(rel => {
+            // Find source entity name
+            const sourceId = rel._from;
+            const sourceEntity = somData.entities.find(e => e._id === sourceId) || 
+                                { name: sourceId.split('/')[1], _id: sourceId };
+            
+            // Get line type indicator
+            let lineTypeSymbol = '―';
+            if (rel.lineType === 'dashed') lineTypeSymbol = '- - -';
+            else if (rel.lineType === 'dotted') lineTypeSymbol = '····';
+            
+            const li = document.createElement('li');
+            li.className = 'info-relation-item';
+            li.innerHTML = `
+              <span class="text-lytBlue">${sourceEntity.name || sourceEntity._id}</span>
+              <span class="line-type-indicator">${lineTypeSymbol}</span>
+              <span class="text-lytOrange">${rel.name || rel.predicate || 'relates to'}</span>
+            `;
+            incomingList.appendChild(li);
+          });
+        } else {
+          incomingList.innerHTML = '<li>No incoming relations</li>';
+        }
+        
+        // Populate outgoing relations
+        const outgoingList = document.getElementById('entity-outgoing-list');
+        outgoingList.innerHTML = '';
+        if (outgoingRelations.length > 0) {
+          outgoingRelations.forEach(rel => {
+            // Find target entity name
+            const targetId = rel._to;
+            const targetEntity = somData.entities.find(e => e._id === targetId) || 
+                                { name: targetId.split('/')[1], _id: targetId };
+            
+            // Get line type indicator
+            let lineTypeSymbol = '―';
+            if (rel.lineType === 'dashed') lineTypeSymbol = '- - -';
+            else if (rel.lineType === 'dotted') lineTypeSymbol = '····';
+            
+            const li = document.createElement('li');
+            li.className = 'info-relation-item';
+            li.innerHTML = `
+              <span class="text-lytOrange">${rel.name || rel.predicate || 'relates to'}</span>
+              <span class="line-type-indicator">${lineTypeSymbol}</span>
+              <span class="text-lytGreen">${targetEntity.name || targetEntity._id}</span>
+            `;
+            outgoingList.appendChild(li);
+          });
+        } else {
+          outgoingList.innerHTML = '<li>No outgoing relations</li>';
+        }
+      }
+
+      // Close button handler
+      document.addEventListener('DOMContentLoaded', function() {
+        const closeBtn = document.getElementById('close-info-sidebar');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function() {
+            const sidebar = document.getElementById('right-info-sidebar');
+            sidebar.classList.add('hidden');
+            
+            // Reset node colors when closing the panel
+            if (window.Graph) {
+              window.Graph.nodeColor(n => n.color);
+            }
+          });
+        }
+      });
+    });
+
+// Add this to your existing JavaScript that handles the dropdown
+document.getElementById('perspective-dropdown').addEventListener('click', function(e) {
+  const menu = document.getElementById('perspective-dropdown-menu');
+  menu.classList.toggle('show');
+  
+  // Prevent clicks inside the dropdown from closing it
+  e.stopPropagation();
+  
+  // Close when clicking outside
+  document.addEventListener('click', function closeMenu(e) {
+    if (!e.target.closest('#perspective-dropdown')) {
+      menu.classList.remove('show');
+      document.removeEventListener('click', closeMenu);
+    }
+  });
+});
+  </script>
+  
+  <!-- Load app scripts -->
+  <script src="/js/perspectives.js"></script>
+  <script src="/js/types.js"></script>
+  <script src="/js/entities.js"></script>
+  
+  <!-- Fix color picker -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const colorPreviewButton = document.getElementById('color-preview-button');
+      const colorPalette = document.getElementById('color-palette');
+      const typeColorPicker = document.getElementById('type-color-picker');
+      const typeColorHex = document.getElementById('type-color-hex');
+      const typeColor = document.getElementById('type-color');
+      
+      if (colorPreviewButton && colorPalette) {
+        // Show color palette when clicking the preview button
+        colorPreviewButton.addEventListener('click', function() {
+          colorPalette.classList.toggle('visible');
+          
+          // Add class to parent accordion to make room for palette
+          const accordionContent = document.querySelector('.accordion[data-form="type"] .accordion-content');
+          if (accordionContent) {
+            accordionContent.classList.toggle('has-active-color-picker');
+          }
+        });
+        
+        // Select a color from the palette
+        document.querySelectorAll('.palette-color').forEach(function(colorEl) {
+          colorEl.addEventListener('click', function() {
+            const color = this.getAttribute('data-color');
+            colorPreviewButton.style.backgroundColor = color;
+            typeColorHex.value = color;
+            
+            if (typeColorPicker) {
+              typeColorPicker.value = color;
+            }
+            
+            if (typeColor) {
+              typeColor.value = color.replace('#', '0x');
+            }
+            
+            // Close palette after selection
+            colorPalette.classList.remove('visible');
+          });
+        });
+        
+        // Convert hex to oxFormat
+        function hexToOxFormat(hex) {
+          // Remove # if present
+          if (hex.startsWith('#')) {
+            hex = hex.substring(1);
+          }
+          
+          // Add 0x prefix
+          return '0x' + hex;
+        }
+      }
     });
   </script>
+  <script src="/js/relations.js"></script>
+  <script src="/js/visualization.js"></script>
+  <div id="right-info-sidebar" class="hidden">
+    <div class="info-header flex justify-between items-center p-3 border-b border-gray-700">
+      <h3 id="entity-info-title" class="text-lytOrange font-bold">Entity Details</h3>
+      <button id="close-info-sidebar" class="text-white hover:text-lytOrange">
+        <svg class="icon" viewBox="0 0 24 24">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="info-content p-4">
+      <div class="mb-4">
+        <span class="text-gray-400 text-sm">ID</span>
+        <div id="entity-info-id" class="text-white"></div>
+      </div>
+      <div class="mb-4">
+        <span class="text-gray-400 text-sm">Name</span>
+        <div id="entity-info-name" class="text-white"></div>
+      </div>
+      <div class="mb-4">
+        <span class="text-gray-400 text-sm">Type</span>
+        <div id="entity-info-type" class="flex items-center">
+          <span id="entity-type-color" class="color-dot mr-2"></span>
+          <span id="entity-type-name" class="text-white"></span>
+        </div>
+      </div>
+      <div class="mb-4">
+        <span class="text-gray-400 text-sm">Kind</span>
+        <div id="entity-info-kind" class="text-white"></div>
+      </div>
+      <div class="mb-4">
+        <span class="text-gray-400 text-sm">Properties</span>
+        <div id="entity-info-props" class="text-white"></div>
+      </div>
+      <div class="mb-4">
+        <span class="text-gray-400 text-sm">Created By</span>
+        <div id="entity-info-created-by" class="text-white"></div>
+      </div>
+      <div class="mb-4">
+        <span class="text-gray-400 text-sm">Created At</span>
+        <div id="entity-info-created-at" class="text-white"></div>
+      </div>
+      <div id="entity-info-relations">
+        <span class="text-gray-400 text-sm">Relations</span>
+        <div id="entity-incoming-relations" class="mt-2">
+          <h4 class="text-xs text-gray-500">Incoming</h4>
+          <ul class="text-white text-sm mt-1" id="entity-incoming-list"></ul>
+        </div>
+        <div id="entity-outgoing-relations" class="mt-2">
+          <h4 class="text-xs text-gray-500">Outgoing</h4>
+          <ul class="text-white text-sm mt-1" id="entity-outgoing-list"></ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </body>
 </html>

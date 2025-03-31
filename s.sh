@@ -1,23 +1,37 @@
 #!/bin/bash
 
-# Función para matar procesos en puertos específicos
+# Function to kill processes on specific ports
 kill_port() {
   local port=$1
   lsof -i :$port | grep LISTEN | awk '{print $2}' | xargs -r kill -9
 }
 
-# Limpiar puertos
+# Clean up ports
 kill_port 3000
 kill_port 3001
 
-# Lanzar Hono con watch
+# Make sure database schemas are up to date
+echo "Updating database schema..."
+if [ -f ./scripts/update-db-schema.js ]; then
+  node ./scripts/update-db-schema.js
+fi
+
+# Make sure Foxx service is installed
+echo "Installing Foxx service..."
+if [ -f ./install-foxx.sh ]; then
+  bash ./install-foxx.sh
+fi
+
+echo "Starting server..."
+
+# Launch Hono with watch
 bun --watch index.ts &
 
-# Lanzar Tailwind con watch
+# Launch Tailwind with watch
 bunx tailwindcss -i ./input.css -o ./public/output.css --watch &
 
-# Lanzar reload server
+# Launch reload server
 bun reload.js &
 
-# Esperar a que todos los procesos terminen
+# Wait for all processes to complete
 wait

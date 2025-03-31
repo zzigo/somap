@@ -18,7 +18,6 @@
     }
   },
   "routes": {
-    // ...existing routes...
     "/properties": {
       "description": "Property definitions API",
       "service": "./services/properties.js"
@@ -26,6 +25,10 @@
     "/propertyPredictors": {
       "description": "Property predictors API",
       "service": "./services/propertyPredictors.js"
+    },
+    "/perspectives": {
+      "description": "Perspectives API",
+      "service": "./services/perspectives.js"
     }
   }
 }
