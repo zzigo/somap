@@ -14,16 +14,6 @@ const DB_PASS = process.env.DB_PASS || "asdBGT788";
 const SERVER_PORT = parseInt(process.env.PORT || "3000");
 const SERVER_HOST = process.env.HOST || "0.0.0.0";
 
-// Initialize database connection with proper credentials
-const db = new Database({
-  url: `http://${DB_HOST}:${DB_PORT}`,
-  databaseName: "somap",
-  auth: {
-    username: DB_USER,
-    password: DB_PASS,
-  },
-});
-
 // Sanitize username for collection names
 function sanitizeUsername(username: string): string {
   return username.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
@@ -73,6 +63,7 @@ async function ensureDatabase(
 // Modify the startServer function
 async function startServer() {
   let systemDb: Database;
+  let db: Database;
 
   try {
     // Initialize system database connection with retry
@@ -90,6 +81,13 @@ async function startServer() {
 
     // Ensure somap database exists
     await ensureDatabase(systemDb, "somap");
+
+    // Initialize somap database connection
+    db = new Database({
+      url: `http://${DB_HOST}:${DB_PORT}`,
+      databaseName: "somap",
+      auth: { username: DB_USER, password: DB_PASS },
+    });
 
     // Test somap database connection
     const somapConnected = await waitForDatabase(db);
@@ -147,6 +145,7 @@ async function startServer() {
     }
 
     // Store database in app locals
+    app.locals = { db };
     console.log("Database initialized successfully");
   } catch (err) {
     console.error("Database initialization failed:", err);
@@ -271,24 +270,14 @@ async function startServer() {
     const sanitizedUsername = sanitizeUsername(username);
 
     try {
-      console.log(`Attempting login for user: ${sanitizedUsername}`);
-
-      // Find user by username and password using AQL query
-      // (more reliable than collection.find which might not be implemented correctly)
-      const cursor = await db.query(aql`
-        FOR u IN users
-        FILTER u.username == ${sanitizedUsername} AND u.password == ${password}
-        LIMIT 1
-        RETURN u
-      `);
-
-      const user = await cursor.next();
+      // Find user by username and password
+      const user = await db.collection("users").firstExample({
+        username: sanitizedUsername,
+        password, // In production, this should be hashed and compared securely
+      });
 
       if (!user) {
-        console.log(
-          `Login failed for user: ${sanitizedUsername} - Invalid credentials`
-        );
-        return c.json({ success: false, message: "Invalid credentials" }, 401);
+        return c.json({ error: "Invalid credentials" }, 401);
       }
 
       // Update last login time
@@ -305,20 +294,18 @@ async function startServer() {
         sameSite: "Lax",
       });
 
-      console.log(`User ${sanitizedUsername} logged in successfully`);
       return c.json({
         userId: sanitizedUsername,
         username: sanitizedUsername,
         lastLogin: new Date(),
       });
-    } catch (error) {
-      console.error(`Login error for ${sanitizedUsername}:`, error);
+    } catch (err) {
+      console.error("Login failed:", err);
       return c.json(
         {
-          success: false,
-          message: "Authentication failed",
+          error: "Login failed",
           details:
-            process.env.NODE_ENV === "development" ? error.message : undefined,
+            process.env.NODE_ENV === "development" ? err.message : undefined,
         },
         500
       );
