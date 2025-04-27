@@ -28,7 +28,7 @@ echo "Starting server..."
 bun --watch index.ts &
 
 # Launch Tailwind with watch
-bunx tailwindcss -i ./input.css -o ./public/output.css --watch &
+bunx tailwindcss -i ./input.css -o ./public/css/output.css --watch &
 
 # Launch reload server
 bun reload.js &

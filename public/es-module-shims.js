@@ -1,0 +1,1 @@
+/opt/somap/vendor/es-module-shims.js

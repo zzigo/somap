@@ -2,16 +2,16 @@
 <html>
 <head>
   <title>SOMAP</title>
-  <link href="/output.css" rel="stylesheet">
+  <link href="/css/output.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/3d-force-graph@1.73.2/dist/3d-force-graph.min.js"></script>
   <style>
+    /* Your existing styles remain unchanged */
     #graph-container { 
       width: 100%; 
       height: 100vh; 
       position: relative; 
       z-index: 1; 
-      display: none; 
+      display: block; 
     }
     .graph-controls {
       position: fixed;
@@ -38,9 +38,9 @@
     }
     #status-bar { 
       position: fixed; 
-      bottom: 0; 
-      left: 0; 
-      right: 0; 
+      bottom: 0;  
+      left: 0;  
+      right: 0;  
       background: rgba(0, 0, 0, 0.7); 
       z-index: 20;
       transition: transform 0.5s ease;
@@ -55,7 +55,7 @@
       bottom: 40px; 
       width: 40px; 
       background: rgba(0, 0, 0, 0.7); 
-      z-index: 10;
+      z-index: 10; 
     }
     #second-sidebar { 
       position: fixed; 
@@ -69,7 +69,7 @@
       z-index: 9; 
       overflow-y: auto; 
       transform: translateX(0);
-      opacity: 1;
+      opacity: 1; 
       resize: horizontal;
       overflow-x: hidden;
     }
@@ -101,7 +101,7 @@
       height: 36px;
       border: 2px solid rgba(255, 255, 255, 0.2);
       border-radius: 4px;
-      overflow: visible; /* Change from hidden to visible */
+      overflow: visible;
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
       z-index: 50;
     }
@@ -109,9 +109,11 @@
       width: 100%;
       height: 100%;
       cursor: pointer;
-      background-color: #FF9500; /* Default color */
-      border: 2px solid white; /* Make border more visible */
+      background-color: #FF9500;
+      border: 2px solid white;
       border-radius: 3px;
+      position: relative;
+      z-index: 51;
     }
     .color-palette {
       display: none;
@@ -124,20 +126,24 @@
       padding: 12px;
       width: 240px;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-      z-index: 1000;
+      z-index: 1000 !important;
     }
-    /* Position the color picker relative to form container */
     .accordion-content.has-active-color-picker {
       margin-bottom: 200px;
+      position: relative;
+      z-index: 49;
     }
     .color-palette.visible {
-      display: block;
+      display: block !important;
+      opacity: 1 !important;
     }
     .palette-grid {
-      display: grid;
+      display: grid !important;
       grid-template-columns: repeat(8, 1fr);
       gap: 6px;
       margin-bottom: 12px;
+      position: relative;
+      z-index: 1001;
     }
     .palette-color {
       width: 22px;
@@ -189,19 +195,18 @@
     .popup-item { display: flex; align-items: center; gap: 8px; padding: 5px; cursor: pointer; }
     .popup-item:hover { background: #ff9500; color: black; }
     .accordion { padding: 10px 0; position: relative; }
-    .accordion-content { 
+    .accordion-content {
       position: absolute; 
       left: 40px; 
       top: 0; 
       background: rgba(0, 0, 0, 0.7); 
       width: 200px; 
       display: none; 
-      z-index: 10; 
-      padding: 5px;
+      z-index: 10;  
+      padding: 5px; 
       max-height: 80vh;
       overflow-y: auto;
     }
-    /* Relations need more width to properly display content */
     .accordion[data-form="entity"] .accordion-content,
     .accordion[data-form="relation"] .accordion-content,
     .accordion[data-form="type"] .accordion-content {
@@ -212,9 +217,9 @@
     .accordion-item { padding: 15px; cursor: pointer; display: flex; align-items: center; gap: 5px; }
     .accordion-item:hover { background: #ff95007e; color: black; }
     .accordion-item .edit-icons { display: none; }
-    .accordion-item:hover .edit-icons { 
-      display: flex; 
-      gap: 5px; 
+    .accordion-item:hover .edit-icons {
+      display: flex;
+      gap: 5px;
       position: relative;
       z-index: 15;
     }
@@ -231,19 +236,19 @@
       transform: scale(1.1);
     }
     #menu-toggle, #user-toggle { 
-      pointer-events: auto; }
-
-    #status-bar-right { 
+      pointer-events: auto; 
+    }
+    #status-bar-right {
       margin-right: 5px; 
       display: flex; 
       justify-content: flex-end;
       align-items: center; 
-      padding-right: 5px; /* safer than margin-right */
-      width: 100%; /* ensures full width of container */}
-
-    #user-toggle { 
-      margin-right: 0; }
-
+      padding-right: 5px;
+      width: 100%;
+    }
+    #user-toggle {
+      margin-right: 0; 
+    }
     .color-dot {
       display: inline-block;
       width: 12px;
@@ -328,13 +333,11 @@
     .line-type-indicator {
       margin: 0 5px;
     }
-    /* Add this to your existing styles */
     #perspective-dropdown {
       display: flex;
       align-items: center;
       height: 100%;
     }
-    
     #perspective-dropdown .icon {
       display: flex;
       align-items: center;
@@ -344,85 +347,94 @@
       margin-left: 16px;
       vertical-align: middle;
     }
-    
     #active-perspective {
       display: inline-block;
       vertical-align: middle;
     }
-
-    /* Add this CSS to fix the perspective dropdown menu direction */
-#perspective-dropdown-menu {
-  position: absolute;
-  bottom: 100%;  /* Position above the trigger instead of below */
-  left: 0;
-  margin-bottom: 8px;  /* Add margin below the menu (visually above the icon) */
-  transform-origin: bottom left;  /* Animation should originate from bottom */
-  z-index: 1000;
-  min-width: 250px;
-  padding: 1px;
-  margin: 10px;
-  background-color: rgba(30, 30, 30, 0.1);
-  border: 0px solid rgba(80, 80, 80, 0.8);
-  border-radius: 6px;
-  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);  /* Shadow direction changed */
-  overflow: hidden;
-}
-
-/* Add a subtle animation for opening upward */
-@keyframes slideUp {
-  from { transform: translateY(10px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-#perspective-dropdown-menu.show {
-  display: block !important;
-  animation: slideUp 0.2s ease-out;
-}
-
-/* Add to your existing styles */
-#right-info-sidebar {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 40px;
-  width: 300px;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  z-index: 10;
-  overflow-y: auto;
-  transform: translateX(0);
-  opacity: 1;
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-#right-info-sidebar.hidden {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.info-header {
-  background: rgba(20, 20, 20, 0.8);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.info-property {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  padding: 8px 0;
-}
-
-.info-relation-item {
-  padding: 5px 0;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 0.85rem;
-}
-
-.info-relation-item .line-type-indicator {
-  display: inline-block;
-  width: 24px;
-}
+    #perspective-dropdown-menu {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      margin-bottom: 8px;
+      transform-origin: bottom left;
+      z-index: 1000;
+      min-width: 250px;
+      padding: 1px;
+      margin: 10px;
+      background-color: rgba(30, 30, 30, 0.1);
+      border: 0px solid rgba(80, 80, 80, 0.8);
+      border-radius: 6px;
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(10px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    #perspective-dropdown-menu.show {
+      display: block !important;
+      animation: slideUp 0.2s ease-out;
+    }
+    #right-info-sidebar {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 40px;
+      width: 300px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      z-index: 10;
+      overflow-y: auto;
+      transform: translateX(0);
+      opacity: 1;
+      transition: transform 0.5s ease, opacity 0.5s ease;
+      border-left: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    #right-info-sidebar.hidden {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    .info-header {
+      background: rgba(20, 20, 20, 0.8);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .info-property {
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 8px 0;
+    }
+    .info-relation-item {
+      padding: 5px 0;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 0.85rem;
+    }
+    .info-relation-item .line-type-indicator {
+      display: inline-block;
+      width: 24px;
+    }
+    #graph-container { 
+      width: 100% !important; 
+      height: 100vh !important; 
+      position: relative !important; 
+      z-index: 1; 
+      display: block !important; 
+      visibility: visible !important;
+      opacity: 1;
+      background: transparent;
+    }
+    #graph-container canvas {
+      width: 100% !important;
+      height: 100% !important;
+      position: absolute !important;
+      top: 0;
+      left: 0;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
   </style>
 </head>
 <body>
@@ -431,19 +443,13 @@
       <button id="menu-toggle" class="flex items-center p-2 hover:text-lytOrange" title="Toggle Left Sidebar">
         <svg class="icon" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18" /></svg>
       </button>
-      
-      <!-- Space out perspective elements -->
       <div id="perspective-dropdown" class="relative flex items-center cursor-pointer ml-2 mr-4">
-        <div class="flex items-center">
-          <svg class="icon perspective-icon mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="stroke:#ff9500; vertical-align: middle;">
-            <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"></path>
-            <path d="M9.5 15.5L12 13l2.5 2.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-            <path d="M8 10h8M6 14h2M16 14h2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
-          </svg>
-          <span id="active-perspective" class="text-lytOrange font-bold" title="Active Perspective">default</span>
-        </div>
-        
-        <!-- Dropdown Menu - positioned upward -->
+        <svg class="icon perspective-icon mr-2" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" style="stroke:#ff9500; vertical-align: middle;">
+          <path d="M21 3H3c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h18c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H3V5h18v14z"></path>
+          <path d="M9.5 15.5L12 13l2.5 2.5" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+          <path d="M8 10h8M6 14h2M16 14h2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path>
+        </svg>
+        <span id="active-perspective" class="text-lytOrange font-bold" title="Active Perspective">default</span>
         <div id="perspective-dropdown-menu" class="absolute hidden left-0 bottom-full mb-1 bg-gray-900 border border-gray-700 rounded shadow-lg z-50 w-64">
           <div class="py-1 px-2 border-b border-gray-700 text-xs text-gray-400">SELECT PERSPECTIVE</div>
           <div id="perspective-dropdown-items" class="max-h-48 overflow-y-auto"></div>
@@ -453,33 +459,14 @@
               <span>New Perspective</span>
             </div>
           </div>
-          
-          <!-- Hidden perspective form -->
-          <div id="perspective-form" class="hidden p-3 border-t border-gray-700 bg-gray-800">
-            <div class="text-white text-sm mb-2">Add New Perspective</div>
-            <input id="perspective-name" class="input-transparent text-white p-1 mb-2 w-full placeholder-lytGrey" placeholder="Name" />
-            <input id="perspective-description" class="input-transparent text-white p-1 mb-2 w-full placeholder-lytGrey" placeholder="Description" />
-            
-            <div class="text-white text-xs mt-2 mb-1">Kinds (comma-separated):</div>
-            <input id="perspective-kinds" class="input-transparent text-white p-1 mb-3 w-full placeholder-lytGrey" placeholder="object,agent,material,environment,interaction" value="object,agent,material,environment,interaction" />
-            
-            <div class="flex gap-2">
-              <button id="perspective-submit" class="flex-1 p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black text-sm">Add</button>
-              <button id="perspective-cancel" class="flex-1 p-2 bg-transparent border border-lytGrey rounded hover:bg-gray-700 text-sm">Cancel</button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
-    
-    <!-- Right-aligned items -->
     <div id="status-bar-right" class="flex items-center gap-2 ml-auto">
       <div id="entities-display" class="flex items-center gap-1 cursor-pointer hover:text-lytOrange" title="Entity Count">
         <svg class="icon" viewBox="0 0 24 24"><path d="M12 12m-3 0a3 3 0 1 0 6 0a3 3 0 1 0-6 0" /></svg>
         <span id="entity-count">0</span>
       </div>
-      
-      <!-- User section at the right edge -->
       <div class="flex items-center ml-4">
         <span id="user-display" class="cursor-pointer hover:text-lytOrange mr-2" title="Current User"></span>
         <button id="user-toggle" class="flex items-center p-2 hover:text-lytOrange" title="User Menu">
@@ -489,7 +476,6 @@
           </svg>
         </button>
       </div>
-      
       <div id="auth-fields" class="flex items-center gap-2 hidden">
         <input id="username" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="User" title="Username" />
         <input id="password" type="password" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Pass" title="Password" />
@@ -530,6 +516,7 @@
     </div>
   </div>
   <div id="left-sidebar" class="flex flex-col gap-2 p-2">
+    <!-- Your existing sidebar HTML remains unchanged -->
     <div class="accordion" data-form="entity">
       <div class="flex items-center gap-2">
         <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -546,8 +533,6 @@
             <select id="entity-type" class="input-transparent text-white p-1 placeholder-lytGrey" name="entity-type">
               <option value="" disabled selected>Select a Type</option>
             </select>
-            
-            <!-- Add Kind selection -->
             <select id="entity-kind" class="input-transparent text-white p-1 placeholder-lytGrey mt-2" name="entity-kind">
               <option value="" disabled selected>Select a Kind</option>
               <option value="object">Object</option>
@@ -556,14 +541,12 @@
               <option value="environment">Environment</option>
               <option value="interaction">Interaction</option>
             </select>
-            
             <button id="entity-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black mt-2">Add Entity</button>
             <button id="entity-debug" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Debug Entity Creation</button>
-
-<div class="flex items-center justify-between mt-2">
-  <button id="entity-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update Entity</button>
-  <button id="entity-test-delete" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytRed hover:text-black text-xs" style="width: 48%;">Test Delete Entity</button>
-</div>
+            <div class="flex items-center justify-between mt-2">  
+              <button id="entity-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update Entity</button>
+              <button id="entity-test-delete" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytRed hover:text-black text-xs" style="width: 48%;">Test Delete Entity</button>
+            </div>
           </div>
           <div id="entities-list" class="pl-4"></div>
         </div>
@@ -582,7 +565,6 @@
           <div id="type-form" class="flex flex-col gap-2 p-2 mt-2 hidden form-container">
             <div class="text-white mb-2">Add Type</div>
             <input id="type-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" name="type-name" />
-            
             <div class="flex items-center gap-2">
               <div class="flex-grow">
                 <input id="type-color-hex" class="input-transparent text-white p-1 placeholder-lytGrey w-full" placeholder="Color (e.g., #FF9500)" name="type-color-hex" />
@@ -591,7 +573,6 @@
                 <div id="type-color-preview" class="color-preview-button"></div>
                 <div class="color-palette" id="type-color-palette">
                   <div class="palette-grid" id="type-palette-grid">
-                    <!-- Default colors -->
                     <div class="palette-color" style="background-color: #FF6B6B" data-color="#FF6B6B"></div>
                     <div class="palette-color" style="background-color: #FF9500" data-color="#FF9500"></div>
                     <div class="palette-color" style="background-color: #FFBE0B" data-color="#FFBE0B"></div>
@@ -600,7 +581,6 @@
                     <div class="palette-color" style="background-color: #5E60CE" data-color="#5E60CE"></div>
                     <div class="palette-color" style="background-color: #8338EC" data-color="#8338EC"></div>
                     <div class="palette-color" style="background-color: #FF70A6" data-color="#FF70A6"></div>
-                    
                     <div class="palette-color" style="background-color: #E63946" data-color="#E63946"></div>
                     <div class="palette-color" style="background-color: #F77F00" data-color="#F77F00"></div>
                     <div class="palette-color" style="background-color: #FCBF49" data-color="#FCBF49"></div>
@@ -609,7 +589,6 @@
                     <div class="palette-color" style="background-color: #3A0CA3" data-color="#3A0CA3"></div>
                     <div class="palette-color" style="background-color: #7209B7" data-color="#7209B7"></div>
                     <div class="palette-color" style="background-color: #F72585" data-color="#F72585"></div>
-                  
                     <div class="palette-color" style="background-color: #D90429" data-color="#D90429"></div>
                     <div class="palette-color" style="background-color: #FB8500" data-color="#FB8500"></div>
                     <div class="palette-color" style="background-color: #EFD595" data-color="#EFD595"></div>
@@ -627,7 +606,6 @@
               </div>
             </div>
             <input id="type-color-value" type="hidden" value="0xff9500" name="type-color-value" />
-            
             <select id="type-shape" class="input-transparent text-white p-1 bg-dkGrey border border-lytGrey rounded">
               <option value="" disabled selected>Select a Shape</option>
               <option value="sphere">Sphere</option>
@@ -651,7 +629,6 @@
         </div>
       </div>
     </div>
-    
     <div class="accordion" data-form="relation">
       <div class="flex items-center gap-2">
         <svg class="icon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
@@ -680,11 +657,10 @@
               Line types will appear with different styles in the UI and 3D graph
             </div>
             <button id="relation-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Relation</button>
-
-<div class="flex items-center justify-between mt-2">
-  <button id="relation-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update Relation</button>
-  <button id="relation-test-delete" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytRed hover:text-black text-xs" style="width: 48%;">Test Delete Relation</button>
-</div>
+            <div class="flex items-center justify-between mt-2">
+              <button id="relation-test-update" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black text-xs" style="width: 48%;">Test Update Relation</button>
+              <button id="relation-test-delete" class="flex items-center justify-center p-1 bg-transparent border border-lytGrey rounded hover:bg-lytRed hover:text-black text-xs" style="width: 48%;">Test Delete Relation</button>
+            </div>
             <button id="relation-debug" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Debug Relation Creation</button>
           </div>
           <div id="relations-list" class="pl-4"></div>
@@ -809,8 +785,6 @@
               <option value="boolean">Boolean</option>
               <option value="enum">Enumeration</option>
             </select>
-            
-            <!-- Conditional fields for number/parameter space -->
             <div id="property-number-fields" class="hidden">
               <div class="flex gap-2">
                 <input id="property-min" type="number" class="input-transparent text-white p-1 placeholder-lytGrey w-1/2" placeholder="Min" />
@@ -825,23 +799,16 @@
               </select>
               <input id="property-unit" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Unit (optional)" />
             </div>
-            
-            <!-- Conditional fields for enum -->
             <div id="property-enum-fields" class="hidden">
               <textarea id="property-options" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Options (one per line)"></textarea>
             </div>
-            
-            <!-- Applicable types multiselect -->
             <div>
               <label class="text-white text-sm">Applicable Types</label>
               <div id="property-applicable-types" class="flex flex-wrap gap-2 mt-1 border border-lytGrey p-2 rounded">
-                <!-- Will be populated with checkboxes -->
               </div>
             </div>
-            
             <button id="property-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Property</button>
           </div>
-          
           <div class="accordion-item" data-form="predictor-form">
             <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M6 12H18M12 6V18" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
             Add Property Predictor
@@ -850,41 +817,32 @@
             <div class="text-white mb-2">Add Property Predictor</div>
             <input id="predictor-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Name" />
             <textarea id="predictor-formula" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Formula (e.g., Math.sqrt(tension/mass) * length)"></textarea>
-            
             <div>
               <label class="text-white text-sm">Input Properties</label>
               <div id="predictor-input-properties" class="flex flex-wrap gap-2 mt-1 border border-lytGrey p-2 rounded">
-                <!-- Will be populated with checkboxes -->
               </div>
             </div>
-            
             <div class="text-white mb-2">Output</div>
-            <input id="predictor-output-name" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Output Name" />
-            <input id="predictor-output-unit" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Output Unit (optional)" />
+            <input id="predictor-output-name-1" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Output Name" />
+            <input id="predictor-output-unit-1" class="input-transparent text-white p-1 placeholder-lytGrey" placeholder="Output Unit (optional)" />
             <select id="predictor-output-type" class="input-transparent text-white p-1 placeholder-lytGrey">
               <option value="" disabled selected>Output Type</option>
               <option value="number">Number</option>
               <option value="string">String</option>
               <option value="boolean">Boolean</option>
             </select>
-            
-            <!-- Applicable types multiselect -->
             <div>
               <label class="text-white text-sm">Applicable Types</label>
               <div id="predictor-applicable-types" class="flex flex-wrap gap-2 mt-1 border border-lytGrey p-2 rounded">
-                <!-- Will be populated with checkboxes -->
               </div>
             </div>
-            
             <div class="flex items-center gap-2">
               <input id="predictor-confidence" type="range" min="0" max="1" step="0.05" value="0.95" class="flex-grow" />
               <span id="predictor-confidence-value" class="text-white">0.95</span>
             </div>
-            
             <button id="predictor-submit" class="flex items-center justify-center p-2 bg-transparent border border-lytGrey rounded hover:bg-lytOrange hover:text-black">Add Predictor</button>
             <button id="predictor-test" class="flex items-center justify-center p-2 mt-2 bg-transparent border border-lytGrey rounded hover:bg-lytBlue hover:text-black">Test Formula</button>
           </div>
-          
           <div id="properties-list" class="pl-4"></div>
           <div id="predictors-list" class="pl-4"></div>
         </div>
@@ -892,2676 +850,36 @@
     </div>
   </div>
   <div id="second-sidebar" class="hidden">
-    <!-- Forms have been moved into the accordion content -->
   </div>
   <div id="graph-container"></div>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      console.log('DOM fully loaded');
-      
-      // Check for user session in both localStorage and cookies
-      const checkAndRestoreSession = () => {
-        // First try to get from localStorage
-        let userId = localStorage.getItem('userId');
-        console.log('Checking localStorage for userId:', userId);
-        
-        // If not in localStorage, check cookies
-        if (!userId) {
-          console.log('Not found in localStorage, checking cookies...');
-          const cookies = document.cookie.split(';');
-          for (const cookie of cookies) {
-            const [name, value] = cookie.trim().split('=');
-            console.log('Checking cookie:', name, value);
-            if (name === 'userId' && value) {
-              userId = value;
-              // Persist to localStorage for redundancy
-              localStorage.setItem('userId', userId);
-              console.log('Session restored from cookie:', userId);
-              break;
-            }
-          }
-        } else {
-          console.log('Session restored from localStorage:', userId);
-        }
-        
-        // If we found a userId, ensure the cookie is refreshed with a long expiration
-        if (userId) {
-          console.log('Found valid userId, refreshing cookie expiration');
-          const expiryDate = new Date();
-          expiryDate.setDate(expiryDate.getDate() + 30); // 30 day expiration
-          document.cookie = `userId=${userId}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
-        } else {
-          console.log('No valid session found');
-        }
-        
-        return userId;
-      };
-      
-      let userId = checkAndRestoreSession();
-      let activePerspective = localStorage.getItem('perspective') || 'default';
-      
-      // Log session info
-      console.log('Session initialized with userId:', userId, 'perspective:', activePerspective);
-      
-      const signupBtn = document.getElementById('signup');
-      const loginBtn = document.getElementById('login');
-      const signupOpt = document.getElementById('signup-opt');
-      const loginOpt = document.getElementById('login-opt');
-      const logoutOpt = document.getElementById('logout-opt');
-      const usernameInput = document.getElementById('username');
-      const passwordInput = document.getElementById('password');
-      const userDisplay = document.getElementById('user-display');
-      const userToggle = document.getElementById('user-toggle');
-      const userMenu = document.getElementById('user-menu');
-      const entityCount = document.getElementById('entity-count');
-      const entitiesDisplay = document.getElementById('entities-display');
-      const entitiesPopup = document.getElementById('entities-popup');
-      const authFields = document.getElementById('auth-fields');
-      const menuToggle = document.getElementById('menu-toggle');
-      const leftSidebar = document.getElementById('left-sidebar');
-      const secondSidebar = document.getElementById('second-sidebar');
-      const graphContainer = document.getElementById('graph-container');
-      const activePerspectiveDisplay = document.getElementById('active-perspective');
-      const addForm = document.getElementById('add-form');
-      const addName = document.getElementById('add-name');
-      const addType = document.getElementById('add-type');
-      const addColor = document.getElementById('add-color');
-      const addShape = document.getElementById('add-shape');
-      const addLine = document.getElementById('add-line');
-      const addSubmit = document.getElementById('add-submit');
-      
-      // Entity form elements
-      const entityForm = document.getElementById('entity-form');
-      const entityName = document.getElementById('entity-name');
-      const entityType = document.getElementById('entity-type');
-      const entitySubmit = document.getElementById('entity-submit');
-      
-      // Type form elements
-      const typeForm = document.getElementById('type-form');
-      const typeName = document.getElementById('type-name');
-      const typeColor = document.getElementById('type-color');
-      const typeColorHex = document.getElementById('type-color-hex');
-      const typeColorPicker = document.getElementById('type-color-picker');
-      const typeShape = document.getElementById('type-shape');
-      const typeSubmit = document.getElementById('type-submit');
-      
-      // Relation form elements
-      const relationForm = document.getElementById('relation-form');
-      const relationName = document.getElementById('relation-name');
-      const relationFrom = document.getElementById('relation-from');
-      const relationTo = document.getElementById('relation-to');
-      const relationLine = document.getElementById('relation-line');
-      const relationSubmit = document.getElementById('relation-submit');
-      
-      // Perspective form elements
-      const perspectiveForm = document.getElementById('perspective-form');
-      const perspectiveName = document.getElementById('perspective-name');
-      const perspectiveSubmit = document.getElementById('perspective-submit');
-      
-      let somData = null;
-      let addMode = null;
-
-      console.log('Elements loaded:', {
-        signupBtn, loginBtn, signupOpt, loginOpt, logoutOpt,
-        usernameInput, passwordInput, userDisplay, userToggle, userMenu,
-        entityCount, entitiesDisplay, entitiesPopup, authFields, menuToggle, leftSidebar, graphContainer
-      });
-
-      if (!signupBtn || !menuToggle || !userToggle) {
-        console.error('Critical elements missing!');
-        return;
-      }
-      
-      // Add a debug mode toggle
-      let debugMode = localStorage.getItem('somapDebug') === 'true';
-      
-      function log(...args) {
-        if (debugMode) console.debug(...args);
-      }
-      
-      // Debug toggle function
-      function toggleDebug() {
-        debugMode = !debugMode;
-        localStorage.setItem('somapDebug', debugMode);
-        console.log(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`);
-        return debugMode;
-      }
-      
-      // Color conversion functions
-      function hexToOxFormat(hex) {
-        // Remove # if present
-        hex = hex.replace('#', '');
-        
-        // Ensure it's a valid hex color
-        if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
-          return '0xff9500'; // Default orange if invalid
-        }
-        
-        return '0x' + hex.toLowerCase();
-      }
-      
-      function oxFormatToHex(oxFormat) {
-        // Handle empty or invalid values
-        if (!oxFormat || !oxFormat.startsWith('0x')) {
-          return '#ff9500'; // Default orange
-        }
-        
-        // Remove 0x and ensure it's 6 characters
-        const hex = oxFormat.substring(2);
-        if (!/^[0-9A-Fa-f]{6}$/.test(hex)) {
-          return '#ff9500';
-        }
-        
-        return '#' + hex.toLowerCase();
-      }
-      
-      // Define setupEditDelete function before it's called
-      function setupEditDelete(collection) {
-        log(`Setting up edit/delete handlers for ${collection}`);
-        
-        // Use querySelectorAll to get all items for this collection
-        const items = document.querySelectorAll(`#${collection}-list .accordion-item`);
-        log(`Found ${items.length} items for ${collection}`);
-        
-        items.forEach(item => {
-          const id = item.getAttribute('data-id');
-          if (!id) {
-            log(`Skipping item without data-id:`, item.textContent.trim());
-            return; // Skip items without data-id
-          }
-          
-          log(`Setting up handlers for ${collection} item: ${id}`);
-          
-          // Find the edit-icons container
-          const editIcons = item.querySelector('.edit-icons');
-          if (!editIcons) {
-            log(`No edit icons found for ${collection} item ${id}`);
-            return;
-          }
-          
-          // Get the pencil and trash icons
-          const pencil = editIcons.querySelector('svg:first-child');
-          const trash = editIcons.querySelector('svg:last-child');
-          
-          log(`Found pencil: ${!!pencil}, trash: ${!!trash} for ${collection} item ${id}`);
-          
-          // Make sure icons are clickable and visible
-          if (pencil) {
-            pencil.style.cursor = 'pointer';
-            pencil.style.pointerEvents = 'auto';
-            pencil.style.zIndex = '100';
-            
-            // Add event listener instead of using onclick property
-            pencil.addEventListener('click', function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log(`Edit clicked for ${collection} item ${id}`);
-              
-              const itemText = item.childNodes[0].textContent.trim();
-              setupInlineEdit(item, id, collection, itemText);
-            });
-          }
-
-          if (trash) {
-            trash.style.cursor = 'pointer';
-            trash.style.pointerEvents = 'auto';
-            trash.style.zIndex = '100';
-            
-            // Add event listener instead of using onclick property  
-            trash.addEventListener('click', function(e) {
-              e.preventDefault();
-              e.stopPropagation();
-              console.log(`Delete clicked for ${collection} item ${id}`);
-              
-              const confirmed = confirm(`Are you sure you want to delete this ${collection}?`);
-              if (confirmed) {
-                try {
-                  console.log(`Deleting ${collection} item ${id}`);
-                  
-                  // For API endpoint, we need singular form
-                  const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
-                  
-                  // Extract ID key (12345) from full ID (collection/12345)
-                  let idKey = id;
-                  if (id.includes('/')) {
-                    // Always extract just the numeric ID part
-                    idKey = id.split('/')[1];
-                  }
-                  
-                  // Construct the endpoint properly
-                  const endpoint = `/api/${singularCollection}/${idKey}`;
-                  console.log(`Sending DELETE request to: ${endpoint}`);
-                  
-                  fetch(endpoint, {
-                    method: 'DELETE'
-                  })
-                  .then(response => {
-                    console.log(`Delete response status: ${response.status}`);
-                    return response.text().then(text => ({ status: response.status, text, ok: response.ok }));
-                  })
-                  .then(({ status, text, ok }) => {
-                    console.log(`Delete response (${status}):`, text);
-                    
-                    if (ok) {
-                      console.log(`Successfully deleted ${collection} item ${id}`);
-                      item.remove();
-                      initializeGraph();
-                    } else {
-                      console.error(`Failed to delete ${collection} item:`, text);
-                      alert(`Failed to delete ${collection}: ${text}`);
-                    }
-                  })
-                  .catch(err => {
-                    console.error(`Error deleting ${collection} item:`, err);
-                    alert(`Error deleting ${collection}: ${err.message}`);
-                  });
-                } catch (err) {
-                  console.error(`Error deleting ${collection} item:`, err);
-                  alert(`Error deleting ${collection}: ${err.message}`);
-                }
-              }
-            });
-          }
-        });
-      }
-      
-      // Function to handle inline editing
-      function setupInlineEdit(element, itemId, collection, currentName) {
-        // Create input element
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = currentName;
-        input.className = 'inline-edit-input';
-        
-        // Add element to DOM
-        element.classList.add('inline-edit-active');
-        element.appendChild(input);
-        
-        // Focus and select all text
-        input.focus();
-        input.select();
-        
-        // Handle save on enter or cancel on escape
-        input.addEventListener('keydown', async (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            const newName = input.value.trim();
-            
-            if (newName && newName !== currentName) {
-              try {
-                console.log(`Updating ${collection} item ${itemId} to ${newName}`);
-                
-                // For API endpoint, we need singular form
-                const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
-                
-                // Extract ID key (12345) from full ID (collection/12345)
-                let idKey = itemId;
-                if (itemId.includes('/')) {
-                  // Extract just the numeric part for the API endpoint
-                  idKey = itemId.split('/')[1];
-                }
-                
-                // Construct the endpoint with just the ID key part
-                const endpoint = `/api/${singularCollection}/${idKey}`;
-                console.log(`Sending PATCH request to: ${endpoint}`);
-                
-                const response = await fetch(endpoint, {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ name: newName })
-                });
-                
-                console.log(`Update response status: ${response.status}`);
-                const responseText = await response.text();
-                console.log(`Update response text:`, responseText);
-                
-                if (response.ok) {
-                  console.log(`Successfully updated ${collection} item ${itemId}`);
-                  
-                  // Update the text content - be careful with the DOM structure
-                  // Some items might have color dots or other elements before the text
-                  const colorDot = element.querySelector('.color-dot');
-                  if (colorDot) {
-                    // If there's a color dot, we need to update just the text node after it
-                    let textNode = null;
-                    for (let i = 0; i < element.childNodes.length; i++) {
-                      if (element.childNodes[i].nodeType === Node.TEXT_NODE) {
-                        textNode = element.childNodes[i];
-                        break;
-                      }
-                    }
-                    if (textNode) {
-                      textNode.textContent = newName;
-                    }
-                  } else if (element.querySelector('.relation-content')) {
-                    // For relations, update the name span
-                    const nameSpan = element.querySelector('.relation-name');
-                    if (nameSpan) {
-                      nameSpan.textContent = newName;
-                    }
-                  } else {
-                    // For simple items, just update the first child text node
-                    let textNode = element.childNodes[0];
-                    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                      textNode.textContent = newName;
-                    }
-                  }
-                  
-                  initializeGraph();
-                } else {
-                  console.error(`Failed to update ${collection} item:`, responseText);
-                  alert(`Failed to update ${collection}: ${responseText}`);
-                }
-              } catch (err) {
-                console.error(`Error updating ${collection} item:`, err);
-                alert(`Error updating ${collection}: ${err.message}`);
-              }
-            }
-            
-            // Clean up regardless of success
-            element.classList.remove('inline-edit-active');
-            input.remove();
-            
-          } else if (e.key === 'Escape') {
-            // Cancel edit
-            element.classList.remove('inline-edit-active');
-            input.remove();
-          }
-        });
-      }
-
-      function updateAuthUI() {
-        // Double-check userId in case it was set by a different tab/window
-        if (!userId) {
-          userId = checkAndRestoreSession();
-        }
-        
-        console.log('Updating UI, userId:', userId);
-        activePerspectiveDisplay.textContent = activePerspective;
-        if (userId) {
-          signupBtn.style.display = 'none';
-          loginBtn.style.display = 'none';
-          signupOpt.style.display = 'none';
-          loginOpt.style.display = 'none';
-          logoutOpt.style.display = 'block';
-          usernameInput.style.display = 'none';
-          passwordInput.style.display = 'none';
-          authFields.style.display = 'none';
-          userDisplay.style.display = 'block';
-          entitiesDisplay.style.display = 'flex';
-          graphContainer.style.display = 'block';
-          
-          // Use classList instead of style.display for elements with transitions
-          leftSidebar.classList.remove('left-sidebar-hidden');
-          // Second sidebar remains hidden until an accordion is clicked
-        } else {
-          signupBtn.style.display = 'flex';
-          loginBtn.style.display = 'flex';
-          signupOpt.style.display = 'block';
-          loginOpt.style.display = 'block';
-          logoutOpt.style.display = 'none';
-          usernameInput.style.display = 'inline-block';
-          passwordInput.style.display = 'inline-block';
-          authFields.style.display = 'none';
-          userDisplay.style.display = 'none';
-          entitiesDisplay.style.display = 'none';
-          graphContainer.style.display = 'none';
-          
-          // Use classList for elements with transitions
-          leftSidebar.classList.add('left-sidebar-hidden');
-          secondSidebar.classList.add('hidden');
-        }
-      }
-
-      async function fetchSOMData() {
-        console.log('Fetching SOM data');
-        
-        // Double-check userId before making the request
-        // This ensures we have the most current session info
-        if (!userId) {
-          userId = checkAndRestoreSession();
-        }
-        
-        const url = userId ? `/api/som?perspective=${activePerspective}` : '/api/som';
-        console.log('Fetching data from URL:', url, 'with userId:', userId);
-        
-        try {
-          const response = await fetch(url);
-          if (!response.ok) {
-            console.error('Fetch failed:', response.status, await response.text());
-            return { nodes: [], links: [] };
-          }
-          const data = await response.json();
-          console.log('SOM Data:', data);
-          somData = data;
-          
-          if (data.error) {
-            console.error('API Error:', data.details);
-            return { nodes: [], links: [] };
-          }
-          
-          if (data.user) {
-            localStorage.setItem('username', data.user.username);
-            userDisplay.textContent = data.user.username;
-            entityCount.textContent = data.user.entityCount;
-            entitiesPopup.innerHTML = data.entities.map(e => `<div>${e.name}</div>`).join('');
-            
-            // Populate entities list
-            document.getElementById('entities-list').innerHTML = data.entities.map(e => `
-              <div class="accordion-item" data-id="${e._id}">
-                ${e.name}
-                <span class="edit-icons">
-                  <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
-                  </svg>
-                  <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                  </svg>
-                </span>
-              </div>`).join('');
-            
-            // Immediately setup edit/delete handlers for entities
-            setupEditDelete('entities');
-            
-            // Populate types list
-            if (data.types && data.types.length > 0) {
-              document.getElementById('types-list').innerHTML = data.types.map(type => `
-                <div class="accordion-item" data-id="${type._id}">
-                  <span class="color-dot" style="background-color: ${oxFormatToHex(type.color || '0xff9500')}"></span>
-                  ${type.name}
-                  <span class="edit-icons">
-                    <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
-                    </svg>
-                    <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                    </svg>
-                  </span>
-                </div>`).join('');
-              
-              // Immediately setup edit/delete handlers for types
-              setupEditDelete('types');
-              
-              // Populate types dropdown for entity creation
-              const typeSelect = document.getElementById('entity-type');
-              // Clear existing options except the first one
-              typeSelect.innerHTML = '<option value="" disabled selected>Select a Type</option>';
-              // Add types from data
-              data.types.forEach(type => {
-                const option = document.createElement('option');
-                option.value = type._id;
-                option.textContent = type.name;
-                typeSelect.appendChild(option);
-              });
-            }
-            
-            // Populate relations list with translated entity names instead of IDs
-            if (data.relations && data.relations.length > 0) {
-              // Create a map of entity IDs to names for easy lookup
-              const entityMap = {};
-              data.entities.forEach(entity => {
-                entityMap[entity._id] = entity.name;
-              });
-              
-              // Add user to the entity map
-              if (data.user) {
-                entityMap[`users/${data.user.username}`] = `User: ${data.user.username}`;
-              }
-              
-              document.getElementById('relations-list').innerHTML = data.relations.map(relation => {
-                // Get the source and target entity names or use the ID if not found
-                const sourceName = entityMap[relation._from] || relation._from.split('/').pop();
-                const targetName = entityMap[relation._to] || relation._to.split('/').pop();
-                
-                // Get line type indicator symbol
-                let lineTypeSymbol = '―';
-                if (relation.lineType === 'dashed') lineTypeSymbol = '- - -';
-                else if (relation.lineType === 'dotted') lineTypeSymbol = '····';
-                
-                return `
-                <div class="accordion-item" data-id="${relation._id}">
-                  <div class="relation-content">
-                    <span class="relation-name">${relation.name || 'Relationship'}</span>
-                    <div class="relation-details text-xs">
-                      <span class="text-lytBlue">${sourceName}</span>
-                      <span class="line-type-indicator">${lineTypeSymbol}</span>
-                      <svg class="icon-sm" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
-                      <span class="text-lytGreen">${targetName}</span>
-                    </div>
-                  </div>
-                  <span class="edit-icons">
-                    <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                      <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
-                        </svg>
-                        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                        </svg>
-                      </span>
-                    </div>`;
-              }).join('');
-              
-              // Immediately setup edit/delete handlers for relations
-              setupEditDelete('relations');
-            }
-            
-            // Populate entity dropdowns for relation creation
-            if (data.entities && data.entities.length > 0) {
-              const fromSelect = document.getElementById('relation-from');
-              const toSelect = document.getElementById('relation-to');
-              
-              // Clear existing options except the first one
-              fromSelect.innerHTML = '<option value="" disabled selected>Source Entity</option>';
-              toSelect.innerHTML = '<option value="" disabled selected>Target Entity</option>';
-              
-              // Add user as a possible source
-              const userOption = document.createElement('option');
-              userOption.value = `users/${userId}`;  // Make sure the user ID has the "users/" prefix
-              userOption.textContent = `User: ${userId}`;
-              fromSelect.appendChild(userOption);
-              
-              // Add entities to both dropdowns
-              data.entities.forEach(entity => {
-                // For the FROM dropdown
-                const fromOption = document.createElement('option');
-                fromOption.value = entity._id;  // This already has the "entities/" prefix
-                fromOption.textContent = entity.name;
-                fromSelect.appendChild(fromOption);
-                
-                // For the TO dropdown
-                const toOption = document.createElement('option');
-                toOption.value = entity._id;  // This already has the "entities/" prefix
-                toOption.textContent = entity.name;
-                toSelect.appendChild(toOption);
-              });
-            }
-          }
-          
-          // Fetch perspectives
-          try {
-            const perspectivesResponse = await fetch('/api/perspectives');
-            if (perspectivesResponse.ok) {
-              const perspectives = await perspectivesResponse.json();
-              console.log('Perspectives:', perspectives);
-              
-              // Update perspectives list in the sidebar
-              document.getElementById('perspectives-list').innerHTML = perspectives
-                .map(p => `
-                  <div class="accordion-item" data-id="${p._id || 'default'}">
-                    ${p.name}
-                    ${p.name !== 'default' ? `
-                      <span class="edit-icons">
-                        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M4.20999 20.5199C4.11375 20.521 4.01826 20.5029 3.92902 20.4669C3.83977 20.4308 3.75854 20.3775 3.68999 20.3099C3.61139 20.2323 3.55092 20.1383 3.51288 20.0346C3.47485 19.9308 3.4602 19.82 3.46999 19.7099L3.77999 15.8699C3.79328 15.6916 3.87156 15.5244 3.99999 15.3999L15.06 4.33995C15.6762 3.76286 16.4961 3.45361 17.34 3.47995C18.1784 3.48645 18.9828 3.81181 19.59 4.38995C20.1723 4.98795 20.5073 5.7839 20.5277 6.61837C20.5481 7.45284 20.2524 8.26421 19.7 8.88995L8.62999 19.9999C8.50609 20.1234 8.34386 20.201 8.16999 20.2199L4.27999 20.5699L4.20999 20.5199ZM5.20999 16.2599L4.99999 18.9999L7.73999 18.7499L18.64 7.82995C18.8525 7.57842 18.9884 7.27118 19.0314 6.94472C19.0745 6.61827 19.0229 6.28631 18.8828 5.9883C18.7428 5.69028 18.5201 5.43873 18.2413 5.26354C17.9625 5.08834 17.6393 4.99685 17.31 4.99995C17.0936 4.98621 16.8766 5.01633 16.6721 5.0885C16.4676 5.16067 16.2798 5.27341 16.12 5.41995L5.20999 16.2599Z" fill="#fff"></path>
-                        </svg>
-                        <svg class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M18 6V16.2C18 17.8802 18 18.7202 17.673 19.362C17.3854 19.9265 16.9265 20.3854 16.362 20.673C15.7202 21 14.8802 21 13.2 21H10.8C9.11984 21 8.27976 21 7.63803 20.673C7.07354 20.3854 6.6146 19.9265 6.32698 19.362C6 18.7202 6 17.8802 6 16.2V6M4 6H20M16 6L15.7294 5.18807C15.4671 4.40125 15.3359 4.00784 15.0927 3.71698C14.8779 3.46013 14.6021 3.26132 14.2905 3.13878C13.9376 3 13.523 3 12.6936 3H11.3064C10.477 3 10.0624 3 9.70951 3.13878C9.39792 3.26132 9.12208 3.46013 8.90729 3.71698C8.66405 4.00784 8.53292 4.40125 8.27064 5.18807L8 6" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-                        </svg>
-                      </span>
-                    ` : ''}
-                  </div>`
-                )
-                .join('');
-              
-              // Immediately setup edit/delete handlers for perspectives
-              setupEditDelete('perspectives');
-              
-              // Setup perspective click handlers
-              document.querySelectorAll('#perspectives-list .accordion-item').forEach(item => {
-                item.addEventListener('click', (e) => {
-                  e.stopPropagation();
-                  const perspectiveName = item.textContent.trim();
-                  activePerspective = perspectiveName;
-                  localStorage.setItem('perspective', perspectiveName);
-                  activePerspectiveDisplay.textContent = perspectiveName;
-                  
-                  // Reload data with new perspective
-                  initializeGraph();
-                });
-              });
-            }
-          } catch (err) {
-            console.error('Error fetching perspectives:', err);
-          }
-
-          const allNodeIds = new Set([...data.entities.map(e => e._id), ...(data.user ? [data.user.username] : [])]);
-          return {
-            nodes: [
-              ...data.entities.map(e => ({
-                id: e._id,
-                name: e.name,
-                color: parseInt(e.color || data.types.find(t => t._id === e.typeId)?.color || '0xff0000')
-              })),
-              ...(data.user ? [{ id: data.user.username, name: data.user.username, color: 0xff69b4 }] : [])
-            ],
-            links: data.relations
-              .filter(r => r._from && r._to && allNodeIds.has(r._from) && allNodeIds.has(r._to))
-              .map(r => ({
-                source: r._from,
-                target: r._to,
-                lineType: r.lineType || 'solid',
-                name: r.name,
-                id: r._id,
-                endpointMode: r.endpointMode || 'arrow'
-              }))
-          };
-        } catch (error) {
-          console.error('Fetch SOM data failed:', error);
-          return { nodes: [], links: [] };
-        }
-      }
-
-      // Initialize graph style controls after the graph is loaded
-      let styleControlsContainer;
-      let particleControls;
-      let particleSpeedControl;
-      let linkWidthControl;
-      let nodeScaleControl;
-      
-      // Setup style controls only after graph initialization
-      function setupStyleControls() {
-        if (!window.Graph) {
-          console.error('Cannot setup style controls: Graph not initialized');
-          return;
-        }
-        
-        // Create style controls container if it doesn't exist
-        if (!styleControlsContainer) {
-          styleControlsContainer = document.createElement('div');
-          styleControlsContainer.style.position = 'fixed';
-          styleControlsContainer.style.bottom = '60px';
-          styleControlsContainer.style.right = '10px';
-          styleControlsContainer.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-          styleControlsContainer.style.padding = '10px';
-          styleControlsContainer.style.borderRadius = '5px';
-          styleControlsContainer.style.zIndex = '100';
-          styleControlsContainer.style.display = 'none'; // Hidden by default
-          graphContainer.appendChild(styleControlsContainer);
-          
-          // Toggle button for style controls
-          const styleToggleBtn = document.createElement('button');
-          styleToggleBtn.id = 'style-toggle-btn';
-          styleToggleBtn.textContent = 'Graph Style';
-          styleToggleBtn.style.position = 'fixed';
-          styleToggleBtn.style.top = '60px';
-          styleToggleBtn.style.right = '250px';
-          styleToggleBtn.style.padding = '8px 16px';
-          styleToggleBtn.style.backgroundColor = 'rgba(0, 0, 0, 0.6)';
-          styleToggleBtn.style.color = 'white';
-          styleToggleBtn.style.border = '1px solid #666';
-          styleToggleBtn.style.borderRadius = '4px';
-          styleToggleBtn.style.zIndex = '100';
-          styleToggleBtn.style.cursor = 'pointer';
-          graphContainer.appendChild(styleToggleBtn);
-          
-          styleToggleBtn.addEventListener('click', () => {
-            const isVisible = styleControlsContainer.style.display === 'block';
-            styleControlsContainer.style.display = isVisible ? 'none' : 'block';
-          });
-          
-          // Add the controls
-          particleControls = addControl('Particles', 0, 10, 3, 1, (val) => {
-            if (window.Graph) window.Graph.linkDirectionalParticles(() => val);
-          });
-          
-          particleSpeedControl = addControl('Particle Speed', 0.001, 0.05, 0.01, 0.001, (val) => {
-            if (window.Graph) window.Graph.linkDirectionalParticleSpeed(() => val);
-          });
-          
-          linkWidthControl = addControl('Link Width', 0.1, 5, 1.2, 0.1, (val) => {
-            if (window.Graph) window.Graph.linkWidth(() => val);
-          });
-          
-          nodeScaleControl = addControl('Node Scale', 0.5, 5, 1, 0.1, (val) => {
-            if (window.Graph) window.Graph.nodeVal((node) => 10 * val);
-          });
-          
-          // Setup all other controls
-          setupHighlightNodeButton();
-          setupResetButton();
-          setupLineTypePreservation();
-        }
-      }
-      
-      // Create a function to add controls with safety check for Graph object
-      function addControl(name, min, max, value, step, onChange) {
-        const controlDiv = document.createElement('div');
-        controlDiv.style.marginBottom = '10px';
-        
-        const label = document.createElement('label');
-        label.textContent = name;
-        label.style.display = 'block';
-        label.style.marginBottom = '5px';
-        label.style.color = 'white';
-        label.style.fontSize = '12px';
-        
-        const input = document.createElement('input');
-        input.type = 'range';
-        input.min = min;
-        input.max = max;
-        input.step = step;
-        input.value = value;
-        input.style.width = '100%';
-        
-        const valueDisplay = document.createElement('span');
-        valueDisplay.textContent = value;
-        valueDisplay.style.marginLeft = '10px';
-        valueDisplay.style.color = 'white';
-        valueDisplay.style.fontSize = '12px';
-        
-        input.addEventListener('input', () => {
-          valueDisplay.textContent = input.value;
-          // Only call onChange when Graph exists
-          if (window.Graph) {
-            onChange(parseFloat(input.value));
-          }
-        });
-        
-        controlDiv.appendChild(label);
-        controlDiv.appendChild(input);
-        label.appendChild(valueDisplay);
-        
-        styleControlsContainer.appendChild(controlDiv);
-        
-        return input;
-      }
-      
-      function setupHighlightNodeButton() {
-        // Add particle emitter for specific node relationships
-        const highlightNodeBtn = document.createElement('button');
-        highlightNodeBtn.textContent = 'Highlight Connections';
-        highlightNodeBtn.style.backgroundColor = 'rgba(255, 149, 0, 0.8)';
-        highlightNodeBtn.style.color = 'white';
-        highlightNodeBtn.style.border = 'none';
-        highlightNodeBtn.style.padding = '8px';
-        highlightNodeBtn.style.borderRadius = '4px';
-        highlightNodeBtn.style.cursor = 'pointer';
-        highlightNodeBtn.style.width = '100%';
-        highlightNodeBtn.style.marginBottom = '10px';
-        highlightNodeBtn.style.marginTop = '10px';
-        
-        highlightNodeBtn.addEventListener('click', () => {
-          if (!window.Graph) return;
-          
-          // Get the current graph data
-          const gData = window.Graph.graphData();
-          
-          // Check if we have nodes
-          if (!gData.nodes || gData.nodes.length === 0) return;
-          
-          // Random node to highlight
-          const randomNodeIndex = Math.floor(Math.random() * gData.nodes.length);
-          const randomNode = gData.nodes[randomNodeIndex];
-          
-          // Find all links connected to this node
-          const connectedLinks = gData.links.filter(link => 
-            link.source.id === randomNode.id || link.target.id === randomNode.id
-          );
-          
-          if (connectedLinks.length === 0) {
-            alert(`Node ${randomNode.name || randomNode.id} has no connections.`);
-            return;
-          }
-          
-          // Highlight the node
-          const prevColor = randomNode.__prevColor || randomNode.color;
-          randomNode.__prevColor = prevColor;
-          
-          // Pulse animation for the selected node
-          let pulseDirection = 1;
-          let pulseStrength = 0;
-          const pulseInterval = setInterval(() => {
-            pulseStrength += (0.1 * pulseDirection);
-            if (pulseStrength >= 1) pulseDirection = -1;
-            if (pulseStrength <= 0) {
-              pulseDirection = 1;
-              pulseStrength = 0;
-            }
-            
-            // Apply pulsing color
-            window.Graph.nodeColor(node => {
-              if (node.id === randomNode.id) {
-                const pulseColor = 0xffff00; // Yellow pulse
-                return pulseColor;
-              }
-              return node.color;
-            });
-          }, 50);
-          
-          // Emit particles on all connected links
-          connectedLinks.forEach(link => {
-            // Emit multiple particles
-            for (let i = 0; i < 5; i++) {
-              setTimeout(() => {
-                window.Graph.emitParticle(link);
-              }, i * 300); // Stagger the emission
-            }
-          });
-          
-          // Stop pulse after a few seconds
-          setTimeout(() => {
-            clearInterval(pulseInterval);
-            window.Graph.nodeColor(node => node.color);
-          }, 5000);
-        });
-        
-        styleControlsContainer.appendChild(highlightNodeBtn);
-      }
-      
-      function setupResetButton() {
-        // Add a reset button to restore default settings
-        const resetBtn = document.createElement('button');
-        resetBtn.textContent = 'Reset Default Style';
-        resetBtn.style.backgroundColor = 'rgba(200, 200, 200, 0.8)';
-        resetBtn.style.color = 'black';
-        resetBtn.style.border = 'none';
-        resetBtn.style.padding = '8px';
-        resetBtn.style.borderRadius = '4px';
-        resetBtn.style.cursor = 'pointer';
-        resetBtn.style.width = '100%';
-        resetBtn.style.marginTop = '15px';
-        
-        resetBtn.addEventListener('click', () => {
-          if (!window.Graph) return;
-          
-          // Reset to default values
-          particleControls.value = 3;
-          particleControls.nextElementSibling.textContent = 3;
-          
-          particleSpeedControl.value = 0.01;
-          particleSpeedControl.nextElementSibling.textContent = 0.01;
-          
-          linkWidthControl.value = 1.2;
-          linkWidthControl.nextElementSibling.textContent = 1.2;
-          
-          nodeScaleControl.value = 1;
-          nodeScaleControl.nextElementSibling.textContent = 1;
-          
-          // Apply default settings
-          // Reset to original styling logic based on line types
-          window.Graph
-            .linkDirectionalParticles(link => {
-              // Default particles based on line type
-              if (link.lineType === 'dashed') return 2;
-              if (link.lineType === 'dotted') return 3;
-              return 0;
-            })
-            .linkDirectionalParticleSpeed(link => {
-              // Different speeds based on line type
-              if (link.lineType === 'dotted') return 0.015;
-              if (link.lineType === 'dashed') return 0.008;
-              return 0.01;
-            })
-            .linkWidth(link => link.lineType === 'dotted' ? 0.8 : 1.2)
-            .nodeVal(node => 10);
-        });
-        
-        styleControlsContainer.appendChild(resetBtn);
-      }
-      
-      function setupLineTypePreservation() {
-        // Add a checkbox to toggle respect for line types
-        const lineTypeDiv = document.createElement('div');
-        lineTypeDiv.style.marginTop = '15px';
-        lineTypeDiv.style.display = 'flex';
-        lineTypeDiv.style.alignItems = 'center';
-        
-        const respectLineTypeCheckbox = document.createElement('input');
-        respectLineTypeCheckbox.type = 'checkbox';
-        respectLineTypeCheckbox.id = 'respect-line-type';
-        respectLineTypeCheckbox.checked = true;
-        
-        const lineTypeLabel = document.createElement('label');
-        lineTypeLabel.htmlFor = 'respect-line-type';
-        lineTypeLabel.textContent = 'Preserve line type styles';
-        lineTypeLabel.style.color = 'white';
-        lineTypeLabel.style.fontSize = '12px';
-        lineTypeLabel.style.marginLeft = '8px';
-        
-        respectLineTypeCheckbox.addEventListener('change', () => {
-          if (!window.Graph) return;
-          
-          if (respectLineTypeCheckbox.checked) {
-            // Reset to line type based styles
-            window.Graph
-              .linkDirectionalParticleColor(link => {
-                if (link.lineType === 'dotted') return '#51cbee';
-                if (link.lineType === 'dashed') return '#ffffff';
-                return '#ff9500';
-              })
-              .linkOpacity(link => {
-                if (link.lineType === 'dotted') return 0.4;
-                if (link.lineType === 'dashed') return 0.7;
-                return 0.9;
-              })
-              .linkCurvature(link => {
-                return link.lineType === 'dotted' ? 0.2 : 
-                      link.lineType === 'dashed' ? 0.1 : 0;
-              });
-          } else {
-            // Apply uniform styles
-            window.Graph
-              .linkDirectionalParticleColor(() => '#ff9500')
-              .linkOpacity(0.8)
-              .linkCurvature(0);
-          }
-        });
-        
-        lineTypeDiv.appendChild(respectLineTypeCheckbox);
-        lineTypeDiv.appendChild(lineTypeLabel);
-        styleControlsContainer.appendChild(lineTypeDiv);
-      }
-
-      async function initializeGraph() {
-        console.log('Initializing graph');
-        
-        // Create a global Graph variable that other components can access
-        try {
-          window.Graph = ForceGraph3D()(graphContainer)
-            .nodeColor(node => node.color)
-            .nodeLabel(node => node.name)
-            .linkLabel(link => link.name || 'relationship')
-            .linkDirectionalParticleColor(link => {
-              // Different colored particles based on line type
-              if (link.lineType === 'dotted') return '#51cbee';  // Blue for dotted
-              if (link.lineType === 'dashed') return '#ffffff';  // White for dashed
-              return '#ff9500';  // Orange for solid (default)
-            })
-            .linkDirectionalParticleWidth(link => link.lineType === 'dotted' ? 3 : 4)
-            .linkDirectionalParticles(link => {
-              // Default particles based on line type
-              if (link.particles !== undefined) return link.particles;
-              if (link.lineType === 'dashed') return 2;  // Two particles for dashed
-              if (link.lineType === 'dotted') return 3;  // Three particles for dotted
-              return 0;  // No particles by default for solid lines
-            })
-            .linkDirectionalParticleSpeed(link => {
-              // Different speeds based on line type
-              if (link.lineType === 'dotted') return 0.015;  // Faster for dotted
-              if (link.lineType === 'dashed') return 0.008;  // Medium for dashed
-              return 0.01;  // Standard for solid
-            })
-            .linkHoverPrecision(10)
-            .linkWidth(link => link.lineType === 'dotted' ? 0.8 : 1.2)  // Thinner for dotted
-            .linkOpacity(link => {
-              // Different opacities for different line types
-              if (link.lineType === 'dotted') return 0.4;
-              if (link.lineType === 'dashed') return 0.7;
-              return 0.9;  // Solid lines
-            })
-            // Use curvature for visual distinction since we can't do dashes
-            .linkCurvature(link => {
-              // Create slight curve for different line types
-              return link.lineType === 'dotted' ? 0.2 : 
-                    link.lineType === 'dashed' ? 0.1 : 0;
-            });
-
-          // Suppress the warning about useLegacyLights
-          try {
-            // Get the internal three.js renderer
-            const renderer = window.Graph.renderer();
-            if (renderer) {
-              // Simply delete the deprecated property to avoid warnings
-              delete renderer.useLegacyLights;
-            }
-          } catch (err) {
-            console.warn('Error configuring THREE.js renderer:', err);
-          }
-          
-          // Initialize graph control event handlers
-          initializeGraphControls();
-        } catch (err) {
-          console.error('Error initializing ForceGraph3D:', err);
-          return null;
-        }
-        
-        // Fetch data and populate the graph
-        try {
-          const graphData = await fetchSOMData();
-          
-          if (!graphData || !graphData.nodes || !window.Graph) {
-            console.error('Invalid graph data or Graph not initialized');
-            return window.Graph;
-          }
-          
-          console.log(`Rendering graph with ${graphData.nodes.length} nodes and ${graphData.links?.length || 0} links`);
-          
-          // Update links to include lineType property
-          if (graphData.links) {
-            graphData.links.forEach(link => {
-              // Set lineType property if not already present
-              if (!link.lineType && link.lineMode) {
-                link.lineType = link.lineMode; // Use lineMode as fallback
-              } else if (!link.lineType) {
-                link.lineType = 'solid'; // Default to solid
-              }
-              
-              // Add particle count based on line type
-              if (link.lineType === 'solid') {
-                link.particles = 1;  // One particle for solid lines
-              } else if (link.lineType === 'dashed') {
-                link.particles = 2;  // Two particles for dashed lines
-              }
-            });
-          }
-          
-          // Apply the data to the graph
-          window.Graph.graphData(graphData);
-          
-          // Configure click behavior for links
-          window.Graph.onLinkClick(link => {
-            // Emit particles when link is clicked
-            if (window.Graph && window.Graph.emitParticle) {
-              window.Graph.emitParticle(link);
-            }
-          });
-
-          // Add node click handler
-          window.Graph.onNodeClick(node => {
-            // Highlight the node
-            window.Graph.nodeColor(n => n.id === node.id ? 0xffff00 : n.color);
-            
-            // Center the view on the node
-            const distance = 40;
-            const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
-            window.Graph.cameraPosition(
-              { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
-              node,
-              1000
-            );
-            
-            // Show node info in the right sidebar
-            showEntityInfo(node);
-          });
-
-          return window.Graph;
-        } catch (err) {
-          console.error('Error processing graph data:', err);
-          return window.Graph;
-        }
-      }
-      
-      // Function to initialize graph controls directly
-      function initializeGraphControls() {
-        const particlesControl = document.getElementById('particles-control');
-        const particleSpeedControl = document.getElementById('particle-speed-control');
-        const linkWidthControl = document.getElementById('link-width-control');
-        const nodeScaleControl = document.getElementById('node-scale-control');
-        
-        console.log('Initializing graph controls directly:', {
-          particlesControl, particleSpeedControl, linkWidthControl, nodeScaleControl
-        });
-        
-        // Setup direct event handlers for sliders to affect the graph
-        if (particlesControl) {
-          particlesControl.addEventListener('input', function() {
-            const value = parseInt(this.value);
-            const valueDisplay = document.getElementById('particles-value');
-            if (valueDisplay) valueDisplay.textContent = value;
-            
-            console.log('Particles value changed to:', value);
-            if (window.Graph) {
-              window.Graph.linkDirectionalParticles(() => value);
-            }
-          });
-        }
-        
-        if (particleSpeedControl) {
-          particleSpeedControl.addEventListener('input', function() {
-            const value = parseFloat(this.value);
-            const valueDisplay = document.getElementById('particle-speed-value');
-            if (valueDisplay) valueDisplay.textContent = value.toFixed(3);
-            
-            console.log('Particle speed value changed to:', value);
-            if (window.Graph) {
-              window.Graph.linkDirectionalParticleSpeed(() => value);
-            }
-          });
-        }
-        
-        if (linkWidthControl) {
-          linkWidthControl.addEventListener('input', function() {
-            const value = parseFloat(this.value);
-            const valueDisplay = document.getElementById('link-width-value');
-            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
-            
-            console.log('Link width value changed to:', value);
-            if (window.Graph) {
-              window.Graph.linkWidth(() => value);
-            }
-          });
-        }
-        
-        if (nodeScaleControl) {
-          nodeScaleControl.addEventListener('input', function() {
-            const value = parseFloat(this.value);
-            const valueDisplay = document.getElementById('node-scale-value');
-            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
-            
-            console.log('Node scale value changed to:', value);
-            if (window.Graph) {
-              window.Graph.nodeVal(node => 10 * value);
-            }
-          });
-        }
-      }
-
-      // Function to persistently save user session
-      function saveUserSession(userId) {
-        if (!userId) return;
-        
-        console.log('Saving user session:', userId);
-        
-        // Save to localStorage for client-side persistence
-        localStorage.setItem('userId', userId);
-        
-        // Also set a cookie for server-side recognition with a longer expiry
-        // This uses a 30-day expiration
-        const expiryDate = new Date();
-        expiryDate.setDate(expiryDate.getDate() + 30);
-        const cookieValue = `userId=${userId}; expires=${expiryDate.toUTCString()}; path=/; SameSite=Lax`;
-        console.log('Setting cookie:', cookieValue);
-        document.cookie = cookieValue;
-      }
-
-      signupBtn.addEventListener('click', async () => {
-        console.log('Signup button clicked');
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-        const response = await fetch('/api/users/signup', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
-        });
-        const data = await response.json();
-        if (data.userId) {
-          userId = data.userId;
-          saveUserSession(userId);
-          updateAuthUI();
-          initializeGraph();
-        } else {
-          alert(data.error || 'Signup failed');
-        }
-      });
-
-      loginBtn.addEventListener('click', async () => {
-        console.log('Login button clicked');
-        const username = usernameInput.value;
-        const password = passwordInput.value;
-        const response = await fetch('/api/users/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password }),
-        });
-        const data = await response.json();
-        if (data.userId) {
-          userId = data.userId;
-          saveUserSession(userId);
-          updateAuthUI();
-          initializeGraph();
-        } else {
-          alert(data.error || 'Login failed');
-        }
-      });
-
-      passwordInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-          console.log('Enter pressed in password input');
-          if (loginBtn.style.display !== 'none') loginBtn.click();
-          else if (signupBtn.style.display !== 'none') signupBtn.click();
-        }
-      });
-
-      logoutOpt.addEventListener('click', async () => {
-        console.log('Logout option clicked');
-        try {
-          // Call the server-side logout endpoint
-          const response = await fetch('/api/users/logout', { method: 'POST' });
-          console.log('Logout response:', response.status);
-        } catch (err) {
-          console.error('Error during logout:', err);
-        }
-        
-        // Clear user ID
-        userId = null;
-        
-        // Clear all session data from localStorage
-        localStorage.removeItem('userId');
-        localStorage.removeItem('username');
-        
-        // Clear the cookie by setting an expired date in the past
-        document.cookie = 'userId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax';
-        console.log('Session cleared from all storage mechanisms');
-        
-        // Update UI to reflect logged out state
-        updateAuthUI();
-        initializeGraph();
-      });
-
-      signupOpt.addEventListener('click', () => {
-        console.log('Signup option clicked');
-        authFields.style.display = 'flex';
-        signupBtn.style.display = 'flex';
-        loginBtn.style.display = 'none';
-        userMenu.classList.add('hidden');
-      });
-
-      loginOpt.addEventListener('click', () => {
-        console.log('Login option clicked');
-        authFields.style.display = 'flex';
-        signupBtn.style.display = 'none';
-        loginBtn.style.display = 'flex';
-        userMenu.classList.add('hidden');
-      });
-
-      userToggle.addEventListener('click', () => {
-        console.log('User toggle clicked');
-        userMenu.classList.toggle('hidden');
-      });
-
-      entitiesDisplay.addEventListener('mouseenter', () => {
-        console.log('Entities display mouseenter');
-        entitiesPopup.classList.remove('hidden');
-      });
-
-      entitiesDisplay.addEventListener('mouseleave', () => {
-        console.log('Entities display mouseleave');
-        entitiesPopup.classList.add('hidden');
-      });
-
-      menuToggle.addEventListener('click', () => {
-        console.log('Menu toggle clicked');
-        const isVisible = !leftSidebar.classList.contains('left-sidebar-hidden');
-         
-        if (isVisible) {
-          leftSidebar.classList.add('left-sidebar-hidden');
-          secondSidebar.classList.add('hidden');
-           
-          // Close all accordion contents
-          document.querySelectorAll('.accordion-content').forEach(content => {
-            content.classList.remove('persistent');
-          });
-        } else {
-          leftSidebar.classList.remove('left-sidebar-hidden');
-          // Second sidebar remains hidden until an accordion is clicked
-        }
-      });
-
-      document.querySelectorAll('.accordion').forEach(accordion => {
-        const accordionIcon = accordion.querySelector('svg');
-        const accordionContent = accordion.querySelector('.accordion-content');
-         
-        accordionIcon.addEventListener('click', (e) => {
-          e.stopPropagation();
-          // Close all other accordion contents
-          document.querySelectorAll('.accordion-content').forEach(content => {
-            if (content !== accordionContent) {
-              content.classList.remove('persistent');
-            }
-          });
-          // Toggle this accordion content
-          accordionContent.classList.toggle('persistent');
-           
-          // Show the second sidebar when accordion content is displayed
-          if (accordionContent.classList.contains('persistent')) {
-            secondSidebar.classList.remove('hidden');
-          } else if (!document.querySelector('.accordion-content.persistent')) {
-            // Hide second sidebar if no accordion content is open
-            secondSidebar.classList.add('hidden');
-          }
-        });
-      });
-
-      document.addEventListener('click', (e) => {
-        // Close accordion contents when clicking outside
-        if (!e.target.closest('.accordion') && 
-            !e.target.closest('.accordion-content') && 
-            !e.target.closest('.form-container')) {
-          document.querySelectorAll('.accordion-content').forEach(content => {
-            content.classList.remove('persistent');
-          });
-          document.querySelectorAll('.form-container').forEach(form => {
-            form.style.display = 'none';
-          });
-        }
-      });
-
-      document.querySelectorAll('.accordion-item').forEach(item => {
-        if (item.textContent.includes('Add')) {
-          item.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevent event from bubbling up
-            console.log(`Add ${item.textContent.trim()} clicked`);
-             
-            // Get the form ID from data attribute
-            const formId = item.getAttribute('data-form');
-            const accordionContent = item.closest('.accordion-content');
-             
-            if (formId) {
-              // First hide all forms in all accordion contents
-              document.querySelectorAll('.form-container').forEach(form => {
-                form.style.display = 'none';
-              });
-               
-              // Show the selected form
-              const form = document.getElementById(formId);
-              if (form) {
-                form.style.display = 'flex';
-                 
-                // Set addMode based on the form
-                if (formId === 'entity-form') addMode = 'entity';
-                else if (formId === 'type-form') addMode = 'type';
-                else if (formId === 'relation-form') addMode = 'relation';
-                else if (formId === 'perspective-form') addMode = 'perspective';
-                 
-                // Clear form fields
-                const inputs = form.querySelectorAll('input:not([type="color"])');
-                inputs.forEach(input => {
-                  if (input.type !== 'hidden') input.value = '';
-                });
-              }
-            }
-             
-            // Keep the parent accordion content visible
-            if (accordionContent) {
-              // First remove persistent class from all accordion contents
-              document.querySelectorAll('.accordion-content').forEach(content => {
-                if (content !== accordionContent) {
-                  content.classList.remove('persistent');
-                }
-              });
-              accordionContent.classList.add('persistent');
-            }
-          });
-        }
-      });
-
-      document.addEventListener('keydown', (e) => {
-        if (e.ctrlKey && e.key === 'e') {
-          console.log('Ctrl+E pressed');
-          e.preventDefault(); // Prevent default browser behavior
-           
-          // Toggle all sidebar elements
-          const leftSidebar = document.getElementById('left-sidebar');
-          const secondSidebar = document.getElementById('second-sidebar');
-          const statusBar = document.getElementById('status-bar');
-           
-          // Check if the left sidebar is currently visible (not transformed)
-          const isVisible = !leftSidebar.classList.contains('left-sidebar-hidden');
-           
-          // Toggle visibility with CSS classes for smooth transition
-          if (isVisible) {
-            leftSidebar.classList.add('left-sidebar-hidden');
-            secondSidebar.classList.add('hidden');
-            statusBar.classList.add('statusbar-hidden');
-          } else {
-            leftSidebar.classList.remove('left-sidebar-hidden');
-            statusBar.classList.remove('statusbar-hidden');
-            // secondSidebar remains hidden until an accordion is clicked
-          }
-           
-          // Close all accordion contents
-          document.querySelectorAll('.accordion-content').forEach(content => {
-            content.classList.remove('persistent');
-          });
-           
-          // Hide all forms
-          document.querySelectorAll('.form-container').forEach(form => {
-            form.style.display = 'none';
-          });
-        }
-      });
-
-      // Add direct API test function for simple debugging
-      async function directAPITest(action, collection, id) {
-        try {
-          const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
-          
-          // Process the ID correctly
-          let requestId = id;
-          if (id.includes('/')) {
-            // If ID has collection prefix (like "types/123"), extract just the ID part
-            requestId = id.split('/')[1];
-          } else if (collection === 'relations' || collection === 'entities' || collection === 'types') {
-            // For these collections, if no slash, use ID as is
-            requestId = id;
-          }
-          
-          // Construct proper URL
-          const endpoint = `/api/${singularCollection}/${requestId}`;
-          console.log(`Sending ${action} request to: ${endpoint}`);
-          
-          let response;
-          if (action === 'DELETE') {
-            response = await fetch(endpoint, { method: 'DELETE' });
-          } else if (action === 'PATCH') {
-            const newName = prompt(`Enter new name for item in ${collection}:`);
-            if (!newName) return null;
-            response = await fetch(endpoint, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ name: newName })
-            });
-          }
-          
-          const responseText = await response.text();
-          console.log(`${action} response: ${response.status}`, responseText);
-          
-          if (response.ok) {
-            <!-- alert(`${action} operation succeeded`); -->
-            return true;
-          } else {
-            <!-- alert(`${action} operation failed: ${responseText}`); -->
-            return false;
-          }
-        } catch (err) {
-          console.error(`Error in ${action} operation:`, err);
-          alert(`Error: ${err.message}`);
-          return false;
-        }
-      }
-
-      // Add debug listeners for testing direct API calls
-      document.getElementById('type-test-update').addEventListener('click', async () => {
-        const typeId = prompt("Enter type ID to update (e.g., types/12345 or just 12345):");
-        if (typeId) {
-          const success = await directAPITest('PATCH', 'types', typeId);
-          if (success) initializeGraph();
-        }
-      });
-      
-      document.getElementById('type-test-delete').addEventListener('click', async () => {
-        const typeId = prompt("Enter type ID to delete (e.g., types/12345 or just 12345):");
-        if (typeId) {
-          const success = await directAPITest('DELETE', 'types', typeId);
-          if (success) initializeGraph();
-        }
-      });
-      
-      // Add API Debug Test handler
-      document.getElementById('api-debug-test').addEventListener('click', async () => {
-        console.log("Running comprehensive API Debug Test");
-        
-        // Create a debug results div
-        const resultsDiv = document.createElement('div');
-        resultsDiv.style.position = 'fixed';
-        resultsDiv.style.top = '50%';
-        resultsDiv.style.left = '50%';
-        resultsDiv.style.transform = 'translate(-50%, -50%)';
-        resultsDiv.style.width = '80%';
-        resultsDiv.style.maxHeight = '80vh';
-        resultsDiv.style.overflow = 'auto';
-        resultsDiv.style.backgroundColor = '#222';
-        resultsDiv.style.color = '#fff';
-        resultsDiv.style.padding = '20px';
-        resultsDiv.style.borderRadius = '8px';
-        resultsDiv.style.zIndex = '9999';
-        resultsDiv.style.boxShadow = '0 0 20px rgba(0,0,0,0.7)';
-        resultsDiv.style.fontSize = '14px';
-        resultsDiv.style.fontFamily = 'monospace';
-        
-        document.body.appendChild(resultsDiv);
-        
-        // Add close button
-        const closeButton = document.createElement('button');
-        closeButton.textContent = '✕';
-        closeButton.style.position = 'absolute';
-        closeButton.style.top = '10px';
-        closeButton.style.right = '10px';
-        closeButton.style.backgroundColor = '#444';
-        closeButton.style.border = 'none';
-        closeButton.style.color = '#fff';
-        closeButton.style.width = '30px';
-        closeButton.style.height = '30px';
-        closeButton.style.borderRadius = '50%';
-        closeButton.style.cursor = 'pointer';
-        closeButton.onclick = () => resultsDiv.remove();
-        resultsDiv.appendChild(closeButton);
-        
-        // Function to add test result to the div
-        function addResult(test, result, details = '') {
-          const resultRow = document.createElement('div');
-          resultRow.style.marginBottom = '10px';
-          resultRow.style.borderBottom = '1px solid #444';
-          resultRow.style.paddingBottom = '10px';
-          
-          const status = result ? '✅' : '❌';
-          resultRow.innerHTML = `<div><strong>${status} ${test}</strong></div>`;
-          
-          if (details) {
-            const detailsElem = document.createElement('div');
-            detailsElem.style.marginTop = '5px';
-            detailsElem.style.marginLeft = '20px';
-            detailsElem.style.color = '#aaa';
-            detailsElem.style.fontSize = '12px';
-            detailsElem.style.whiteSpace = 'pre-wrap';
-            detailsElem.style.wordBreak = 'break-all';
-            detailsElem.textContent = details;
-            resultRow.appendChild(detailsElem);
-          }
-          
-          resultsDiv.appendChild(resultRow);
-        }
-        
-        // Test each API
-        try {
-          // 1. Check the debug endpoint
-          addResult('Testing /api/debug endpoint...', true, 'Started');
-          let debugData = null;
-          try {
-            const debugResponse = await fetch('/api/debug');
-            debugData = await debugResponse.json();
-            addResult('Debug API response', debugResponse.ok, 
-                      `Status: ${debugResponse.status}\nData: ${JSON.stringify(debugData, null, 2).substring(0, 500)}...`);
-          } catch (err) {
-            addResult('Debug API', false, `Error: ${err.message}`);
-          }
-          
-          // 2. Check collections data
-          if (debugData && debugData.collections) {
-            const collections = Object.keys(debugData.collections);
-            addResult('Collections found', collections.length > 0, collections.join(', '));
-            
-            // Find sample IDs for testing
-            const testIds = {};
-            for (const coll of collections) {
-              const sample = debugData.collections[coll].sample;
-              if (sample && sample.length > 0) {
-                testIds[coll] = sample[0]._id;
-              }
-            }
-            addResult('Found test IDs', Object.keys(testIds).length > 0, 
-                      Object.entries(testIds).map(([k, v]) => `${k}: ${v}`).join('\n'));
-            
-            // 3. Test GET endpoints
-            for (const coll of collections) {
-              try {
-                const singularColl = coll.endsWith('s') ? coll.slice(0, -1) : coll;
-                const response = await fetch(`/api/${coll}`);
-                const data = await response.json();
-                addResult(`GET /${coll}`, response.ok, 
-                          `Status: ${response.status}\nItems: ${Array.isArray(data) ? data.length : 'not array'}`);
-              } catch (err) {
-                addResult(`GET /${coll}`, false, `Error: ${err.message}`);
-              }
-            }
-            
-            // 4. Test individual document GET
-            for (const [coll, id] of Object.entries(testIds)) {
-              if (!id) continue;
-              
-              try {
-                const singularColl = coll.endsWith('s') ? coll.slice(0, -1) : coll;
-                const idKey = id.includes('/') ? id.split('/')[1] : id;
-                const response = await fetch(`/api/${singularColl}/${idKey}`);
-                let resultText = '';
-                try {
-                  const data = await response.json();
-                  resultText = `Data: ${JSON.stringify(data).substring(0, 100)}...`;
-                } catch {
-                  resultText = await response.text();
-                }
-                addResult(`GET /${singularColl}/${idKey}`, response.ok, 
-                          `Status: ${response.status}\n${resultText}`);
-              } catch (err) {
-                addResult(`GET /${coll}/${id}`, false, `Error: ${err.message}`);
-              }
-            }
-            
-            // 5. Print all available routes
-            if (debugData.routes) {
-              addResult('Available routes', true, debugData.routes.join('\n'));
-            }
-          }
-          
-          // 6. Add server environment info
-          addResult('Server environment', true, `DB: ${debugData?.dbInfo || 'unknown'}\nTime: ${new Date().toString()}`);
-          
-          // 7. Add client environment info
-          addResult('Client environment', true, 
-                    `User ID: ${userId || 'not logged in'}\nActive perspective: ${activePerspective}\nBrowser: ${navigator.userAgent}`);
-          
-        } catch (err) {
-          addResult('API Debug Test', false, `General error: ${err.message}`);
-        }
-      });
-      
-      // Function to directly test edit/delete operations without relying on UI click handlers
-      function directAPITest(action, collection, id) {
-        return new Promise(async (resolve, reject) => {
-          try {
-            console.log(`Running direct API test: ${action} on ${collection}/${id}`);
-            
-            // Format collection name (singular for API endpoint)
-            const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
-            
-            // Extract ID key (12345) from full ID (collection/12345)
-            const idKey = id.includes('/') ? id.split('/')[1] : id;
-            
-            // Construct proper URL with singular collection and just the ID key
-            const endpoint = `/api/${singularCollection}/${idKey}`;
-            console.log(`Sending ${action} request to: ${endpoint}`);
-            
-            // Show loading state
-            const loadingDiv = document.createElement('div');
-            loadingDiv.style.position = 'fixed';
-            loadingDiv.style.top = '50%';
-            loadingDiv.style.left = '50%';
-            loadingDiv.style.transform = 'translate(-50%, -50%)';
-            loadingDiv.style.backgroundColor = 'rgba(0,0,0,0.7)';
-            loadingDiv.style.color = 'white';
-            loadingDiv.style.padding = '20px';
-            loadingDiv.style.borderRadius = '5px';
-            loadingDiv.style.zIndex = '9999';
-            loadingDiv.textContent = `Sending ${action} request...`;
-            document.body.appendChild(loadingDiv);
-            
-            let response;
-            let body = {};
-            
-            if (action === 'DELETE') {
-              response = await fetch(endpoint, { method: 'DELETE' });
-            } else if (action === 'PATCH') {
-              const newName = prompt(`Enter new name for ${collection} item:`);
-              if (!newName) {
-                document.body.removeChild(loadingDiv);
-                return resolve(null);
-              }
-              
-              body = { name: newName };
-              response = await fetch(endpoint, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(body)
-              });
-            }
-            
-            console.log(`${action} response status: ${response.status}`);
-            const responseText = await response.text();
-            console.log(`${action} response text:`, responseText);
-            
-            // Remove loading div
-            document.body.removeChild(loadingDiv);
-            
-            if (response.ok) {
-              const successMsg = `${action} operation succeeded for ${collection}/${id}`;
-              console.log(successMsg);
-              alert(successMsg);
-              resolve(true);
-            } else {
-              // Try to parse the response as JSON for better error message
-              let errorMsg = responseText;
-              try {
-                const errorJson = JSON.parse(responseText);
-                errorMsg = errorJson.error || errorJson.details || responseText;
-              } catch (e) {
-                // Use the text as is if it's not valid JSON
-                errorMsg = `${response.status} ${response.statusText}: ${responseText}`;
-              }
-              
-              console.error(`${action} operation failed:`, errorMsg);
-              <!-- alert(`${action} operation failed: ${errorMsg}`); -->
-              resolve(false);
-            }
-          } catch (err) {
-            console.error(`Error in ${action} operation:`, err);
-            alert(`Error: ${err.message}`);
-            resolve(false);
-          }
-        });
-      }
-
-      // Add event handlers for left sidebar controls
-      document.addEventListener('DOMContentLoaded', function() {
-        // Add event listeners for graph controls in the left sidebar
-        document.querySelectorAll('.graph-controls-item').forEach(item => {
-          item.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const controlType = item.getAttribute('data-control');
-            
-            // Handle different control types
-            switch (controlType) {
-              case 'style-toggle':
-                // Show the style controls form in the accordion
-                const styleControlsAccordion = document.getElementById('style-controls-accordion');
-                if (!styleControlsAccordion) return;
-                
-                const isVisible = styleControlsAccordion.style.display === 'flex';
-                
-                // Hide any other open forms first
-                document.querySelectorAll('.form-container').forEach(form => {
-                  form.style.display = 'none';
-                });
-                
-                // Toggle the style controls form
-                styleControlsAccordion.style.display = isVisible ? 'none' : 'flex';
-                
-                // Make sure the accordion content remains visible
-                const accordionContent = item.closest('.accordion-content');
-                if (accordionContent) {
-                  accordionContent.classList.add('persistent');
-                }
-                break;
-                
-              case 'emit-particles':
-                // Emit particles on random links
-                if (!window.Graph) return;
-                const graphData = window.Graph.graphData();
-                const links = graphData.links;
-                if (links.length === 0) return;
-                
-                // Emit particles on 5 random links
-                const randomCount = Math.min(5, links.length);
-                for (let i = 0; i < randomCount; i++) {
-                  const randomLink = links[Math.floor(Math.random() * links.length)];
-                  window.Graph.emitParticle(randomLink);
-                }
-                break;
-                
-              case 'auto-flow':
-                // Toggle auto flow
-                if (!window.Graph) return;
-                
-                // Toggle global auto emission state
-                window.autoEmission = !window.autoEmission;
-                const statusEl = document.getElementById('auto-flow-status');
-                if (statusEl) {
-                  statusEl.textContent = `Auto Flow: ${window.autoEmission ? 'On' : 'Off'}`;
-                }
-                
-                if (window.autoEmission) {
-                  // Start auto emission
-                  window.autoEmitInterval = setInterval(() => {
-                    const currentData = window.Graph.graphData();
-                    const currentLinks = currentData.links;
-                    
-                    if (!currentLinks || currentLinks.length === 0) return;
-                    
-                    // Get a random link
-                    const randomLink = currentLinks[Math.floor(Math.random() * currentLinks.length)];
-                    window.Graph.emitParticle(randomLink);
-                  }, 300); // Emit every 300ms
-                } else {
-                  // Stop auto emission
-                  clearInterval(window.autoEmitInterval);
-                }
-                break;
-                
-              case 'highlight-node':
-                // Highlight a random node and its connections
-                if (!window.Graph) return;
-                
-                // Get the current graph data
-                const gData = window.Graph.graphData();
-                
-                // Check if we have nodes
-                if (!gData.nodes || gData.nodes.length === 0) return;
-                
-                // Random node to highlight
-                const randomNodeIndex = Math.floor(Math.random() * gData.nodes.length);
-                const randomNode = gData.nodes[randomNodeIndex];
-                
-                // Find all links connected to this node
-                const connectedLinks = gData.links.filter(link => 
-                  link.source.id === randomNode.id || link.target.id === randomNode.id
-                );
-                
-                if (connectedLinks.length === 0) {
-                  alert(`Node ${randomNode.name || randomNode.id} has no connections.`);
-                  return;
-                }
-                
-                // Highlight the node
-                const prevColor = randomNode.__prevColor || randomNode.color;
-                randomNode.__prevColor = prevColor;
-                
-                // Pulse animation for the selected node
-                let pulseDirection = 1;
-                let pulseStrength = 0;
-                const pulseInterval = setInterval(() => {
-                  pulseStrength += (0.1 * pulseDirection);
-                  if (pulseStrength >= 1) pulseDirection = -1;
-                  if (pulseStrength <= 0) {
-                    pulseDirection = 1;
-                    pulseStrength = 0;
-                  }
-                  
-                  // Apply pulsing color
-                  window.Graph.nodeColor(node => {
-                    if (node.id === randomNode.id) {
-                      const pulseColor = 0xffff00; // Yellow pulse
-                      return pulseColor;
-                    }
-                    return node.color;
-                  });
-                }, 50);
-                
-                // Emit particles on all connected links
-                connectedLinks.forEach(link => {
-                  // Emit multiple particles
-                  for (let i = 0; i < 5; i++) {
-                    setTimeout(() => {
-                      window.Graph.emitParticle(link);
-                    }, i * 300); // Stagger the emission
-                  }
-                });
-                
-                // Stop pulse after a few seconds
-                setTimeout(() => {
-                  clearInterval(pulseInterval);
-                  window.Graph.nodeColor(node => node.color);
-                }, 5000);
-                break;
-            }
-          });
-        });
-      });
-
-      // Add a debug mode toggle
-      // NOTE: This is already defined earlier to avoid redeclaration errors
-      
-      function log(...args) {
-        if (debugMode) console.debug(...args);
-      }
-      
-      // Debug toggle function
-      function toggleDebug() {
-        debugMode = !debugMode;
-        localStorage.setItem('somapDebug', debugMode);
-        console.log(`Debug mode ${debugMode ? 'enabled' : 'disabled'}`);
-        return debugMode;
-      }
-      
-      // Function to handle inline editing
-      function setupInlineEdit(element, itemId, collection, currentName) {
-        // Create input element
-        const input = document.createElement('input');
-        input.type = 'text';
-        input.value = currentName;
-        input.className = 'inline-edit-input';
-        
-        // Add element to DOM
-        element.classList.add('inline-edit-active');
-        element.appendChild(input);
-        
-        // Focus and select all text
-        input.focus();
-        input.select();
-        
-        // Handle save on enter or cancel on escape
-        input.addEventListener('keydown', async (e) => {
-          if (e.key === 'Enter') {
-            e.preventDefault();
-            const newName = input.value.trim();
-            
-            if (newName && newName !== currentName) {
-              try {
-                console.log(`Updating ${collection} item ${itemId} to ${newName}`);
-                
-                // For API endpoint, we need singular form
-                const singularCollection = collection.endsWith('s') ? collection.slice(0, -1) : collection;
-                
-                // Extract ID key (12345) from full ID (collection/12345)
-                let idKey = itemId;
-                if (itemId.includes('/')) {
-                  // Extract just the numeric part for the API endpoint
-                  idKey = itemId.split('/')[1];
-                }
-                
-                // Construct the endpoint with just the ID key part
-                const endpoint = `/api/${singularCollection}/${idKey}`;
-                console.log(`Sending PATCH request to: ${endpoint}`);
-                
-                const response = await fetch(endpoint, {
-                  method: 'PATCH',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ name: newName })
-                });
-                
-                console.log(`Update response status: ${response.status}`);
-                const responseText = await response.text();
-                console.log(`Update response text:`, responseText);
-                
-                if (response.ok) {
-                  console.log(`Successfully updated ${collection} item ${itemId}`);
-                  
-                  // Update the text content - be careful with the DOM structure
-                  // Some items might have color dots or other elements before the text
-                  const colorDot = element.querySelector('.color-dot');
-                  if (colorDot) {
-                    // If there's a color dot, we need to update just the text node after it
-                    let textNode = null;
-                    for (let i = 0; i < element.childNodes.length; i++) {
-                      if (element.childNodes[i].nodeType === Node.TEXT_NODE) {
-                        textNode = element.childNodes[i];
-                        break;
-                      }
-                    }
-                    if (textNode) {
-                      textNode.textContent = newName;
-                    }
-                  } else if (element.querySelector('.relation-content')) {
-                    // For relations, update the name span
-                    const nameSpan = element.querySelector('.relation-name');
-                    if (nameSpan) {
-                      nameSpan.textContent = newName;
-                    }
-                  } else {
-                    // For simple items, just update the first child text node
-                    let textNode = element.childNodes[0];
-                    if (textNode && textNode.nodeType === Node.TEXT_NODE) {
-                      textNode.textContent = newName;
-                    }
-                  }
-                  
-                  initializeGraph();
-                } else {
-                  console.error(`Failed to update ${collection} item:`, responseText);
-                  alert(`Failed to update ${collection}: ${responseText}`);
-                }
-              } catch (err) {
-                console.error(`Error updating ${collection} item:`, err);
-                alert(`Error updating ${collection}: ${err.message}`);
-              }
-            }
-            
-            // Clean up regardless of success
-            element.classList.remove('inline-edit-active');
-            input.remove();
-            
-          } else if (e.key === 'Escape') {
-            // Cancel edit
-            element.classList.remove('inline-edit-active');
-            input.remove();
-          }
-        });
-      }
-
-      // Add event listeners for graph controls in the left sidebar
-      document.addEventListener('DOMContentLoaded', function() {
-        // Get style-related elements from accordion menu
-        const styleToggleBtn = document.querySelector('.graph-controls-item[data-control="style-toggle"]');
-        const styleControlsAccordion = document.getElementById('style-controls-accordion');
-        const particlesControl = document.getElementById('particles-control');
-        const particleSpeedControl = document.getElementById('particle-speed-control');
-        const linkWidthControl = document.getElementById('link-width-control');
-        const nodeScaleControl = document.getElementById('node-scale-control');
-        const resetStyleBtn = document.getElementById('reset-style-btn');
-        const respectLineTypeCheckbox = document.getElementById('respect-line-type');
-        
-        // Log all controls for debugging
-        console.log('Graph style controls:', {
-          styleToggleBtn, styleControlsAccordion, particlesControl, particleSpeedControl,
-          linkWidthControl, nodeScaleControl, resetStyleBtn, respectLineTypeCheckbox
-        });
-        
-        // Setup graph controls visibility
-        if (styleToggleBtn && styleControlsAccordion) {
-          styleToggleBtn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            
-            console.log('Style toggle button clicked');
-            
-            // Get current display value
-            const currentDisplay = window.getComputedStyle(styleControlsAccordion).display;
-            const isVisible = currentDisplay !== 'none';
-            
-            console.log('Style controls current display:', currentDisplay, 'isVisible:', isVisible);
-            
-            // Hide any other open forms first
-            document.querySelectorAll('.form-container').forEach(form => {
-              if (form !== styleControlsAccordion) {
-                form.style.display = 'none';
-              }
-            });
-            
-            // Toggle the style controls form
-            styleControlsAccordion.style.display = isVisible ? 'none' : 'flex';
-            console.log('Set style controls display to:', styleControlsAccordion.style.display);
-            
-            // Make sure the accordion content remains visible
-            const accordionContent = styleToggleBtn.closest('.accordion-content');
-            if (accordionContent) {
-              accordionContent.classList.add('persistent');
-              console.log('Added persistent class to accordion content');
-            }
-          });
-        }
-        
-        // Initialize the control handlers (they will be used when Graph is created)
-        if (particlesControl) {
-          particlesControl.addEventListener('input', function() {
-            const value = parseInt(this.value);
-            const valueDisplay = document.getElementById('particles-value');
-            if (valueDisplay) valueDisplay.textContent = value;
-            
-            console.log('Particles control set to:', value);
-            if (window.Graph) {
-              window.Graph.linkDirectionalParticles(() => value);
-            }
-          });
-        }
-        
-        if (particleSpeedControl) {
-          particleSpeedControl.addEventListener('input', function() {
-            const value = parseFloat(this.value);
-            const valueDisplay = document.getElementById('particle-speed-value');
-            if (valueDisplay) valueDisplay.textContent = value.toFixed(3);
-            
-            console.log('Particle speed control set to:', value);
-            if (window.Graph) {
-              window.Graph.linkDirectionalParticleSpeed(() => value);
-            }
-          });
-        }
-        
-        if (linkWidthControl) {
-          linkWidthControl.addEventListener('input', function() {
-            const value = parseFloat(this.value);
-            const valueDisplay = document.getElementById('link-width-value');
-            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
-            
-            console.log('Link width control set to:', value);
-            if (window.Graph) {
-              window.Graph.linkWidth(() => value);
-            }
-          });
-        }
-        
-        if (nodeScaleControl) {
-          nodeScaleControl.addEventListener('input', function() {
-            const value = parseFloat(this.value);
-            const valueDisplay = document.getElementById('node-scale-value');
-            if (valueDisplay) valueDisplay.textContent = value.toFixed(1);
-            
-            console.log('Node scale control set to:', value);
-            if (window.Graph) {
-              window.Graph.nodeVal((node) => 10 * value);
-            }
-          });
-        }
-        
-        if (resetStyleBtn) {
-          resetStyleBtn.addEventListener('click', function() {
-            console.log('Resetting graph style to defaults');
-            
-            // Reset controls to default values
-            if (particlesControl) {
-              particlesControl.value = 3;
-              const particlesValue = document.getElementById('particles-value');
-              if (particlesValue) particlesValue.textContent = '3';
-            }
-            
-            if (particleSpeedControl) {
-              particleSpeedControl.value = 0.01;
-              const particleSpeedValue = document.getElementById('particle-speed-value');
-              if (particleSpeedValue) particleSpeedValue.textContent = '0.01';
-            }
-            
-            if (linkWidthControl) {
-              linkWidthControl.value = 1.2;
-              const linkWidthValue = document.getElementById('link-width-value');
-              if (linkWidthValue) linkWidthValue.textContent = '1.2';
-            }
-            
-            if (nodeScaleControl) {
-              nodeScaleControl.value = 1;
-              const nodeScaleValue = document.getElementById('node-scale-value');
-              if (nodeScaleValue) nodeScaleValue.textContent = '1';
-            }
-            
-            if (respectLineTypeCheckbox) {
-              respectLineTypeCheckbox.checked = true;
-            }
-            
-            // Apply defaults to graph if available
-            if (window.Graph) {
-              window.Graph
-                .linkDirectionalParticles(link => {
-                  if (link.lineType === 'dashed') return 2;
-                  if (link.lineType === 'dotted') return 3;
-                  return 0;
-                })
-                .linkDirectionalParticleSpeed(link => {
-                  if (link.lineType === 'dotted') return 0.015;
-                  if (link.lineType === 'dashed') return 0.008;
-                  return 0.01;
-                })
-                .linkWidth(link => link.lineType === 'dotted' ? 0.8 : 1.2)
-                .nodeVal(node => 10);
-            }
-          });
-        }
-        
-        if (respectLineTypeCheckbox) {
-          respectLineTypeCheckbox.addEventListener('change', function() {
-            if (!window.Graph) return;
-            
-            if (this.checked) {
-              // Use line type specific styling
-              window.Graph
-                .linkDirectionalParticleColor(link => {
-                  if (link.lineType === 'dotted') return '#51cbee';
-                  if (link.lineType === 'dashed') return '#ffffff';
-                  return '#ff9500';
-                })
-                .linkOpacity(link => {
-                  if (link.lineType === 'dotted') return 0.4;
-                  if (link.lineType === 'dashed') return 0.7;
-                  return 0.9;
-                })
-                .linkCurvature(link => {
-                  return link.lineType === 'dotted' ? 0.2 : 
-                         link.lineType === 'dashed' ? 0.1 : 0;
-                });
-            } else {
-              // Use uniform styling
-              window.Graph
-                .linkDirectionalParticleColor(() => '#ff9500')
-                .linkOpacity(0.8)
-                .linkCurvature(0);
-            }
-          });
-        }
-        
-        // Remove duplicate style controls container
-        const oldStyleControlsContainer = document.getElementById('style-controls');
-        if (oldStyleControlsContainer) {
-          oldStyleControlsContainer.remove();
-        }
-        
-        const emitParticlesItem = document.querySelector('.graph-controls-item[data-control="emit-particles"]');
-        if (emitParticlesItem) {
-          emitParticlesItem.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Emit particles on random links
-            if (!window.Graph) return;
-            const graphData = window.Graph.graphData();
-            const links = graphData.links;
-            if (!links || links.length === 0) return;
-            
-            // Emit particles on 5 random links
-            const randomCount = Math.min(5, links.length);
-            for (let i = 0; i < randomCount; i++) {
-              const randomLink = links[Math.floor(Math.random() * links.length)];
-              window.Graph.emitParticle(randomLink);
-            }
-          });
-        }
-        
-        const autoFlowItem = document.querySelector('.graph-controls-item[data-control="auto-flow"]');
-        if (autoFlowItem) {
-          autoFlowItem.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Toggle auto flow
-            if (!window.Graph) return;
-            
-            // Initialize autoEmission if undefined
-            if (typeof window.autoEmission === 'undefined') {
-              window.autoEmission = false;
-            }
-            
-            // Toggle global auto emission state
-            window.autoEmission = !window.autoEmission;
-            const statusEl = document.getElementById('auto-flow-status');
-            if (statusEl) {
-              statusEl.textContent = `Auto Flow: ${window.autoEmission ? 'On' : 'Off'}`;
-            }
-            
-            if (window.autoEmission) {
-              // Start auto emission
-              window.autoEmitInterval = setInterval(() => {
-                if (!window.Graph) return;
-                const currentData = window.Graph.graphData();
-                const currentLinks = currentData.links;
-                
-                if (!currentLinks || currentLinks.length === 0) return;
-                
-                // Get a random link
-                const randomLink = currentLinks[Math.floor(Math.random() * currentLinks.length)];
-                window.Graph.emitParticle(randomLink);
-              }, 300); // Emit every 300ms
-            } else {
-              // Stop auto emission
-              clearInterval(window.autoEmitInterval);
-            }
-          });
-        }
-        
-        const highlightNodeItem = document.querySelector('.graph-controls-item[data-control="highlight-node"]');
-        if (highlightNodeItem) {
-          highlightNodeItem.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Highlight a random node and its connections
-            if (!window.Graph) return;
-            
-            // Get the current graph data
-            const gData = window.Graph.graphData();
-            
-            // Check if we have nodes
-            if (!gData.nodes || gData.nodes.length === 0) return;
-            
-            // Random node to highlight
-            const randomNodeIndex = Math.floor(Math.random() * gData.nodes.length);
-            const randomNode = gData.nodes[randomNodeIndex];
-            
-            // Find all links connected to this node
-            const connectedLinks = gData.links.filter(link => 
-              link.source.id === randomNode.id || link.target.id === randomNode.id
-            );
-            
-            if (connectedLinks.length === 0) {
-              alert(`Node ${randomNode.name || randomNode.id} has no connections.`);
-              return;
-            }
-            
-            // Highlight the node
-            const prevColor = randomNode.__prevColor || randomNode.color;
-            randomNode.__prevColor = prevColor;
-            
-            // Pulse animation for the selected node
-            let pulseDirection = 1;
-            let pulseStrength = 0;
-            const pulseInterval = setInterval(() => {
-              pulseStrength += (0.1 * pulseDirection);
-              if (pulseStrength >= 1) pulseDirection = -1;
-              if (pulseStrength <= 0) {
-                pulseDirection = 1;
-                pulseStrength = 0;
-              }
-              
-              // Apply pulsing color
-              window.Graph.nodeColor(node => {
-                if (node.id === randomNode.id) {
-                  const pulseColor = 0xffff00; // Yellow pulse
-                  return pulseColor;
-                }
-                return node.color;
-              });
-            }, 50);
-            
-            // Emit particles on all connected links
-            connectedLinks.forEach(link => {
-              // Emit multiple particles
-              for (let i = 0; i < 5; i++) {
-                setTimeout(() => {
-                  window.Graph.emitParticle(link);
-                }, i * 300); // Stagger the emission
-              }
-            });
-            
-            // Stop pulse after a few seconds
-            setTimeout(() => {
-              clearInterval(pulseInterval);
-              window.Graph.nodeColor(node => node.color);
-            }, 5000);
-          });
-        }
-        
-        // Initialize color picker
-        const colorPreviewButton = document.getElementById('color-preview-button');
-        const colorPalette = document.getElementById('color-palette');
-        const typeColorHex = document.getElementById('type-color-hex');
-        const typeColor = document.getElementById('type-color');
-        const typeColorPicker = document.getElementById('type-color-picker');
-        
-        if (colorPreviewButton && colorPalette && typeColorHex && typeColor && typeColorPicker) {
-          // Set initial colors
-          const initialColor = typeColor.value || '0xff9500';
-          const initialHex = oxFormatToHex(initialColor);
-          typeColorHex.value = initialHex;
-          typeColorPicker.value = initialHex;
-          colorPreviewButton.style.backgroundColor = initialHex;
-          
-          // Toggle color palette when clicking the preview button
-          colorPreviewButton.addEventListener('click', function(e) {
-            e.stopPropagation();
-            // Toggle visibility
-            const isVisible = colorPalette.style.display === 'block';
-            colorPalette.style.display = isVisible ? 'none' : 'block';
-            colorPalette.style.zIndex = '1000';
-            
-            // Ensure colorPicker and its parent remain visible during use
-            const accordionContent = colorPreviewButton.closest('.accordion-content');
-            if (accordionContent) {
-              accordionContent.classList.toggle('has-active-color-picker', !isVisible);
-            }
-          });
-          
-          // Handle palette color selection
-          document.querySelectorAll('.palette-color').forEach(color => {
-            color.addEventListener('click', function(e) {
-              e.stopPropagation();
-              const selectedColor = this.getAttribute('data-color');
-              if (!selectedColor) return;
-              
-              // Update all color inputs
-              typeColorHex.value = selectedColor;
-              typeColorPicker.value = selectedColor;
-              typeColor.value = hexToOxFormat(selectedColor);
-              colorPreviewButton.style.backgroundColor = selectedColor;
-              
-              // Hide palette
-              colorPalette.style.display = 'none';
-              
-              // Update accordion content
-              const accordionContent = colorPreviewButton.closest('.accordion-content');
-              if (accordionContent) {
-                accordionContent.classList.remove('has-active-color-picker');
-              }
-            });
-          });
-          
-          // Update from custom color picker
-          typeColorPicker.addEventListener('input', function(e) {
-            e.stopPropagation();
-            const hexValue = this.value;
-            
-            // Update other inputs
-            typeColorHex.value = hexValue;
-            typeColor.value = hexToOxFormat(hexValue);
-            colorPreviewButton.style.backgroundColor = hexValue;
-          });
-          
-          // Update from hex input
-          typeColorHex.addEventListener('input', function(e) {
-            const hexValue = this.value;
-            
-            // Only update if it's a valid hex color
-            if (/^#[0-9A-Fa-f]{6}$/.test(hexValue)) {
-              typeColorPicker.value = hexValue;
-              typeColor.value = hexToOxFormat(hexValue);
-              colorPreviewButton.style.backgroundColor = hexValue;
-            } else if (/^[0-9A-Fa-f]{6}$/.test(hexValue)) {
-              // If they entered 6 hex chars without the #, add it
-              const fullHex = '#' + hexValue;
-              typeColorPicker.value = fullHex;
-              typeColor.value = hexToOxFormat(fullHex);
-              colorPreviewButton.style.backgroundColor = fullHex;
-            }
-          });
-          
-          // Close when clicking outside
-          document.addEventListener('click', function(e) {
-            if (!e.target.closest('.color-picker-wrapper') && colorPalette.style.display === 'block') {
-              colorPalette.style.display = 'none';
-              
-              // Update accordion content
-              document.querySelectorAll('.accordion-content').forEach(content => {
-                content.classList.remove('has-active-color-picker');
-              });
-            }
-          });
-        }
-      });
-
-      // Remove the floating style controls setup
-      // There's already an async implementation of this function earlier in the code
-      // The duplicate implementation is now removed to prevent conflicts
-
-      // Function to show entity info in the right sidebar
-      function showEntityInfo(node) {
-        if (!node || !somData) return;
-        
-        console.log('Showing info for node:', node);
-        
-        // Find entity details in somData
-        const entity = somData.entities.find(e => e._id === node.id);
-        if (!entity) {
-          console.log('Entity not found in data:', node.id);
-          return;
-        }
-        
-        // Find entity type
-        const entityType = somData.types.find(t => t._id === entity.type);
-        
-        // Show the sidebar
-        const infoSidebar = document.getElementById('right-info-sidebar');
-        infoSidebar.classList.remove('hidden');
-        
-        // Populate fields
-        document.getElementById('entity-info-id').textContent = entity._id;
-        document.getElementById('entity-info-name').textContent = entity.name || entity.label;
-        
-        // Type info with color dot
-        document.getElementById('entity-type-name').textContent = entityType ? entityType.name : 'Unknown';
-        const typeColorDot = document.getElementById('entity-type-color');
-        if (typeColorDot) {
-          typeColorDot.style.backgroundColor = entityType ? oxFormatToHex(entityType.color || '0xff9500') : '#ff9500';
-        }
-        
-        // Other fields
-        document.getElementById('entity-info-kind').textContent = entity.kind || 'Not specified';
-        
-        // Format properties as JSON
-        const propsDiv = document.getElementById('entity-info-props');
-        if (entity.props && Object.keys(entity.props).length > 0) {
-          propsDiv.innerHTML = '';
-          Object.entries(entity.props).forEach(([key, value]) => {
-            const propDiv = document.createElement('div');
-            propDiv.className = 'info-property';
-            propDiv.innerHTML = `<span class="text-lytGrey">${key}:</span> ${JSON.stringify(value)}`;
-            propsDiv.appendChild(propDiv);
-          });
-        } else {
-          propsDiv.textContent = 'No properties';
-        }
-        
-        // Created info
-        document.getElementById('entity-info-created-by').textContent = entity.createdBy || 'Unknown';
-        document.getElementById('entity-info-created-at').textContent = entity.createdAt ? 
-          new Date(entity.createdAt).toLocaleString() : 'Unknown';
-        
-        // Find all relations for this entity
-        const entityId = entity._id;
-        const incomingRelations = somData.relations.filter(r => r._to === entityId);
-        const outgoingRelations = somData.relations.filter(r => r._from === entityId);
-        
-        // Populate incoming relations
-        const incomingList = document.getElementById('entity-incoming-list');
-        incomingList.innerHTML = '';
-        if (incomingRelations.length > 0) {
-          incomingRelations.forEach(rel => {
-            // Find source entity name
-            const sourceId = rel._from;
-            const sourceEntity = somData.entities.find(e => e._id === sourceId) || 
-                                { name: sourceId.split('/')[1], _id: sourceId };
-            
-            // Get line type indicator
-            let lineTypeSymbol = '―';
-            if (rel.lineType === 'dashed') lineTypeSymbol = '- - -';
-            else if (rel.lineType === 'dotted') lineTypeSymbol = '····';
-            
-            const li = document.createElement('li');
-            li.className = 'info-relation-item';
-            li.innerHTML = `
-              <span class="text-lytBlue">${sourceEntity.name || sourceEntity._id}</span>
-              <span class="line-type-indicator">${lineTypeSymbol}</span>
-              <span class="text-lytOrange">${rel.name || rel.predicate || 'relates to'}</span>
-            `;
-            incomingList.appendChild(li);
-          });
-        } else {
-          incomingList.innerHTML = '<li>No incoming relations</li>';
-        }
-        
-        // Populate outgoing relations
-        const outgoingList = document.getElementById('entity-outgoing-list');
-        outgoingList.innerHTML = '';
-        if (outgoingRelations.length > 0) {
-          outgoingRelations.forEach(rel => {
-            // Find target entity name
-            const targetId = rel._to;
-            const targetEntity = somData.entities.find(e => e._id === targetId) || 
-                                { name: targetId.split('/')[1], _id: targetId };
-            
-            // Get line type indicator
-            let lineTypeSymbol = '―';
-            if (rel.lineType === 'dashed') lineTypeSymbol = '- - -';
-            else if (rel.lineType === 'dotted') lineTypeSymbol = '····';
-            
-            const li = document.createElement('li');
-            li.className = 'info-relation-item';
-            li.innerHTML = `
-              <span class="text-lytOrange">${rel.name || rel.predicate || 'relates to'}</span>
-              <span class="line-type-indicator">${lineTypeSymbol}</span>
-              <span class="text-lytGreen">${targetEntity.name || targetEntity._id}</span>
-            `;
-            outgoingList.appendChild(li);
-          });
-        } else {
-          outgoingList.innerHTML = '<li>No outgoing relations</li>';
-        }
-      }
-
-      // Close button handler
-      document.addEventListener('DOMContentLoaded', function() {
-        const closeBtn = document.getElementById('close-info-sidebar');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', function() {
-            const sidebar = document.getElementById('right-info-sidebar');
-            sidebar.classList.add('hidden');
-            
-            // Reset node colors when closing the panel
-            if (window.Graph) {
-              window.Graph.nodeColor(n => n.color);
-            }
-          });
-        }
-      });
-    });
-
-// Add this to your existing JavaScript that handles the dropdown
-document.getElementById('perspective-dropdown').addEventListener('click', function(e) {
-  const menu = document.getElementById('perspective-dropdown-menu');
-  menu.classList.toggle('show');
-  
-  // Prevent clicks inside the dropdown from closing it
-  e.stopPropagation();
-  
-  // Close when clicking outside
-  document.addEventListener('click', function closeMenu(e) {
-    if (!e.target.closest('#perspective-dropdown')) {
-      menu.classList.remove('show');
-      document.removeEventListener('click', closeMenu);
-    }
-  });
-});
-  </script>
-  
-  <!-- Load app scripts -->
-  <script src="/js/perspectives.js"></script>
-  <script src="/js/types.js"></script>
-  <script src="/js/entities.js"></script>
-  
-  <!-- Fix color picker -->
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const colorPreviewButton = document.getElementById('color-preview-button');
-      const colorPalette = document.getElementById('color-palette');
-      const typeColorPicker = document.getElementById('type-color-picker');
-      const typeColorHex = document.getElementById('type-color-hex');
-      const typeColor = document.getElementById('type-color');
-      
-      if (colorPreviewButton && colorPalette) {
-        // Show color palette when clicking the preview button
-        colorPreviewButton.addEventListener('click', function() {
-          colorPalette.classList.toggle('visible');
-          
-          // Add class to parent accordion to make room for palette
-          const accordionContent = document.querySelector('.accordion[data-form="type"] .accordion-content');
-          if (accordionContent) {
-            accordionContent.classList.toggle('has-active-color-picker');
-          }
-        });
-        
-        // Select a color from the palette
-        document.querySelectorAll('.palette-color').forEach(function(colorEl) {
-          colorEl.addEventListener('click', function() {
-            const color = this.getAttribute('data-color');
-            colorPreviewButton.style.backgroundColor = color;
-            typeColorHex.value = color;
-            
-            if (typeColorPicker) {
-              typeColorPicker.value = color;
-            }
-            
-            if (typeColor) {
-              typeColor.value = color.replace('#', '0x');
-            }
-            
-            // Close palette after selection
-            colorPalette.classList.remove('visible');
-          });
-        });
-        
-        // Convert hex to oxFormat
-        function hexToOxFormat(hex) {
-          // Remove # if present
-          if (hex.startsWith('#')) {
-            hex = hex.substring(1);
-          }
-          
-          // Add 0x prefix
-          return '0x' + hex;
-        }
-      }
-    });
-  </script>
-  <script src="/js/relations.js"></script>
-  <script src="/js/visualization.js"></script>
-  <div id="right-info-sidebar" class="hidden">
-    <div class="info-header flex justify-between items-center p-3 border-b border-gray-700">
-      <h3 id="entity-info-title" class="text-lytOrange font-bold">Entity Details</h3>
-      <button id="close-info-sidebar" class="text-white hover:text-lytOrange">
-        <svg class="icon" viewBox="0 0 24 24">
-          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
-        </svg>
-      </button>
-    </div>
-    <div class="info-content p-4">
-      <div class="mb-4">
-        <span class="text-gray-400 text-sm">ID</span>
-        <div id="entity-info-id" class="text-white"></div>
-      </div>
-      <div class="mb-4">
-        <span class="text-gray-400 text-sm">Name</span>
-        <div id="entity-info-name" class="text-white"></div>
-      </div>
-      <div class="mb-4">
-        <span class="text-gray-400 text-sm">Type</span>
-        <div id="entity-info-type" class="flex items-center">
-          <span id="entity-type-color" class="color-dot mr-2"></span>
-          <span id="entity-type-name" class="text-white"></span>
-        </div>
-      </div>
-      <div class="mb-4">
-        <span class="text-gray-400 text-sm">Kind</span>
-        <div id="entity-info-kind" class="text-white"></div>
-      </div>
-      <div class="mb-4">
-        <span class="text-gray-400 text-sm">Properties</span>
-        <div id="entity-info-props" class="text-white"></div>
-      </div>
-      <div class="mb-4">
-        <span class="text-gray-400 text-sm">Created By</span>
-        <div id="entity-info-created-by" class="text-white"></div>
-      </div>
-      <div class="mb-4">
-        <span class="text-gray-400 text-sm">Created At</span>
-        <div id="entity-info-created-at" class="text-white"></div>
-      </div>
-      <div id="entity-info-relations">
-        <span class="text-gray-400 text-sm">Relations</span>
-        <div id="entity-incoming-relations" class="mt-2">
-          <h4 class="text-xs text-gray-500">Incoming</h4>
-          <ul class="text-white text-sm mt-1" id="entity-incoming-list"></ul>
-        </div>
-        <div id="entity-outgoing-relations" class="mt-2">
-          <h4 class="text-xs text-gray-500">Outgoing</h4>
-          <ul class="text-white text-sm mt-1" id="entity-outgoing-list"></ul>
-        </div>
-      </div>
-    </div>
+  <div id="spreadsheet-modal" class="hidden">
+    <div id="spreadsheet"></div>
   </div>
+  <!-- Load libraries locally from /vendor -->
+  <script type="module">
+    // Import ES Module Shims first (optional, only if needed for older browsers)
+    import '/vendor/es-module-shims.js';
+  </script>
+  <script type="module">
+    // Import Three.js core
+    import * as THREE from '/vendor/three/build/three.module.min.js';
+    // Import additional Three.js modules as needed
+    import { OrbitControls } from '/vendor/three/jsm/controls/OrbitControls.js';
+    // Make THREE available globally if your existing scripts expect it
+    window.THREE = THREE;
+    window.OrbitControls = OrbitControls;
+  </script>
+  <script type="module">
+    // Import jspreadsheet (you need to add this file to /public/vendor)
+    import jspreadsheet from '/vendor/jspreadsheet-m.min.js';
+    // Make jspreadsheet available globally if needed
+    window.jspreadsheet = jspreadsheet;
+  </script>
+  <!-- Your application scripts -->
+  <script type="module" src="/js/types.js"></script>
+  <script type="module" src="/js/entities.js"></script>
+  <script type="module" src="/js/relations.js"></script>
+  <script type="module" src="/js/perspectives.js"></script>
+  <script type="module" src="/js/visualization.js"></script>
 </body>
 </html>

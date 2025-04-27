@@ -175,6 +175,7 @@ async function startServer() {
     await next();
   });
 
+
   // User Signup
   app.post("/api/users/signup", async (c) => {
     const { username, password } = await c.req.json();
@@ -1559,7 +1560,10 @@ async function startServer() {
   });
 
   // Serve static files AFTER defining all API routes
+  app.use("/vendor/*", serveStatic({ root: "./public/vendor" }));
+  app.use("/css/*", serveStatic({ root: "./public/css" }));
   app.use("/*", serveStatic({ root: "./public" }));
+
 
   console.log(`Started server on ${SERVER_HOST}:${SERVER_PORT}`);
 }
